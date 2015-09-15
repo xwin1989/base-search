@@ -1,7 +1,7 @@
 package com.qeeka.test.service;
 
-import com.qeeka.domain.QueryRequest;
-import com.qeeka.domain.QueryResponse;
+import com.qeeka.http.QueryRequest;
+import com.qeeka.http.QueryResponse;
 import com.qeeka.test.domain.Book;
 import com.qeeka.test.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;

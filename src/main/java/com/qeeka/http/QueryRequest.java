@@ -1,5 +1,6 @@
-package com.qeeka.domain;
+package com.qeeka.http;
 
+import com.qeeka.domain.QueryGroup;
 import com.qeeka.operate.QueryResultType;
 
 /**
@@ -12,11 +13,11 @@ public class QueryRequest {
     //result type
     private QueryResultType queryResultType = QueryResultType.LIST;
 
-    //page index
-    private Integer pageIndex;
+    //page index and set default
+    private Integer pageIndex = 0;
 
-    //page size
-    private Integer pageSize;
+    //page size and set default
+    private Integer pageSize = 10;
 
     //need total record
     private boolean needCount = true;

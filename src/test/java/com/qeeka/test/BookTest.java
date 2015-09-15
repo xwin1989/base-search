@@ -2,8 +2,8 @@ package com.qeeka.test;
 
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.qeeka.domain.QueryGroup;
-import com.qeeka.domain.QueryRequest;
-import com.qeeka.domain.QueryResponse;
+import com.qeeka.http.QueryRequest;
+import com.qeeka.http.QueryResponse;
 import com.qeeka.operate.Direction;
 import com.qeeka.operate.QueryOperate;
 import com.qeeka.operate.Sort;
@@ -27,7 +27,7 @@ public class BookTest extends SpringTestWithDB {
     @DatabaseSetup("/BookData.xml")
     public void testSelectAll() {
         QueryResponse<Book> response = bookService.search(new QueryRequest());
-        Assert.assertTrue(response.getTotal() == 3);
+        Assert.assertTrue(response.getTotalRecords() == 3);
     }
 
     @Test
@@ -40,7 +40,7 @@ public class BookTest extends SpringTestWithDB {
         QueryResponse<Book> response = bookService.search(request);
         Assert.assertTrue(response.getRecords().size() == 2);
         Assert.assertTrue(response.getRecords().get(0).getId() == 3);
-        Assert.assertTrue(response.getTotal() == 3);
+        Assert.assertTrue(response.getTotalRecords() == 3);
     }
 
     @Test
@@ -55,7 +55,7 @@ public class BookTest extends SpringTestWithDB {
         QueryResponse<Book> response = bookService.search(request);
         Assert.assertTrue(response.getRecords().size() == 2);
         Assert.assertTrue(response.getRecords().get(0).getId() == 3);
-        Assert.assertTrue(response.getTotal() == null);
+        Assert.assertTrue(response.getTotalRecords() == null);
     }
 
     @Test
@@ -69,7 +69,7 @@ public class BookTest extends SpringTestWithDB {
 
         QueryResponse<Book> response = bookService.search(request);
         Assert.assertTrue(response.getRecords() == null);
-        Assert.assertTrue(response.getTotal() == 3);
+        Assert.assertTrue(response.getTotalRecords() == 3);
     }
 
     @Test
@@ -84,6 +84,6 @@ public class BookTest extends SpringTestWithDB {
 
         QueryResponse<Book> response = bookService.search(request);
         Assert.assertTrue(response.getRecords() == null);
-        Assert.assertTrue(response.getTotal() == null);
+        Assert.assertTrue(response.getTotalRecords() == null);
     }
 }

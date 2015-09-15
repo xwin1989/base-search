@@ -2,8 +2,8 @@ package com.qeeka.test;
 
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.qeeka.domain.QueryGroup;
-import com.qeeka.domain.QueryRequest;
-import com.qeeka.domain.QueryResponse;
+import com.qeeka.http.QueryRequest;
+import com.qeeka.http.QueryResponse;
 import com.qeeka.operate.QueryOperate;
 import com.qeeka.test.domain.Person;
 import com.qeeka.test.service.PersonService;

@@ -2,8 +2,9 @@ package com.qeeka.repository;
 
 import com.qeeka.domain.QueryModel;
 import com.qeeka.domain.QueryParser;
-import com.qeeka.domain.QueryRequest;
-import com.qeeka.domain.QueryResponse;
+import com.qeeka.http.QueryRequest;
+import com.qeeka.http.QueryResponse;
+import com.qeeka.operate.QueryResultType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
@@ -15,6 +16,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import java.lang.annotation.Annotation;
+import java.util.List;
 import java.util.Map;
 
 
@@ -41,7 +43,6 @@ public abstract class BaseSearchRepository<T> {
         entityClass = arguments[0];
 
         String simpleName = entityClass.getSimpleName();
-        System.out.println(simpleName);
         Annotation annotation = entityClass.getAnnotation(Entity.class);
         if (annotation == null) {
             throw new IllegalArgumentException("repository must extend with generic type Entity.class");
@@ -73,6 +74,30 @@ public abstract class BaseSearchRepository<T> {
         logger.debug("Generate HQL : {}", hql.toString());
 
 
+        if (QueryResultType.LIST.equals(queryRequest.getQueryResultType())) {
+            return listQuery(queryRequest, query, hql);
+        } else {
+            return singleQuery(query, hql);
+        }
+    }
+
+    private QueryResponse<T> singleQuery(QueryModel query, StringBuilder hql) {
+        QueryResponse<T> queryResponse = new QueryResponse<>();
+
+        TypedQuery<T> recordQuery = entityManager.createQuery(hql.toString(), entityClass);
+        for (Map.Entry<String, Object> entry : query.getParameters().entrySet()) {
+            recordQuery.setParameter(entry.getKey(), entry.getValue());
+        }
+        recordQuery.setMaxResults(1);
+
+        List<T> resultList = recordQuery.getResultList();
+        if (resultList != null && !resultList.isEmpty()) {
+            queryResponse.setEntity(resultList.get(0));
+        }
+        return queryResponse;
+    }
+
+    private QueryResponse<T> listQuery(QueryRequest queryRequest, QueryModel query, StringBuilder hql) {
         QueryResponse<T> queryResponse = new QueryResponse<>();
 
         if (queryRequest.isNeedRecord()) {
@@ -100,7 +125,7 @@ public abstract class BaseSearchRepository<T> {
             }
             Long total = countQuery.getSingleResult();
             //Set query total
-            queryResponse.setTotal(total);
+            queryResponse.setTotalRecords(total);
         }
         return queryResponse;
     }
