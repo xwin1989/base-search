@@ -37,4 +37,8 @@ public class PersonService {
     public QueryResponse<Person> search(QueryRequest request) {
         return repository.search(request);
     }
+
+    public Long count(QueryRequest request) {
+        return repository.count(request);
+    }
 }

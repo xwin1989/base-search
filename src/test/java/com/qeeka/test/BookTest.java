@@ -26,7 +26,9 @@ public class BookTest extends SpringTestWithDB {
     @Test
     @DatabaseSetup("/BookData.xml")
     public void testSelectAll() {
-        QueryResponse<Book> response = bookService.search(new QueryRequest());
+        QueryRequest request = new QueryRequest();
+        request.setNeedCount(true);
+        QueryResponse<Book> response = bookService.search(request);
         Assert.assertTrue(response.getTotalRecords() == 3);
     }
 
@@ -37,6 +39,7 @@ public class BookTest extends SpringTestWithDB {
         QueryGroup queryGroup = new QueryGroup("name", "book", QueryOperate.CONTAIN).and("status", 0, QueryOperate.GREAT_THAN)
                 .sort(new Sort(Direction.DESC, "type"));
         request.setQueryGroup(queryGroup);
+        request.setNeedCount(true);
         QueryResponse<Book> response = bookService.search(request);
         Assert.assertTrue(response.getRecords().size() == 2);
         Assert.assertTrue(response.getRecords().get(0).getId() == 3);
@@ -66,6 +69,7 @@ public class BookTest extends SpringTestWithDB {
                 .sort(new Sort(Direction.DESC, "type"));
         request.setQueryGroup(queryGroup);
         request.setNeedRecord(false);
+        request.setNeedCount(true);
 
         QueryResponse<Book> response = bookService.search(request);
         Assert.assertTrue(response.getRecords() == null);

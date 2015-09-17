@@ -20,7 +20,7 @@ public class QueryRequest {
     private Integer pageSize = 10;
 
     //need total record
-    private boolean needCount = true;
+    private boolean needCount = false;
 
     //only need count
     private boolean needRecord = true;
