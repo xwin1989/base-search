@@ -12,7 +12,8 @@ import java.util.Stack;
  */
 public class QueryParser {
 
-    public QueryModel parse(QueryGroup group) {
+    public QueryModel parse(QueryGroup queryGroup) {
+        QueryGroup group = deepQueryGroupCopy(queryGroup);
         QueryModel queryModel = new QueryModel();
         if (group == null) {
             return queryModel;
@@ -157,5 +158,26 @@ public class QueryParser {
             return queryPart.toString();
         }
         return "";
+    }
+
+    private QueryGroup deepQueryGroupCopy(QueryGroup queryGroup) {
+        QueryGroup group = new QueryGroup();
+        //Copy Node
+        if (queryGroup != null) {
+            if (queryGroup.getQueryHandleList() != null) {
+                for (QueryHandle handle : queryGroup.getQueryHandleList()) {
+                    if (handle instanceof QueryOperateNode) {
+                        QueryOperateNode operateNode = new QueryOperateNode(((QueryOperateNode) handle).getQueryLinkOperate());
+                        group.getQueryHandleList().add(operateNode);
+                    } else if (handle instanceof QueryNode) {
+                        QueryNode currentNode = (QueryNode) handle;
+                        QueryNode queryNode = new QueryNode(currentNode.getColumnName(), currentNode.getValue(), currentNode.getQueryOperate());
+                        group.getQueryHandleList().add(queryNode);
+                    }
+                }
+            }
+            group.setSort(queryGroup.getSort());
+        }
+        return group;
     }
 }

@@ -7,9 +7,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
-import com.qeeka.domain.QueryGroup;
 import com.qeeka.deserializer.QueryGroupJsonDeserializer;
-import com.qeeka.domain.QueryRequest;
+import com.qeeka.domain.QueryGroup;
+import com.qeeka.http.QueryRequest;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -32,10 +32,21 @@ public class QueryJSONBinder {
         mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
         mapper.configure(MapperFeature.USE_WRAPPER_NAME_AS_PROPERTY_NAME, true);
 
+        addQueryMapper(mapper);
+        return mapper;
+    }
+
+    /**
+     * Add Query Deserializer to object mapper
+     *
+     * @param objectMapper
+     * @return
+     */
+    public static ObjectMapper addQueryMapper(ObjectMapper objectMapper) {
         SimpleModule module = new SimpleModule();
         module.addDeserializer(QueryGroup.class, new QueryGroupJsonDeserializer());
-        mapper.registerModule(module);
-        return mapper;
+        objectMapper.registerModule(module);
+        return objectMapper;
     }
 
     public static QueryRequest fromJSON(String json) {

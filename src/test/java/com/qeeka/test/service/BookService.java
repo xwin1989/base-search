@@ -1,7 +1,7 @@
 package com.qeeka.test.service;
 
-import com.qeeka.domain.QueryRequest;
-import com.qeeka.domain.QueryResponse;
+import com.qeeka.http.QueryRequest;
+import com.qeeka.http.QueryResponse;
 import com.qeeka.test.domain.Book;
 import com.qeeka.test.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,5 +20,24 @@ public class BookService {
 
     public QueryResponse<Book> search(QueryRequest request) {
         return repository.search(request);
+    }
+
+    @Transactional
+    public void save(Book book) {
+        repository.save(book);
+    }
+
+    @Transactional
+    public void update(Book book) {
+        repository.update(book);
+    }
+
+    public Book getBook(Integer id) {
+        return repository.get(id);
+    }
+
+    @Transactional
+    public void delete(Integer id) {
+        repository.deleteById(id);
     }
 }

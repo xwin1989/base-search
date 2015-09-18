@@ -2,8 +2,8 @@ package com.qeeka.test;
 
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.qeeka.domain.QueryGroup;
-import com.qeeka.domain.QueryRequest;
-import com.qeeka.domain.QueryResponse;
+import com.qeeka.http.QueryRequest;
+import com.qeeka.http.QueryResponse;
 import com.qeeka.operate.QueryOperate;
 import com.qeeka.test.domain.Person;
 import com.qeeka.test.service.PersonService;
@@ -41,8 +41,11 @@ public class PersonTest extends SpringTestWithDB {
                 .and("password", "p1").and("id", ids, QueryOperate.NOT_IN).or("id", 0, QueryOperate.IN);
         String json = QueryJSONBinder.toJSON(new QueryRequest(group));
 
-        QueryResponse<Person> response = personService.search(QueryJSONBinder.fromJSON(json));
+        QueryRequest request = QueryJSONBinder.fromJSON(json);
+        QueryResponse<Person> response = personService.search(request);
         Assert.assertTrue(response.getRecords().get(0).getId() == 0);
+        Long count = personService.count(request);
+        Assert.assertTrue(count == 1);
     }
 
 }

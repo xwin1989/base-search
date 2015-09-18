@@ -1,6 +1,7 @@
 package com.qeeka.test.parse;
 
 import com.qeeka.domain.*;
+import com.qeeka.http.QueryRequest;
 import com.qeeka.operate.QueryOperate;
 import com.qeeka.util.QueryJSONBinder;
 import org.junit.Assert;

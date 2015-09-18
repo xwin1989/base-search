@@ -1,5 +1,6 @@
-package com.qeeka.domain;
+package com.qeeka.http;
 
+import com.qeeka.domain.QueryGroup;
 import com.qeeka.operate.QueryResultType;
 
 /**
@@ -12,14 +13,14 @@ public class QueryRequest {
     //result type
     private QueryResultType queryResultType = QueryResultType.LIST;
 
-    //page index
-    private Integer pageIndex;
+    //page index and set default
+    private Integer pageIndex = 0;
 
-    //page size
-    private Integer pageSize;
+    //page size and set default
+    private Integer pageSize = 10;
 
     //need total record
-    private boolean needCount = true;
+    private boolean needCount = false;
 
     //only need count
     private boolean needRecord = true;
@@ -53,47 +54,53 @@ public class QueryRequest {
         return queryGroup;
     }
 
-    public void setQueryGroup(QueryGroup queryGroup) {
+    public QueryRequest setQueryGroup(QueryGroup queryGroup) {
         this.queryGroup = queryGroup;
+        return this;
     }
 
     public Integer getPageIndex() {
         return pageIndex;
     }
 
-    public void setPageIndex(Integer pageIndex) {
+    public QueryRequest setPageIndex(Integer pageIndex) {
         this.pageIndex = pageIndex;
+        return this;
     }
 
     public Integer getPageSize() {
         return pageSize;
     }
 
-    public void setPageSize(Integer pageSize) {
+    public QueryRequest setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+        return this;
     }
 
     public boolean isNeedCount() {
         return needCount;
     }
 
-    public void setNeedCount(boolean needCount) {
+    public QueryRequest setNeedCount(boolean needCount) {
         this.needCount = needCount;
+        return this;
     }
 
     public boolean isNeedRecord() {
         return needRecord;
     }
 
-    public void setNeedRecord(boolean needRecord) {
+    public QueryRequest setNeedRecord(boolean needRecord) {
         this.needRecord = needRecord;
+        return this;
     }
 
     public QueryResultType getQueryResultType() {
         return queryResultType;
     }
 
-    public void setQueryResultType(QueryResultType queryResultType) {
+    public QueryRequest setQueryResultType(QueryResultType queryResultType) {
         this.queryResultType = queryResultType;
+        return this;
     }
 }
