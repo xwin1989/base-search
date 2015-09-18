@@ -77,11 +77,11 @@ public abstract class BaseSearchRepository<T> {
         if (QueryResultType.LIST.equals(queryRequest.getQueryResultType())) {
             return listQuery(queryRequest, query, hql);
         } else {
-            return singleQuery(query, hql);
+            return singleQuery(query, hql, queryRequest.getQueryResultType());
         }
     }
 
-    private QueryResponse<T> singleQuery(QueryModel query, StringBuilder hql) {
+    private QueryResponse<T> singleQuery(QueryModel query, StringBuilder hql, QueryResultType queryResultType) {
         QueryResponse<T> queryResponse = new QueryResponse<>();
 
         TypedQuery<T> recordQuery = entityManager.createQuery(hql.toString(), entityClass);
@@ -89,10 +89,13 @@ public abstract class BaseSearchRepository<T> {
             recordQuery.setParameter(entry.getKey(), entry.getValue());
         }
         recordQuery.setMaxResults(1);
-
-        List<T> resultList = recordQuery.getResultList();
-        if (resultList != null && !resultList.isEmpty()) {
-            queryResponse.setEntity(resultList.get(0));
+        if (QueryResultType.SINGLE.equals(queryResultType)) {
+            List<T> resultList = recordQuery.getResultList();
+            if (resultList != null && !resultList.isEmpty()) {
+                queryResponse.setEntity(resultList.get(0));
+            }
+        } else if (QueryResultType.UNIQUE.equals(queryResultType)) {
+            queryResponse.setEntity(recordQuery.getSingleResult());
         }
         return queryResponse;
     }
