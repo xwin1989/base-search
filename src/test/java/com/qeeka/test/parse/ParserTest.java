@@ -108,8 +108,9 @@ public class ParserTest {
 
     @Test
     public void testSubQuery() {
-        QueryGroup group = new QueryGroup("id", "in (select * from a)", QueryOperate.SUB_QUERY);
+        QueryGroup group = new QueryGroup("id", "in (select * from a)", QueryOperate.SUB_QUERY).and("name", "hello", QueryOperate.CONTAIN);
         QueryModel queryModel = parser.parse(group);
-        Assert.assertEquals(queryModel.getStatement(), "id in (select * from a)");
+        Assert.assertEquals(queryModel.getStatement(), "(id in (select * from a) AND name LIKE :name0)");
+        Assert.assertTrue(queryModel.getParameters().size() == 1);
     }
 }
