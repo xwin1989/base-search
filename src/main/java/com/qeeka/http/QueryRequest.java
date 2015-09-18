@@ -54,47 +54,53 @@ public class QueryRequest {
         return queryGroup;
     }
 
-    public void setQueryGroup(QueryGroup queryGroup) {
+    public QueryRequest setQueryGroup(QueryGroup queryGroup) {
         this.queryGroup = queryGroup;
+        return this;
     }
 
     public Integer getPageIndex() {
         return pageIndex;
     }
 
-    public void setPageIndex(Integer pageIndex) {
+    public QueryRequest setPageIndex(Integer pageIndex) {
         this.pageIndex = pageIndex;
+        return this;
     }
 
     public Integer getPageSize() {
         return pageSize;
     }
 
-    public void setPageSize(Integer pageSize) {
+    public QueryRequest setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+        return this;
     }
 
     public boolean isNeedCount() {
         return needCount;
     }
 
-    public void setNeedCount(boolean needCount) {
+    public QueryRequest setNeedCount(boolean needCount) {
         this.needCount = needCount;
+        return this;
     }
 
     public boolean isNeedRecord() {
         return needRecord;
     }
 
-    public void setNeedRecord(boolean needRecord) {
+    public QueryRequest setNeedRecord(boolean needRecord) {
         this.needRecord = needRecord;
+        return this;
     }
 
     public QueryResultType getQueryResultType() {
         return queryResultType;
     }
 
-    public void setQueryResultType(QueryResultType queryResultType) {
+    public QueryRequest setQueryResultType(QueryResultType queryResultType) {
         this.queryResultType = queryResultType;
+        return this;
     }
 }

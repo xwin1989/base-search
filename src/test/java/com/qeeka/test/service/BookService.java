@@ -21,4 +21,23 @@ public class BookService {
     public QueryResponse<Book> search(QueryRequest request) {
         return repository.search(request);
     }
+
+    @Transactional
+    public void save(Book book) {
+        repository.save(book);
+    }
+
+    @Transactional
+    public void update(Book book) {
+        repository.update(book);
+    }
+
+    public Book getBook(Integer id) {
+        return repository.get(id);
+    }
+
+    @Transactional
+    public void delete(Integer id) {
+        repository.deleteById(id);
+    }
 }

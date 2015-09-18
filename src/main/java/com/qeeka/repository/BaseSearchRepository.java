@@ -13,8 +13,11 @@ import org.springframework.util.StringUtils;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaQuery;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +38,9 @@ public abstract class BaseSearchRepository<T> {
     //Init query parse class
     private QueryParser queryParser = new QueryParser();
 
+    /**
+     * constructor and init class properties
+     */
     public BaseSearchRepository() {
         Class<?>[] arguments = GenericTypeResolver.resolveTypeArguments(getClass(), BaseSearchRepository.class);
         if (arguments == null || arguments.length != 1) {
@@ -60,6 +66,12 @@ public abstract class BaseSearchRepository<T> {
         }
     }
 
+    /**
+     * search
+     *
+     * @param queryRequest
+     * @return
+     */
     public QueryResponse<T> search(QueryRequest queryRequest) {
         //parse query group to simple query domain
         QueryModel query = queryParser.parse(queryRequest.getQueryGroup());
@@ -81,6 +93,15 @@ public abstract class BaseSearchRepository<T> {
         }
     }
 
+    /**
+     * query by query request
+     *
+     * @param query           1. QueryResultType.SINGLE : return single entity
+     *                        2. QueryResultType.UNIQUE : must be return one
+     * @param hql
+     * @param queryResultType
+     * @return response with single record
+     */
     private QueryResponse<T> singleQuery(QueryModel query, StringBuilder hql, QueryResultType queryResultType) {
         QueryResponse<T> queryResponse = new QueryResponse<>();
 
@@ -100,6 +121,14 @@ public abstract class BaseSearchRepository<T> {
         return queryResponse;
     }
 
+    /**
+     * query by query request
+     *
+     * @param queryRequest
+     * @param query
+     * @param hql
+     * @return response with record list
+     */
     private QueryResponse<T> listQuery(QueryRequest queryRequest, QueryModel query, StringBuilder hql) {
         QueryResponse<T> queryResponse = new QueryResponse<>();
 
@@ -133,6 +162,12 @@ public abstract class BaseSearchRepository<T> {
         return queryResponse;
     }
 
+    /**
+     * count by query request
+     *
+     * @param queryRequest
+     * @return record total
+     */
     public Long count(QueryRequest queryRequest) {
         QueryModel query = queryParser.parse(queryRequest.getQueryGroup());
         StringBuilder countHql = new StringBuilder("SELECT COUNT(E) FROM ").append(entityName).append(" E ");
@@ -145,4 +180,301 @@ public abstract class BaseSearchRepository<T> {
         }
         return countQuery.getSingleResult();
     }
+
+    /**
+     * get entity by primary key
+     *
+     * @param id
+     * @return
+     */
+    public T get(Object id) {
+        StopWatch watch = new StopWatch();
+        try {
+            return (T) entityManager.find(entityClass, id);
+        } finally {
+            logger.debug("get, entityClass={}, id={}, elapsedTime={}", entityClass.getName(), id, watch.elapsedTime());
+        }
+    }
+
+    /**
+     * save entity
+     *
+     * @param entity
+     */
+    public void save(Object entity) {
+        StopWatch watch = new StopWatch();
+        try {
+            entityManager.persist(entity);
+        } finally {
+            logger.debug("save, entityClass={}, elapsedTime={}", entity.getClass().getName(), watch.elapsedTime());
+        }
+    }
+
+    /**
+     * update entity
+     *
+     * @param entity
+     */
+    public void update(Object entity) {
+        StopWatch watch = new StopWatch();
+        try {
+            entityManager.merge(entity);
+        } finally {
+            logger.debug("update, entityClass={}, elapsedTime={}", entity.getClass().getName(), watch.elapsedTime());
+        }
+    }
+
+    /**
+     * update by hql
+     *
+     * @param queryString
+     * @return
+     */
+    public int update(String queryString) {
+        return update(queryString, null);
+    }
+
+    /**
+     * update by hql with params
+     *
+     * @param queryString
+     * @param params
+     * @return
+     */
+    public int update(String queryString, Map<String, Object> params) {
+        StopWatch watch = new StopWatch();
+        try {
+            Query query = entityManager.createQuery(queryString);
+            if (params != null)
+                for (Map.Entry<String, Object> entry : params.entrySet()) {
+                    query.setParameter(entry.getKey(), entry.getValue());
+                }
+            return query.executeUpdate();
+        } finally {
+            logger.debug("update, query={}, params={}, elapsedTime={}", queryString, params, watch.elapsedTime());
+        }
+    }
+
+    /**
+     * remove entity
+     *
+     * @param entity
+     */
+    public void delete(Object entity) {
+        StopWatch watch = new StopWatch();
+        try {
+            entityManager.remove(entity);
+        } finally {
+            logger.debug("delete, entityClass={}, elapsedTime={}", entity.getClass().getName(), watch.elapsedTime());
+        }
+    }
+
+    /**
+     * delete by id
+     */
+    public void deleteById(Object id) {
+        StopWatch watch = new StopWatch();
+        try {
+            T entity = get(id);
+            entityManager.remove(entity);
+        } finally {
+            logger.debug("delete, entityClass={},id={}, elapsedTime={}", entityClass.getName(), id, watch.elapsedTime());
+        }
+    }
+
+    /**
+     * refresh
+     *
+     * @param entity
+     */
+    public void refresh(Object entity) {
+        StopWatch watch = new StopWatch();
+        try {
+            entityManager.refresh(entity);
+        } finally {
+            logger.debug("refresh, entityClass={}, elapsedTime={}", entity.getClass().getName(), watch.elapsedTime());
+        }
+    }
+
+    /**
+     * detach
+     *
+     * @param entity
+     */
+    public void detach(Object entity) {
+        StopWatch watch = new StopWatch();
+        try {
+            entityManager.detach(entity);
+        } finally {
+            logger.debug("detach, entityClass={}, elapsedTime={}", entity.getClass().getName(), watch.elapsedTime());
+        }
+    }
+
+    /**
+     * Find by criteria
+     *
+     * @param query
+     * @return
+     */
+    public List<T> find(CriteriaQuery query) {
+        StopWatch watch = new StopWatch();
+        try {
+            return entityManager.createQuery(query).getResultList();
+        } finally {
+            logger.debug("find by CriteriaQuery<T>, elapsedTime={}", watch.elapsedTime());
+        }
+    }
+
+    /**
+     * Simple query
+     *
+     * @param queryString
+     * @return
+     */
+    public List<T> find(String queryString) {
+        return find(queryString, null);
+    }
+
+    /**
+     * query with params
+     *
+     * @param queryString
+     * @param params
+     * @return
+     */
+    public List<T> find(String queryString, Map<String, Object> params) {
+        StopWatch watch = new StopWatch();
+        try {
+            Query query = entityManager.createQuery(queryString);
+            if (params != null)
+                for (Map.Entry<String, Object> entry : params.entrySet()) {
+                    query.setParameter(entry.getKey(), entry.getValue());
+                }
+            return query.getResultList();
+        } finally {
+            logger.debug("find, query={}, params={}, elapsedTime={}", queryString, params, watch.elapsedTime());
+        }
+    }
+
+    /**
+     * find by query String with paging
+     *
+     * @param queryString
+     * @param offset
+     * @param fetchSize
+     * @return
+     */
+    public List<T> find(String queryString, int offset, int fetchSize) {
+        return find(queryString, null, offset, fetchSize);
+    }
+
+    /**
+     * find by query String with params&paging
+     *
+     * @param queryString
+     * @param params
+     * @param offset
+     * @param fetchSize
+     * @return
+     */
+    public List<T> find(String queryString, Map<String, Object> params, int offset, int fetchSize) {
+        StopWatch watch = new StopWatch();
+        try {
+            Query query = entityManager.createQuery(queryString);
+            if (params != null) {
+                for (Map.Entry<String, Object> entry : params.entrySet()) {
+                    query.setParameter(entry.getKey(), entry.getValue());
+                }
+            }
+            query.setFirstResult(offset);
+            query.setMaxResults(fetchSize);
+            return query.getResultList();
+        } finally {
+            logger.debug("find, query={}, params={},offset={},fetchSize={}, elapsedTime={}", queryString, params, offset, fetchSize, watch.elapsedTime());
+        }
+    }
+
+    /**
+     * criteria query
+     *
+     * @param query
+     * @param offset
+     * @param fetchSize
+     * @return
+     */
+    public List<T> find(CriteriaQuery<T> query, int offset, int fetchSize) {
+        StopWatch watch = new StopWatch();
+        try {
+            TypedQuery<T> typedQuery = entityManager.createQuery(query);
+            typedQuery.setFirstResult(offset);
+            typedQuery.setMaxResults(fetchSize);
+            return typedQuery.getResultList();
+        } finally {
+            logger.debug("find by CriteriaQuery<T>,offset={},fetchSize={}, elapsedTime={}", offset, fetchSize, watch.elapsedTime());
+        }
+    }
+
+    /**
+     * find unique by criteria query
+     *
+     * @param query
+     * @return
+     */
+    public T findUniqueResult(CriteriaQuery<T> query) {
+        StopWatch watch = new StopWatch();
+        try {
+            List<T> results = entityManager.createQuery(query).getResultList();
+            return getUniqueResult(results);
+        } finally {
+            logger.debug("findUniqueResult by CriteriaQuery<T>, elapsedTime={}", watch.elapsedTime());
+        }
+    }
+
+    /**
+     * find unique by criteria query
+     *
+     * @param queryString
+     * @param params
+     * @return
+     */
+    public T findUniqueResult(String queryString, Map<String, Object> params) {
+        StopWatch watch = new StopWatch();
+        try {
+            Query query = entityManager.createQuery(queryString);
+            if (params != null)
+                for (Map.Entry<String, Object> entry : params.entrySet()) {
+                    query.setParameter(entry.getKey(), entry.getValue());
+                }
+            List<T> results = query.getResultList();
+            return getUniqueResult(results);
+        } finally {
+            logger.debug("findUniqueResult, query={}, params={}, elapsedTime={}", queryString, params, watch.elapsedTime());
+        }
+    }
+
+    private T getUniqueResult(List<T> results) {
+        if (results.isEmpty()) return null;
+        if (results.size() > 1) {
+            throw new NonUniqueResultException("result returned more than one element, returnedSize=" + results.size());
+        }
+        return results.get(0);
+    }
+
+    private final class StopWatch {
+        private long start;
+
+        public StopWatch() {
+            reset();
+        }
+
+        public void reset() {
+            start = System.currentTimeMillis();
+        }
+
+        public long elapsedTime() {
+            long end = System.currentTimeMillis();
+            return end - start;
+        }
+    }
+
 }
