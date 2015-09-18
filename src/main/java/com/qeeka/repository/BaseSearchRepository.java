@@ -197,6 +197,23 @@ public abstract class BaseSearchRepository<T> {
     }
 
     /**
+     * get entity by entity class & id
+     *
+     * @param entityClass
+     * @param id
+     * @param <X>
+     * @return
+     */
+    public <X> X get(Class<X> entityClass, Object id) {
+        StopWatch watch = new StopWatch();
+        try {
+            return entityManager.find(entityClass, id);
+        } finally {
+            logger.debug("get, entityClass={}, id={}, elapsedTime={}", entityClass.getName(), id, watch.elapsedTime());
+        }
+    }
+
+    /**
      * save entity
      *
      * @param entity
