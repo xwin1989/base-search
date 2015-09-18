@@ -148,6 +148,10 @@ public class QueryParser {
                     queryPart.append(":").append(parameterName);
                     node.setValue(String.format("%%%s%%", node.getValue()));
                     break;
+                case SUB_QUERY:
+                    queryPart.append(node.getValue());
+                    parameterName = null;
+                    break;
                 default:
                     queryPart.append(":").append(parameterName);
             }
