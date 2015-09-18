@@ -1,6 +1,9 @@
 package com.qeeka.test.parse;
 
-import com.qeeka.domain.*;
+import com.qeeka.domain.QueryGroup;
+import com.qeeka.domain.QueryModel;
+import com.qeeka.domain.QueryNode;
+import com.qeeka.domain.QueryParser;
 import com.qeeka.http.QueryRequest;
 import com.qeeka.operate.QueryOperate;
 import com.qeeka.util.QueryJSONBinder;
@@ -101,5 +104,12 @@ public class ParserTest {
         String s = QueryJSONBinder.toJSON(new QueryRequest(group));
         QueryRequest request = QueryJSONBinder.fromJSON(s);
         Assert.assertEquals(parser.parse(request.getQueryGroup()).getStatement(), "(key = :key3 OR (name = :name2 AND (id IN (:id0) AND id NOT IN (:id1))))))");
+    }
+
+    @Test
+    public void testSubQuery() {
+        QueryGroup group = new QueryGroup("id", "in (select * from a)", QueryOperate.SUB_QUERY);
+        QueryModel queryModel = parser.parse(group);
+        Assert.assertEquals(queryModel.getStatement(), "id in (select * from a)");
     }
 }

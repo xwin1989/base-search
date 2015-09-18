@@ -10,7 +10,7 @@ public enum QueryOperate {
     LIKE(" LIKE "), NOT_LIKE(" NOT LIKE "), CONTAIN(" LIKE "), NOT_CONTAIN(" NOT LIKE "),
     LESS_THAN(" < "), LESS_THAN_EQUALS(" <= "),
     GREAT_THAN(" > "), GREAT_THAN_EQUALS(" >= "),
-    IN(" IN "), NOT_IN(" NOT IN ");
+    IN(" IN "), NOT_IN(" NOT IN "), SUB_QUERY(" ");
 
 
     private String value;
