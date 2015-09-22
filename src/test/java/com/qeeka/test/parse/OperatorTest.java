@@ -84,6 +84,7 @@ public class OperatorTest {
         assertEquals(parse.getParameters().get("a0"), "%s%");
 
     }
+
     @Test
     public void testNotContain() {
         QueryGroup group = new QueryGroup("a", "s", NOT_CONTAIN);
@@ -117,5 +118,11 @@ public class OperatorTest {
         QueryGroup group = new QueryGroup("a", idList, NOT_IN);
         assertEquals(parser.parse(group).getStatement(), "a NOT IN (:a0)");
         assertTrue(parser.parse(group).getParameters().size() == 1);
+    }
+
+    @Test
+    public void testNullValue() {
+        QueryGroup group = new QueryGroup("a", 1, GREAT_THAN).and("b", 2, GREAT_THAN_EQUALS).and("c", null, EQUALS).and("d", null, LIKE);
+        assertEquals(parser.parse(group).getStatement(), "(a > :a0 AND b >= :b1)");
     }
 }
