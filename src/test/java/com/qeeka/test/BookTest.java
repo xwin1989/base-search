@@ -145,4 +145,12 @@ public class BookTest extends SpringTestWithDB {
         Book book = bookService.getBook(1);
         Assert.assertEquals(book.getName(), "book2");
     }
+
+
+    @Test
+    @DatabaseSetup("/BookData.xml")
+    public void testAllBook() {
+        QueryResponse<Book> response = bookService.search(new QueryRequest(new QueryGroup()));
+        Assert.assertTrue(response.getRecords().size() == 3);
+    }
 }
