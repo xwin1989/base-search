@@ -113,4 +113,22 @@ public class ParserTest {
         Assert.assertEquals(queryModel.getStatement(), "(id in (select * from a) AND name LIKE :name0)");
         Assert.assertTrue(queryModel.getParameters().size() == 1);
     }
+
+    @Test
+    public void testAndQuery() {
+        QueryGroup group = new QueryGroup();
+        group.and("status", "1");
+        QueryModel queryModel = parser.parse(group);
+        Assert.assertEquals(queryModel.getStatement(), "status = :status0");
+    }
+
+    @Test
+    public void testOrQuery() {
+        QueryGroup group = new QueryGroup();
+        group.or("status", "1");
+        group.and("a", null, QueryOperate.EQUALS);
+        group.or("b", "b");
+        QueryModel queryModel = parser.parse(group);
+        Assert.assertEquals(queryModel.getStatement(), "(status = :status0 OR b = :b1)");
+    }
 }

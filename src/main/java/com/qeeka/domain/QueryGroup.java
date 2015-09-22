@@ -106,7 +106,8 @@ public class QueryGroup {
     public QueryGroup and(QueryNode node) {
         if (isNotNullValue(node)) {
             queryHandleList.add(node);
-            queryHandleList.add(new QueryOperateNode(QueryLinkOperate.AND));
+            if (queryHandleList.size() > 1)
+                queryHandleList.add(new QueryOperateNode(QueryLinkOperate.AND));
         }
         return this;
     }
@@ -121,7 +122,8 @@ public class QueryGroup {
     public QueryGroup and(String columnName, Object value) {
         if (isNotNullValue(value)) {
             queryHandleList.add(new QueryNode(columnName, value));
-            queryHandleList.add(new QueryOperateNode(QueryLinkOperate.AND));
+            if (queryHandleList.size() > 1)
+                queryHandleList.add(new QueryOperateNode(QueryLinkOperate.AND));
         }
         return this;
     }
@@ -137,7 +139,8 @@ public class QueryGroup {
     public QueryGroup and(String columnName, Object value, QueryOperate queryOperate) {
         if (isNotNullValue(value)) {
             queryHandleList.add(new QueryNode(columnName, value, queryOperate));
-            queryHandleList.add(new QueryOperateNode(QueryLinkOperate.AND));
+            if (queryHandleList.size() > 1)
+                queryHandleList.add(new QueryOperateNode(QueryLinkOperate.AND));
         }
         return this;
     }
@@ -171,7 +174,8 @@ public class QueryGroup {
             throw new IllegalArgumentException("Constructor only support null query operate logic!");
         }
         queryHandleList.add(new QueryNode(columnName, null, queryOperate));
-        queryHandleList.add(new QueryOperateNode(QueryLinkOperate.AND));
+        if (queryHandleList.size() > 1)
+            queryHandleList.add(new QueryOperateNode(QueryLinkOperate.AND));
         return this;
     }
 
@@ -184,7 +188,8 @@ public class QueryGroup {
     public QueryGroup or(QueryNode node) {
         if (isNotNullValue(node)) {
             queryHandleList.add(node);
-            queryHandleList.add(new QueryOperateNode(QueryLinkOperate.OR));
+            if (queryHandleList.size() > 1)
+                queryHandleList.add(new QueryOperateNode(QueryLinkOperate.OR));
         }
         return this;
     }
@@ -200,7 +205,8 @@ public class QueryGroup {
     public QueryGroup or(String columnName, Object value) {
         if (isNotNullValue(value)) {
             queryHandleList.add(new QueryNode(columnName, value));
-            queryHandleList.add(new QueryOperateNode(QueryLinkOperate.OR));
+            if (queryHandleList.size() > 1)
+                queryHandleList.add(new QueryOperateNode(QueryLinkOperate.OR));
         }
         return this;
     }
@@ -216,7 +222,8 @@ public class QueryGroup {
     public QueryGroup or(String columnName, Object value, QueryOperate queryOperate) {
         if (isNotNullValue(value)) {
             queryHandleList.add(new QueryNode(columnName, value, queryOperate));
-            queryHandleList.add(new QueryOperateNode(QueryLinkOperate.OR));
+            if (queryHandleList.size() > 1)
+                queryHandleList.add(new QueryOperateNode(QueryLinkOperate.OR));
         }
         return this;
     }
@@ -231,7 +238,8 @@ public class QueryGroup {
             throw new IllegalArgumentException("Constructor only support null reject logic!");
         }
         queryHandleList.add(new QueryNode(columnName, null, queryOperate));
-        queryHandleList.add(new QueryOperateNode(QueryLinkOperate.OR));
+        if (queryHandleList.size() > 1)
+            queryHandleList.add(new QueryOperateNode(QueryLinkOperate.OR));
         return this;
     }
 
