@@ -165,9 +165,9 @@ public class QueryParser {
     }
 
     private QueryGroup deepQueryGroupCopy(QueryGroup queryGroup) {
-        QueryGroup group = new QueryGroup();
         //Copy Node
         if (queryGroup != null) {
+            QueryGroup group = new QueryGroup();
             if (queryGroup.getQueryHandleList() != null) {
                 for (QueryHandle handle : queryGroup.getQueryHandleList()) {
                     if (handle instanceof QueryOperateNode) {
@@ -181,7 +181,9 @@ public class QueryParser {
                 }
             }
             group.setSort(queryGroup.getSort());
+            return group;
+        }else {
+            return null;
         }
-        return null;
     }
 }
