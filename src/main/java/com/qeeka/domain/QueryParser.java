@@ -182,6 +182,6 @@ public class QueryParser {
             }
             group.setSort(queryGroup.getSort());
         }
-        return group;
+        return null;
     }
 }

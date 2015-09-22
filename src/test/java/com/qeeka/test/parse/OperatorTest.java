@@ -125,4 +125,10 @@ public class OperatorTest {
         QueryGroup group = new QueryGroup("a", 1, GREAT_THAN).and("b", 2, GREAT_THAN_EQUALS).and("c", null, EQUALS).and("d", null, LIKE);
         assertEquals(parser.parse(group).getStatement(), "(a > :a0 AND b >= :b1)");
     }
+
+    @Test
+    public void testNullValue2() {
+        QueryGroup group = new QueryGroup("a", null, GREAT_THAN).and("b", null, GREAT_THAN_EQUALS).and("c", null, EQUALS).and("d", null, LIKE);
+        assertEquals(parser.parse(group).getStatement(), null);
+    }
 }
