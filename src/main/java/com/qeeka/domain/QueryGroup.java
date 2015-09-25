@@ -91,10 +91,14 @@ public class QueryGroup {
      * @param columnName
      */
     public QueryGroup(String columnName, QueryOperate queryOperate) {
-        if (!QueryOperate.IS_NULL.equals(queryOperate) && !QueryOperate.IS_NOT_NULL.equals(queryOperate)) {
+        if (!QueryOperate.IS_NULL.equals(queryOperate) && !QueryOperate.IS_NOT_NULL.equals(queryOperate) && !QueryOperate.SUB_QUERY.equals(queryOperate)) {
             throw new IllegalArgumentException("Constructor only support null reject logic!");
         }
-        queryHandleList.add(new QueryNode(columnName, null, queryOperate));
+        if (QueryOperate.SUB_QUERY.equals(queryOperate)) {
+            queryHandleList.add(new QueryNode("", columnName, queryOperate));
+        } else {
+            queryHandleList.add(new QueryNode(columnName, null, queryOperate));
+        }
     }
 
     /**
@@ -170,10 +174,14 @@ public class QueryGroup {
      * @param columnName
      */
     public QueryGroup and(String columnName, QueryOperate queryOperate) {
-        if (!QueryOperate.IS_NULL.equals(queryOperate) && !QueryOperate.IS_NOT_NULL.equals(queryOperate)) {
-            throw new IllegalArgumentException("Constructor only support null query operate logic!");
+        if (!QueryOperate.IS_NULL.equals(queryOperate) && !QueryOperate.IS_NOT_NULL.equals(queryOperate) && !QueryOperate.SUB_QUERY.equals(queryOperate)) {
+            throw new IllegalArgumentException("Constructor only support null or sub query operate logic!");
         }
-        queryHandleList.add(new QueryNode(columnName, null, queryOperate));
+        if (QueryOperate.SUB_QUERY.equals(queryOperate)) {
+            queryHandleList.add(new QueryNode("", columnName, queryOperate));
+        } else {
+            queryHandleList.add(new QueryNode(columnName, null, queryOperate));
+        }
         if (queryHandleList.size() > 1)
             queryHandleList.add(new QueryOperateNode(QueryLinkOperate.AND));
         return this;
@@ -234,10 +242,14 @@ public class QueryGroup {
      * @param columnName
      */
     public QueryGroup or(String columnName, QueryOperate queryOperate) {
-        if (!queryOperate.equals(QueryOperate.IS_NULL) && !queryOperate.equals(QueryOperate.IS_NOT_NULL)) {
-            throw new IllegalArgumentException("Constructor only support null reject logic!");
+        if (!QueryOperate.IS_NULL.equals(queryOperate) && !QueryOperate.IS_NOT_NULL.equals(queryOperate) && !QueryOperate.SUB_QUERY.equals(queryOperate)) {
+            throw new IllegalArgumentException("Constructor only support null or sub query operate logic!");
         }
-        queryHandleList.add(new QueryNode(columnName, null, queryOperate));
+        if (QueryOperate.SUB_QUERY.equals(queryOperate)) {
+            queryHandleList.add(new QueryNode("", columnName, queryOperate));
+        } else {
+            queryHandleList.add(new QueryNode(columnName, null, queryOperate));
+        }
         if (queryHandleList.size() > 1)
             queryHandleList.add(new QueryOperateNode(QueryLinkOperate.OR));
         return this;

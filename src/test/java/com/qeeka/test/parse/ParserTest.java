@@ -115,6 +115,28 @@ public class ParserTest {
     }
 
     @Test
+    public void testSubQuery2() {
+        QueryGroup group = new QueryGroup("exist (select * from a)", QueryOperate.SUB_QUERY).and("name", "hello");
+        QueryModel queryModel = parser.parse(group);
+        Assert.assertEquals(queryModel.getStatement(), "( exist (select * from a) AND name = :name0)");
+        Assert.assertTrue(queryModel.getParameters().size() == 1);
+    }
+
+    @Test
+    public void testSubQueryOr() {
+        QueryGroup group = new QueryGroup("name", "a").or("exist (select * from a)", QueryOperate.SUB_QUERY);
+        QueryModel queryModel = parser.parse(group);
+        Assert.assertEquals(queryModel.getStatement(), "(name = :name0 OR  exist (select * from a))");
+    }
+
+    @Test
+    public void testSubQueryAnd() {
+        QueryGroup group = new QueryGroup("name", "a").and("exist (select * from a)", QueryOperate.SUB_QUERY);
+        QueryModel queryModel = parser.parse(group);
+        Assert.assertEquals(queryModel.getStatement(), "(name = :name0 AND  exist (select * from a))");
+    }
+
+    @Test
     public void testAndQuery() {
         QueryGroup group = new QueryGroup();
         group.and("status", "1");
