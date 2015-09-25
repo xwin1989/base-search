@@ -75,8 +75,7 @@ public abstract class BaseSearchRepository<T> {
     public QueryResponse<T> search(QueryRequest queryRequest) {
         //parse query group to simple query domain
         QueryModel query = queryParser.parse(queryRequest.getQueryGroup());
-
-        StringBuilder hql = new StringBuilder("FROM ").append(entityName);
+        StringBuilder hql = new StringBuilder("SELECT E FROM ").append(entityName).append(" AS E ");
         if (StringUtils.hasText(query.getStatement())) {
             hql.append(" WHERE ").append(query.getStatement());
         }
