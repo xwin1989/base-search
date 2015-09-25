@@ -88,7 +88,7 @@ public class QueryGroup {
     /**
      * Null Logic
      *
-     * @param columnName
+     * @param columnName if queryOperate equals sub_query , this columnName is sub query sub
      */
     public QueryGroup(String columnName, QueryOperate queryOperate) {
         if (!QueryOperate.IS_NULL.equals(queryOperate) && !QueryOperate.IS_NOT_NULL.equals(queryOperate) && !QueryOperate.SUB_QUERY.equals(queryOperate)) {
@@ -170,8 +170,7 @@ public class QueryGroup {
 
     /**
      * null query node
-     *
-     * @param columnName
+     * @param columnName if queryOperate equals sub_query , this columnName is sub query sub
      */
     public QueryGroup and(String columnName, QueryOperate queryOperate) {
         if (!QueryOperate.IS_NULL.equals(queryOperate) && !QueryOperate.IS_NOT_NULL.equals(queryOperate) && !QueryOperate.SUB_QUERY.equals(queryOperate)) {
@@ -238,8 +237,9 @@ public class QueryGroup {
 
     /**
      * null query node
-     *
-     * @param columnName
+     * @param columnName if queryOperate equals sub_query , this columnName is sub query sub
+     * @param queryOperate
+     * @return
      */
     public QueryGroup or(String columnName, QueryOperate queryOperate) {
         if (!QueryOperate.IS_NULL.equals(queryOperate) && !QueryOperate.IS_NOT_NULL.equals(queryOperate) && !QueryOperate.SUB_QUERY.equals(queryOperate)) {
