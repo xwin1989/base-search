@@ -139,6 +139,9 @@ public abstract class BaseSearchRepository<T> {
             }
             //Page search , need page index and size
             if (queryRequest.getPageIndex() != null && queryRequest.getPageSize() != null) {
+                if (queryRequest.getPageIndex() < 0) {
+                    queryRequest.setPageIndex(0);
+                }
                 recordQuery.setFirstResult(queryRequest.getPageIndex() * queryRequest.getPageSize());
                 recordQuery.setMaxResults(queryRequest.getPageSize());
             }
