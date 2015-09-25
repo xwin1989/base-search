@@ -437,10 +437,10 @@ public abstract class BaseSearchRepository<T> {
      * @param query
      * @return
      */
-    public T findUniqueResult(CriteriaQuery<T> query) {
+    public <X> X findUniqueResult(CriteriaQuery<X> query) {
         StopWatch watch = new StopWatch();
         try {
-            List<T> results = entityManager.createQuery(query).getResultList();
+            List<X> results = entityManager.createQuery(query).getResultList();
             return getUniqueResult(results);
         } finally {
             logger.debug("findUniqueResult by CriteriaQuery<T>, elapsedTime={}", watch.elapsedTime());
@@ -448,28 +448,39 @@ public abstract class BaseSearchRepository<T> {
     }
 
     /**
-     * find unique by criteria query
+     * find unique by query string
+     *
+     * @param queryString
+     * @return
+     */
+    public <X> X findUniqueResult(String queryString) {
+        return findUniqueResult(queryString, null);
+    }
+
+    /**
+     * find unique by query string & params
      *
      * @param queryString
      * @param params
      * @return
      */
-    public T findUniqueResult(String queryString, Map<String, Object> params) {
+    public <X> X findUniqueResult(String queryString, Map<String, Object> params) {
         StopWatch watch = new StopWatch();
         try {
             Query query = entityManager.createQuery(queryString);
-            if (params != null)
+            if (params != null) {
                 for (Map.Entry<String, Object> entry : params.entrySet()) {
                     query.setParameter(entry.getKey(), entry.getValue());
                 }
-            List<T> results = query.getResultList();
+            }
+            List<X> results = query.getResultList();
             return getUniqueResult(results);
         } finally {
             logger.debug("findUniqueResult, query={}, params={}, elapsedTime={}", queryString, params, watch.elapsedTime());
         }
     }
 
-    private T getUniqueResult(List<T> results) {
+    private <X> X getUniqueResult(List<X> results) {
         if (results.isEmpty()) return null;
         if (results.size() > 1) {
             throw new NonUniqueResultException("result returned more than one element, returnedSize=" + results.size());
