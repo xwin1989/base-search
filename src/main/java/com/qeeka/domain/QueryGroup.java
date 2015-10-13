@@ -170,6 +170,7 @@ public class QueryGroup {
 
     /**
      * null query node
+     *
      * @param columnName if queryOperate equals sub_query , this columnName is sub query sub
      */
     public QueryGroup and(String columnName, QueryOperate queryOperate) {
@@ -237,7 +238,8 @@ public class QueryGroup {
 
     /**
      * null query node
-     * @param columnName if queryOperate equals sub_query , this columnName is sub query sub
+     *
+     * @param columnName   if queryOperate equals sub_query , this columnName is sub query sub
      * @param queryOperate
      * @return
      */

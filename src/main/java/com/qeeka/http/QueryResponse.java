@@ -35,18 +35,23 @@ public class QueryResponse<T> {
     public void setTotalRecords(Long totalRecords) {
         this.totalRecords = totalRecords;
     }
+
     public Integer getPageIndex() {
         return pageIndex;
     }
+
     public void setPageIndex(Integer pageIndex) {
         this.pageIndex = pageIndex;
     }
+
     public Integer getPageSize() {
         return pageSize;
     }
+
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
     }
+
     public <X extends BaseSearchResponse<T>> X assignmentToResponse(X response) {
         if (response != null) {
             response.setEntity(this.entity);

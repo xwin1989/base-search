@@ -90,6 +90,7 @@ public class QueryRequest {
         this.needCount = true;
         return this;
     }
+
     public boolean isNeedRecord() {
         return needRecord;
     }

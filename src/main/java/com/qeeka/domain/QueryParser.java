@@ -182,7 +182,7 @@ public class QueryParser {
             }
             group.setSort(queryGroup.getSort());
             return group;
-        }else {
+        } else {
             return null;
         }
     }
