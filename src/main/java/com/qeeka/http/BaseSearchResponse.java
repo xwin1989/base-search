@@ -1,6 +1,10 @@
 package com.qeeka.http;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
 /**
@@ -20,8 +24,10 @@ public class BaseSearchResponse<T> {
     protected Integer pageIndex;
     @XmlElement(name = "page_size")
     protected Integer pageSize;
+    @XmlElement(name = "status")
+    protected String status;
 	@XmlElement(name = "message")
-    private String message;
+    protected String message;
 
     public T getEntity() {
         return entity;
@@ -61,6 +67,12 @@ public class BaseSearchResponse<T> {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+    public String getStatus() {
+        return status;
+    }
+    public void setStatus(String status) {
+        this.status = status;
     }
     public String getMessage() {
         return message;
