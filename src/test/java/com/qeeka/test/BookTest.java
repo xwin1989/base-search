@@ -16,6 +16,8 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * Created by Neal on 2015/7/27.
  */
@@ -158,5 +160,16 @@ public class BookTest extends SpringTestWithDB {
         Assert.assertTrue(searchResponse.getTotalRecords() == 3);
         Assert.assertTrue(searchResponse.getPageIndex() == 0);
         Assert.assertTrue(searchResponse.getPageSize() == 2);
+    }
+
+    @Test
+    @DatabaseSetup("/BookData.xml")
+    public void testNativeQuery() {
+        List<Book> all = bookService.findAll();
+        Integer total = bookService.count();
+        Integer typeById = bookService.getTypeById(1);
+        Assert.assertTrue(all.size() == 3);
+        Assert.assertTrue(total == 3);
+        Assert.assertTrue(typeById == 2);
     }
 }

@@ -509,8 +509,8 @@ public abstract class BaseSearchRepository<T> {
      * @param sql
      * @return
      */
-    public List<T> findByNativeQuery(CharSequence sql) {
-        return findByNativeQuery(sql);
+    public <X> List<X> findByNativeQuery(CharSequence sql) {
+        return findByNativeQuery(sql, null);
     }
 
     /**
@@ -520,8 +520,8 @@ public abstract class BaseSearchRepository<T> {
      * @param params
      * @return
      */
-    public List<T> findByNativeQuery(CharSequence sql, Map<String, Object> params) {
-        return findByNativeQuery(sql, params);
+    public <X> List<X> findByNativeQuery(CharSequence sql, Map<String, Object> params) {
+        return findByNativeQuery(sql, params, null, null);
     }
 
     /**
@@ -532,8 +532,8 @@ public abstract class BaseSearchRepository<T> {
      * @param size
      * @return
      */
-    public List<T> findByNativeQuery(CharSequence sql, int offset, int size) {
-        return findByNativeQuery(sql, offset, size);
+    public <X> List<X> findByNativeQuery(CharSequence sql, int offset, int size) {
+        return findByNativeQuery(sql, null, offset, size);
     }
 
     /**
@@ -545,20 +545,25 @@ public abstract class BaseSearchRepository<T> {
      * @param size
      * @return
      */
-    public List<T> findByNativeQuery(CharSequence sql, Map<String, Object> params, Integer offset, Integer size) {
-        Query namedQuery = entityManager.createNativeQuery(sql.toString(), entityClass);
-        if (params != null) {
-            for (Map.Entry<String, Object> entry : params.entrySet()) {
-                namedQuery.setParameter(entry.getKey(), entry.getValue());
+    public <X> List<X> findByNativeQuery(CharSequence sql, Map<String, Object> params, Integer offset, Integer size) {
+        StopWatch watch = new StopWatch();
+        try {
+            Query namedQuery = entityManager.createNativeQuery(sql.toString());
+            if (params != null) {
+                for (Map.Entry<String, Object> entry : params.entrySet()) {
+                    namedQuery.setParameter(entry.getKey(), entry.getValue());
+                }
             }
+            if (offset != null) {
+                namedQuery.setFirstResult(offset);
+            }
+            if (size != null) {
+                namedQuery.setMaxResults(size);
+            }
+            return namedQuery.getResultList();
+        } finally {
+            logger.debug("findByNativeQuery, query={}, params={}, offset={}, size={}, elapsedTime={}", sql, params, offset, size, watch.elapsedTime());
         }
-        if (offset != null) {
-            namedQuery.setFirstResult(offset);
-        }
-        if (size != null) {
-            namedQuery.setMaxResults(size);
-        }
-        return namedQuery.getResultList();
     }
 
     /**
