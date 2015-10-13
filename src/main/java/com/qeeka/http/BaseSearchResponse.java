@@ -26,7 +26,7 @@ public class BaseSearchResponse<T> {
     protected Integer pageSize;
     @XmlElement(name = "status")
     protected String status;
-	@XmlElement(name = "message")
+    @XmlElement(name = "message")
     protected String message;
 
     public T getEntity() {
@@ -68,15 +68,19 @@ public class BaseSearchResponse<T> {
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
     }
+
     public String getStatus() {
         return status;
     }
+
     public void setStatus(String status) {
         this.status = status;
     }
+
     public String getMessage() {
         return message;
     }
+
     public void setMessage(String message) {
         this.message = message;
     }
