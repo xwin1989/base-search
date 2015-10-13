@@ -2,6 +2,7 @@ package com.qeeka.test;
 
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.qeeka.domain.QueryGroup;
+import com.qeeka.http.BaseSearchResponse;
 import com.qeeka.http.QueryRequest;
 import com.qeeka.http.QueryResponse;
 import com.qeeka.operate.Direction;
@@ -150,7 +151,12 @@ public class BookTest extends SpringTestWithDB {
     @Test
     @DatabaseSetup("/BookData.xml")
     public void testAllBook() {
-        QueryResponse<Book> response = bookService.search(new QueryRequest(new QueryGroup()));
-        Assert.assertTrue(response.getRecords().size() == 3);
+        QueryResponse<Book> response = bookService.search(new QueryRequest(new QueryGroup()).needCount().setPageSize(2));
+        BaseSearchResponse<Book> bookBaseSearchResponse = new BaseSearchResponse<>();
+        BaseSearchResponse<Book> searchResponse = response.assignmentToResponse(bookBaseSearchResponse);
+        Assert.assertTrue(response.getRecords().size() == 2);
+        Assert.assertTrue(searchResponse.getTotalRecords() == 3);
+        Assert.assertTrue(searchResponse.getPageIndex() == 0);
+        Assert.assertTrue(searchResponse.getPageSize() == 2);
     }
 }

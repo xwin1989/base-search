@@ -146,6 +146,8 @@ public abstract class BaseSearchRepository<T> {
             }
             //Set query record
             queryResponse.setRecords(recordQuery.getResultList());
+            queryResponse.setPageIndex(queryRequest.getPageIndex());
+            queryResponse.setPageSize(queryRequest.getPageSize());
         }
         //Query total
         if (queryRequest.isNeedCount()) {

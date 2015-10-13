@@ -86,6 +86,10 @@ public class QueryRequest {
         return this;
     }
 
+    public QueryRequest needCount() {
+        this.needCount = true;
+        return this;
+    }
     public boolean isNeedRecord() {
         return needRecord;
     }

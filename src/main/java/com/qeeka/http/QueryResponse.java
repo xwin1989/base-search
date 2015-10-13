@@ -9,6 +9,8 @@ public class QueryResponse<T> {
     private T entity;
     private List<T> records;
     private Long totalRecords;
+    private Integer pageIndex;
+    private Integer pageSize;
 
     public T getEntity() {
         return entity;
@@ -32,5 +34,28 @@ public class QueryResponse<T> {
 
     public void setTotalRecords(Long totalRecords) {
         this.totalRecords = totalRecords;
+    }
+    public Integer getPageIndex() {
+        return pageIndex;
+    }
+    public void setPageIndex(Integer pageIndex) {
+        this.pageIndex = pageIndex;
+    }
+    public Integer getPageSize() {
+        return pageSize;
+    }
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
+    }
+    public <X extends BaseSearchResponse<T>> X assignmentToResponse(X response) {
+        if (response != null) {
+            response.setEntity(this.entity);
+            response.setRecordList(this.records);
+            response.setTotalRecords(this.totalRecords);
+            response.setPageIndex(this.pageIndex);
+            response.setPageSize(this.pageSize);
+            return response;
+        }
+        return null;
     }
 }
