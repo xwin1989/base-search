@@ -7,23 +7,20 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * Created by Neal on 8/9 0009.
+ * Created by neal.xu on 2015/10/14
  */
 @Entity
-@Table(name = "book")
-public class Book {
+@Table(name = "book_author")
+public class BookAuthor {
     @Id
     @GeneratedValue
-    public Integer id;
+    private Integer id;
 
     @Column(name = "name")
-    public String name;
+    private String name;
 
-    @Column(name = "type")
-    public Integer type;
-
-    @Column(name = "status")
-    public Integer status;
+    @Column(name = "book_id")
+    private Integer bookId;
 
     public Integer getId() {
         return id;
@@ -41,19 +38,11 @@ public class Book {
         this.name = name;
     }
 
-    public Integer getType() {
-        return type;
+    public Integer getBookId() {
+        return bookId;
     }
 
-    public void setType(Integer type) {
-        this.type = type;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
+    public void setBookId(Integer bookId) {
+        this.bookId = bookId;
     }
 }

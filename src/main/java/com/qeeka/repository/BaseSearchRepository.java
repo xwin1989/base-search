@@ -75,8 +75,12 @@ public abstract class BaseSearchRepository<T> {
     public QueryResponse<T> search(QueryRequest queryRequest) {
         //parse query group to simple query domain
         QueryModel query = queryParser.parse(queryRequest.getQueryGroup());
-
-        StringBuilder hql = new StringBuilder("FROM ").append(entityName);
+        StringBuilder hql = new StringBuilder("SELECT E FROM ").append(entityName).append(" AS E ");
+        if (queryRequest.getQueryGroup() != null && queryRequest.getQueryGroup().getEntityMapping() != null) {
+            for (Map.Entry<String, String> entry : queryRequest.getQueryGroup().getEntityMapping().entrySet()) {
+                hql.append(" , ").append(entry.getKey()).append(" AS ").append(entry.getValue()).append(' ');
+            }
+        }
         if (StringUtils.hasText(query.getStatement())) {
             hql.append(" WHERE ").append(query.getStatement());
         }
@@ -139,15 +143,25 @@ public abstract class BaseSearchRepository<T> {
             }
             //Page search , need page index and size
             if (queryRequest.getPageIndex() != null && queryRequest.getPageSize() != null) {
+                if (queryRequest.getPageIndex() < 0) {
+                    queryRequest.setPageIndex(0);
+                }
                 recordQuery.setFirstResult(queryRequest.getPageIndex() * queryRequest.getPageSize());
                 recordQuery.setMaxResults(queryRequest.getPageSize());
             }
             //Set query record
             queryResponse.setRecords(recordQuery.getResultList());
+            queryResponse.setPageIndex(queryRequest.getPageIndex());
+            queryResponse.setPageSize(queryRequest.getPageSize());
         }
         //Query total
         if (queryRequest.isNeedCount()) {
-            StringBuilder countHql = new StringBuilder("SELECT COUNT(E) FROM ").append(entityName).append(" E ");
+            StringBuilder countHql = new StringBuilder("SELECT COUNT(E) FROM ").append(entityName).append(" AS E ");
+            if (queryRequest.getQueryGroup() != null && queryRequest.getQueryGroup().getEntityMapping() != null) {
+                for (Map.Entry<String, String> entry : queryRequest.getQueryGroup().getEntityMapping().entrySet()) {
+                    countHql.append(" , ").append(entry.getKey()).append(" AS ").append(entry.getValue()).append(' ');
+                }
+            }
             if (StringUtils.hasText(query.getStatement())) {
                 countHql.append(" WHERE ").append(query.getStatement());
             }
@@ -190,7 +204,12 @@ public abstract class BaseSearchRepository<T> {
     public T get(Object id) {
         StopWatch watch = new StopWatch();
         try {
-            return (T) entityManager.find(entityClass, id);
+            Object entity = entityManager.find(entityClass, id);
+            if (entity != null) {
+                return (T) entity;
+            } else {
+                return null;
+            }
         } finally {
             logger.debug("get, entityClass={}, id={}, elapsedTime={}", entityClass.getName(), id, watch.elapsedTime());
         }
@@ -258,10 +277,10 @@ public abstract class BaseSearchRepository<T> {
      * @param params
      * @return
      */
-    public int update(String queryString, Map<String, Object> params) {
+    public int update(CharSequence queryString, Map<String, Object> params) {
         StopWatch watch = new StopWatch();
         try {
-            Query query = entityManager.createQuery(queryString);
+            Query query = entityManager.createQuery(queryString.toString());
             if (params != null)
                 for (Map.Entry<String, Object> entry : params.entrySet()) {
                     query.setParameter(entry.getKey(), entry.getValue());
@@ -293,7 +312,9 @@ public abstract class BaseSearchRepository<T> {
         StopWatch watch = new StopWatch();
         try {
             T entity = get(id);
-            entityManager.remove(entity);
+            if (entity != null) {
+                entityManager.remove(entity);
+            }
         } finally {
             logger.debug("delete, entityClass={},id={}, elapsedTime={}", entityClass.getName(), id, watch.elapsedTime());
         }
@@ -348,7 +369,7 @@ public abstract class BaseSearchRepository<T> {
      * @param queryString
      * @return
      */
-    public List<T> find(String queryString) {
+    public List<T> find(CharSequence queryString) {
         return find(queryString, null);
     }
 
@@ -359,10 +380,10 @@ public abstract class BaseSearchRepository<T> {
      * @param params
      * @return
      */
-    public List<T> find(String queryString, Map<String, Object> params) {
+    public List<T> find(CharSequence queryString, Map<String, Object> params) {
         StopWatch watch = new StopWatch();
         try {
-            Query query = entityManager.createQuery(queryString);
+            Query query = entityManager.createQuery(queryString.toString());
             if (params != null)
                 for (Map.Entry<String, Object> entry : params.entrySet()) {
                     query.setParameter(entry.getKey(), entry.getValue());
@@ -381,7 +402,7 @@ public abstract class BaseSearchRepository<T> {
      * @param fetchSize
      * @return
      */
-    public List<T> find(String queryString, int offset, int fetchSize) {
+    public List<T> find(CharSequence queryString, int offset, int fetchSize) {
         return find(queryString, null, offset, fetchSize);
     }
 
@@ -394,10 +415,10 @@ public abstract class BaseSearchRepository<T> {
      * @param fetchSize
      * @return
      */
-    public List<T> find(String queryString, Map<String, Object> params, int offset, int fetchSize) {
+    public List<T> find(CharSequence queryString, Map<String, Object> params, int offset, int fetchSize) {
         StopWatch watch = new StopWatch();
         try {
-            Query query = entityManager.createQuery(queryString);
+            Query query = entityManager.createQuery(queryString.toString());
             if (params != null) {
                 for (Map.Entry<String, Object> entry : params.entrySet()) {
                     query.setParameter(entry.getKey(), entry.getValue());
@@ -453,7 +474,7 @@ public abstract class BaseSearchRepository<T> {
      * @param queryString
      * @return
      */
-    public <X> X findUniqueResult(String queryString) {
+    public <X> X findUniqueResult(CharSequence queryString) {
         return findUniqueResult(queryString, null);
     }
 
@@ -464,10 +485,10 @@ public abstract class BaseSearchRepository<T> {
      * @param params
      * @return
      */
-    public <X> X findUniqueResult(String queryString, Map<String, Object> params) {
+    public <X> X findUniqueResult(CharSequence queryString, Map<String, Object> params) {
         StopWatch watch = new StopWatch();
         try {
-            Query query = entityManager.createQuery(queryString);
+            Query query = entityManager.createQuery(queryString.toString());
             if (params != null) {
                 for (Map.Entry<String, Object> entry : params.entrySet()) {
                     query.setParameter(entry.getKey(), entry.getValue());
@@ -487,6 +508,109 @@ public abstract class BaseSearchRepository<T> {
         }
         return results.get(0);
     }
+
+    //-------------------------------------------------------
+    //                      SQL Query
+    //-------------------------------------------------------
+
+    /**
+     * find list by native query
+     *
+     * @param sql
+     * @return
+     */
+    public <X> List<X> findByNativeQuery(CharSequence sql) {
+        return findByNativeQuery(sql, null);
+    }
+
+    /**
+     * find list by native query & params
+     *
+     * @param sql
+     * @param params
+     * @return
+     */
+    public <X> List<X> findByNativeQuery(CharSequence sql, Map<String, Object> params) {
+        return findByNativeQuery(sql, params, null, null);
+    }
+
+    /**
+     * find list by native query & sql & offset & size
+     *
+     * @param sql
+     * @param offset
+     * @param size
+     * @return
+     */
+    public <X> List<X> findByNativeQuery(CharSequence sql, int offset, int size) {
+        return findByNativeQuery(sql, null, offset, size);
+    }
+
+    /**
+     * find list by native query & sql & params & offset & size
+     *
+     * @param sql
+     * @param params
+     * @param offset
+     * @param size
+     * @return
+     */
+    public <X> List<X> findByNativeQuery(CharSequence sql, Map<String, Object> params, Integer offset, Integer size) {
+        StopWatch watch = new StopWatch();
+        try {
+            Query namedQuery = entityManager.createNativeQuery(sql.toString());
+            if (params != null) {
+                for (Map.Entry<String, Object> entry : params.entrySet()) {
+                    namedQuery.setParameter(entry.getKey(), entry.getValue());
+                }
+            }
+            if (offset != null) {
+                namedQuery.setFirstResult(offset);
+            }
+            if (size != null) {
+                namedQuery.setMaxResults(size);
+            }
+            return namedQuery.getResultList();
+        } finally {
+            logger.debug("findByNativeQuery, query={}, params={}, offset={}, size={}, elapsedTime={}", sql, params, offset, size, watch.elapsedTime());
+        }
+    }
+
+    /**
+     * find unique by native query & sql
+     *
+     * @param sql
+     * @param <X>
+     * @return
+     */
+    public <X> X findUniqueNativeQuery(CharSequence sql) {
+        return findUniqueNativeQuery(sql, null);
+    }
+
+    /**
+     * find unique by native query & sql & params
+     *
+     * @param sql
+     * @param params
+     * @param <X>
+     * @return
+     */
+    public <X> X findUniqueNativeQuery(CharSequence sql, Map<String, Object> params) {
+        StopWatch watch = new StopWatch();
+        try {
+            Query query = entityManager.createNativeQuery(sql.toString());
+            if (params != null) {
+                for (Map.Entry<String, Object> entry : params.entrySet()) {
+                    query.setParameter(entry.getKey(), entry.getValue());
+                }
+            }
+            List<X> results = query.getResultList();
+            return getUniqueResult(results);
+        } finally {
+            logger.debug("findUniqueNativeResult, query={}, params={}, elapsedTime={}", sql, params, watch.elapsedTime());
+        }
+    }
+
 
     private final class StopWatch {
         private long start;

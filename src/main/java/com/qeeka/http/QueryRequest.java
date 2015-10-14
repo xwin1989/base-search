@@ -77,12 +77,23 @@ public class QueryRequest {
         return this;
     }
 
+    public QueryRequest setSearchRequest(BaseSearchRequest searchRequest) {
+        this.setPageIndex(searchRequest.getPageIndex());
+        this.setPageSize(searchRequest.getPageSize());
+        return this;
+    }
+
     public boolean isNeedCount() {
         return needCount;
     }
 
     public QueryRequest setNeedCount(boolean needCount) {
         this.needCount = needCount;
+        return this;
+    }
+
+    public QueryRequest needCount() {
+        this.needCount = true;
         return this;
     }
 

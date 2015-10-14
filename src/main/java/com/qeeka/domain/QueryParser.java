@@ -18,80 +18,62 @@ public class QueryParser {
         if (group == null) {
             return queryModel;
         }
-        List<QueryHandle> nodeStack = group.getQueryHandleList();
+        List<QueryHandle> queryHandleList = group.getQueryHandleList();
         //Set order statement
         String orderStatement = generateOrderStatement(group.getSort());
         queryModel.setOrderStatement(orderStatement);
 
 
-        if (nodeStack == null || nodeStack.isEmpty()) {
+        if (queryHandleList == null || queryHandleList.isEmpty()) {
             return queryModel;
         }
 
         //Handle alone node
-        if (nodeStack.size() == 1) {
-            queryModel.setStatement(generateParameterHql(nodeStack.get(0), queryModel.getParameters()));
+        if (queryHandleList.size() == 1) {
+            queryModel.setStatement(generateParameterHql(queryHandleList.get(0), queryModel.getParameters()));
             return queryModel;
         }
 
         Stack<CharSequence> hqlParts = new Stack<>();
+        Stack<QueryHandle> handleStack = new Stack<>();
 
-        QueryHandle node1 = null;
-        QueryHandle node2 = null;
 
-        int lastScanIndex = 0;
-
-        int index = 0;
-        while (!nodeStack.isEmpty()) {
-            QueryHandle currentNode = nodeStack.get(index);
+        for (int index = 0; index < queryHandleList.size(); index++) {
+            QueryHandle currentNode = queryHandleList.get(index);
             if (currentNode instanceof QueryOperateNode) {
                 QueryOperateNode operateNode = (QueryOperateNode) currentNode;
 
-                if (index - 2 >= 0) {
-                    node2 = nodeStack.get(index - 2);
-                }
-                if (index - 1 >= 0) {
-                    node1 = nodeStack.get(index - 1);
-                }
+                QueryHandle node1 = handleStack.isEmpty() ? null : handleStack.pop();
+                QueryHandle node2 = handleStack.isEmpty() ? null : handleStack.pop();
 
                 //when express like a b +
-                if (lastScanIndex <= index - 2 && node1 instanceof QueryNode && node2 instanceof QueryNode) {
+                if (node1 instanceof QueryNode && node2 instanceof QueryNode) {
                     hqlParts.push(new StringBuilder().append('(')
                             .append(generateParameterHql(node2, queryModel.getParameters())).append(operateNode.getQueryLinkOperate().getValue())
                             .append(generateParameterHql(node1, queryModel.getParameters()))
                             .append(')'));
-                    //remove handle node
-                    nodeStack.remove(index--);
-                    nodeStack.remove(index--);
-                    nodeStack.remove(index);
-                    lastScanIndex = index;
                 } else {
                     CharSequence popNode = hqlParts.pop();
 
-                    if (!hqlParts.isEmpty()) {
+                    if (node1 == null) {
                         CharSequence popNode2 = hqlParts.pop();
                         hqlParts.push(
-                                new StringBuilder().append('(').append(popNode2)
+                                new StringBuilder("(").append(popNode2)
                                         .append(operateNode.getQueryLinkOperate().getValue())
-                                        .append(popNode).append(')')
+                                        .append(popNode).append(")")
                         );
-                        //remove operate node
-                        nodeStack.remove(index--);
                     } else {
                         hqlParts.push(
-                                new StringBuilder('(').append('(').append(generateParameterHql(node1, queryModel.getParameters()))
+                                new StringBuilder("(").append(popNode)
                                         .append(operateNode.getQueryLinkOperate().getValue())
-                                        .append(popNode).append(')').append(')')
-                        );
-                        //remove operate node and query node
-                        nodeStack.remove(index--);
-                        nodeStack.remove(index);
+                                        .append(generateParameterHql(node1, queryModel.getParameters())).append(")"));
                     }
                 }
             } else {
-                index++;
+                handleStack.add(currentNode);
             }
         }
+
         queryModel.setStatement(hqlParts.pop().toString());
         return queryModel;
     }
@@ -120,7 +102,7 @@ public class QueryParser {
             QueryNode node = (QueryNode) handle;
 
             StringBuilder queryPart = new StringBuilder(node.getColumnName()).append(node.getQueryOperate().getValue());
-            StringBuilder parameterName = new StringBuilder(node.getColumnName()).append(parameters.size());
+            StringBuilder parameterName = new StringBuilder(node.getColumnName().replace(".", "_")).append(parameters.size());
 
             switch (node.getQueryOperate()) {
                 case IS_NULL:
@@ -182,7 +164,7 @@ public class QueryParser {
             }
             group.setSort(queryGroup.getSort());
             return group;
-        }else {
+        } else {
             return null;
         }
     }

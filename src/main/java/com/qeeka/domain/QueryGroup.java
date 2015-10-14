@@ -6,8 +6,10 @@ import com.qeeka.operate.QueryLinkOperate;
 import com.qeeka.operate.QueryOperate;
 import com.qeeka.operate.Sort;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by neal.xu on 7/31 0031.
@@ -23,6 +25,11 @@ public class QueryGroup {
      * query sort column
      */
     private Sort sort;
+
+    /**
+     * join other entity
+     */
+    private Map<String, String> entityMapping = new LinkedHashMap<>();
 
     public QueryGroup() {
     }
@@ -88,13 +95,17 @@ public class QueryGroup {
     /**
      * Null Logic
      *
-     * @param columnName
+     * @param columnName if queryOperate equals sub_query , this columnName is sub query sub
      */
     public QueryGroup(String columnName, QueryOperate queryOperate) {
-        if (!QueryOperate.IS_NULL.equals(queryOperate) && !QueryOperate.IS_NOT_NULL.equals(queryOperate)) {
+        if (!QueryOperate.IS_NULL.equals(queryOperate) && !QueryOperate.IS_NOT_NULL.equals(queryOperate) && !QueryOperate.SUB_QUERY.equals(queryOperate)) {
             throw new IllegalArgumentException("Constructor only support null reject logic!");
         }
-        queryHandleList.add(new QueryNode(columnName, null, queryOperate));
+        if (QueryOperate.SUB_QUERY.equals(queryOperate)) {
+            queryHandleList.add(new QueryNode("", columnName, queryOperate));
+        } else {
+            queryHandleList.add(new QueryNode(columnName, null, queryOperate));
+        }
     }
 
     /**
@@ -167,13 +178,17 @@ public class QueryGroup {
     /**
      * null query node
      *
-     * @param columnName
+     * @param columnName if queryOperate equals sub_query , this columnName is sub query sub
      */
     public QueryGroup and(String columnName, QueryOperate queryOperate) {
-        if (!QueryOperate.IS_NULL.equals(queryOperate) && !QueryOperate.IS_NOT_NULL.equals(queryOperate)) {
-            throw new IllegalArgumentException("Constructor only support null query operate logic!");
+        if (!QueryOperate.IS_NULL.equals(queryOperate) && !QueryOperate.IS_NOT_NULL.equals(queryOperate) && !QueryOperate.SUB_QUERY.equals(queryOperate)) {
+            throw new IllegalArgumentException("Constructor only support null or sub query operate logic!");
         }
-        queryHandleList.add(new QueryNode(columnName, null, queryOperate));
+        if (QueryOperate.SUB_QUERY.equals(queryOperate)) {
+            queryHandleList.add(new QueryNode("", columnName, queryOperate));
+        } else {
+            queryHandleList.add(new QueryNode(columnName, null, queryOperate));
+        }
         if (queryHandleList.size() > 1)
             queryHandleList.add(new QueryOperateNode(QueryLinkOperate.AND));
         return this;
@@ -231,13 +246,19 @@ public class QueryGroup {
     /**
      * null query node
      *
-     * @param columnName
+     * @param columnName   if queryOperate equals sub_query , this columnName is sub query sub
+     * @param queryOperate
+     * @return
      */
     public QueryGroup or(String columnName, QueryOperate queryOperate) {
-        if (!queryOperate.equals(QueryOperate.IS_NULL) && !queryOperate.equals(QueryOperate.IS_NOT_NULL)) {
-            throw new IllegalArgumentException("Constructor only support null reject logic!");
+        if (!QueryOperate.IS_NULL.equals(queryOperate) && !QueryOperate.IS_NOT_NULL.equals(queryOperate) && !QueryOperate.SUB_QUERY.equals(queryOperate)) {
+            throw new IllegalArgumentException("Constructor only support null or sub query operate logic!");
         }
-        queryHandleList.add(new QueryNode(columnName, null, queryOperate));
+        if (QueryOperate.SUB_QUERY.equals(queryOperate)) {
+            queryHandleList.add(new QueryNode("", columnName, queryOperate));
+        } else {
+            queryHandleList.add(new QueryNode(columnName, null, queryOperate));
+        }
         if (queryHandleList.size() > 1)
             queryHandleList.add(new QueryOperateNode(QueryLinkOperate.OR));
         return this;
@@ -280,6 +301,50 @@ public class QueryGroup {
 
     public void setSort(Sort sort) {
         this.sort = sort;
+    }
+
+    //------------------ Join ------------------
+
+    /**
+     * join other entity with alias ,  Default return entity (E) and Can't Modify ,
+     * Because BaseSearchRepository need return current <T> class.
+     *
+     * @param entityName
+     * @param entityAlias
+     * @return
+     */
+    public QueryGroup join(String entityName, String entityAlias) {
+        if ("E".equalsIgnoreCase(entityAlias)) {
+            throw new IllegalArgumentException("Can't use `E`  assign to entity!");
+        }
+        if (entityAlias.equalsIgnoreCase(this.entityMapping.get(entityName))) {
+            throw new IllegalArgumentException("Join entity mapping already exist! Please fix #" + entityName);
+        }
+        this.entityMapping.put(entityName, entityAlias);
+        return this;
+    }
+
+    /**
+     * on query
+     * like: E.id = O.id
+     *
+     * @param masterColumn
+     * @param otherColumn
+     * @return
+     */
+    public QueryGroup on(String masterColumn, String otherColumn) {
+        queryHandleList.add(new QueryNode(masterColumn, otherColumn, QueryOperate.COLUMN_EQUALS));
+        if (queryHandleList.size() > 1)
+            queryHandleList.add(new QueryOperateNode(QueryLinkOperate.AND));
+        return this;
+    }
+
+    public Map<String, String> getEntityMapping() {
+        return entityMapping;
+    }
+
+    public void setEntityMapping(Map<String, String> entityMapping) {
+        this.entityMapping = entityMapping;
     }
 
     public List<QueryHandle> getQueryHandleList() {
