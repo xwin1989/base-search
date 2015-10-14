@@ -2,6 +2,7 @@ package com.qeeka.test;
 
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.qeeka.domain.QueryGroup;
+import com.qeeka.http.BaseSearchRequest;
 import com.qeeka.http.BaseSearchResponse;
 import com.qeeka.http.QueryRequest;
 import com.qeeka.http.QueryResponse;
@@ -164,6 +165,19 @@ public class BookTest extends SpringTestWithDB {
 
     @Test
     @DatabaseSetup("/BookData.xml")
+    public void testSearchRequest() {
+        BaseSearchRequest baseSearchRequest = new BaseSearchRequest(0, 2);
+        QueryResponse<Book> response = bookService.search(new QueryRequest(new QueryGroup()).needCount().setSearchRequest(baseSearchRequest));
+        BaseSearchResponse<Book> bookBaseSearchResponse = new BaseSearchResponse<>();
+        BaseSearchResponse<Book> searchResponse = response.assignmentToResponse(bookBaseSearchResponse);
+        Assert.assertTrue(response.getRecords().size() == 2);
+        Assert.assertTrue(searchResponse.getTotalRecords() == 3);
+        Assert.assertTrue(searchResponse.getPageIndex() == 0);
+        Assert.assertTrue(searchResponse.getPageSize() == 2);
+    }
+
+    @Test
+    @DatabaseSetup("/BookData.xml")
     public void testNativeQuery() {
         List<Book> all = bookService.findAll();
         Integer total = bookService.count();
@@ -171,5 +185,17 @@ public class BookTest extends SpringTestWithDB {
         Assert.assertTrue(all.size() == 3);
         Assert.assertTrue(total == 3);
         Assert.assertTrue(typeById == 2);
+    }
+
+    @Test
+    @DatabaseSetup("/BookData.xml")
+    public void testJoinSelect() {
+        QueryGroup group = new QueryGroup("E.status", 1).join("BookInfo", "B").on("E.id", "B.bookId")
+                .join("BookAuthor", "BA").on("BA.bookId", "E.id").and(
+                        new QueryGroup("E.type", 1).or("E.type", 2).or("E.type", 3)
+                ).and("BA.name", QueryOperate.IS_NOT_NULL).sort(new Sort(Direction.ASC, "E.id"));
+        QueryResponse<Book> response = bookService.search(new QueryRequest(group));
+        Assert.assertTrue(response.getRecords().size() == 1);
+        Assert.assertTrue("book1".equals(response.getRecords().get(0).getName()));
     }
 }

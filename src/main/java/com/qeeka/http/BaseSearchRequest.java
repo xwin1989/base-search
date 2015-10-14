@@ -16,6 +16,14 @@ public class BaseSearchRequest {
     @XmlElement(name = "page_size")
     protected int pageSize;
 
+    public BaseSearchRequest() {
+    }
+
+    public BaseSearchRequest(int pageIndex, int pageSize) {
+        this.pageIndex = pageIndex;
+        this.pageSize = pageSize;
+    }
+
     public int getPageIndex() {
         return pageIndex;
     }

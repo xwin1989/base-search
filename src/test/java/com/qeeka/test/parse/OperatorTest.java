@@ -131,4 +131,10 @@ public class OperatorTest {
         QueryGroup group = new QueryGroup("a", null, GREAT_THAN).and("b", null, GREAT_THAN_EQUALS).and("c", null, EQUALS).and("d", null, LIKE);
         assertEquals(parser.parse(group).getStatement(), null);
     }
+
+    @Test
+    public void testJoin() {
+        QueryGroup group = new QueryGroup("E.a", 1).or("E.b", 2).join("OtherEntity", "O").on("O.id", "E.id");
+        assertEquals(parser.parse(group).getStatement(), "((E.a = :E_a0 OR E.b = :E_b1) AND O.id = E.id)");
+    }
 }

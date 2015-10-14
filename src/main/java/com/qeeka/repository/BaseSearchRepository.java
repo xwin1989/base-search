@@ -76,6 +76,11 @@ public abstract class BaseSearchRepository<T> {
         //parse query group to simple query domain
         QueryModel query = queryParser.parse(queryRequest.getQueryGroup());
         StringBuilder hql = new StringBuilder("SELECT E FROM ").append(entityName).append(" AS E ");
+        if (queryRequest.getQueryGroup() != null && queryRequest.getQueryGroup().getEntityMapping() != null) {
+            for (Map.Entry<String, String> entry : queryRequest.getQueryGroup().getEntityMapping().entrySet()) {
+                hql.append(" , ").append(entry.getKey()).append(" AS ").append(entry.getValue()).append(' ');
+            }
+        }
         if (StringUtils.hasText(query.getStatement())) {
             hql.append(" WHERE ").append(query.getStatement());
         }

@@ -6,8 +6,10 @@ import com.qeeka.operate.QueryLinkOperate;
 import com.qeeka.operate.QueryOperate;
 import com.qeeka.operate.Sort;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by neal.xu on 7/31 0031.
@@ -23,6 +25,11 @@ public class QueryGroup {
      * query sort column
      */
     private Sort sort;
+
+    /**
+     * join other entity
+     */
+    private Map<String, String> entityMapping = new LinkedHashMap<>();
 
     public QueryGroup() {
     }
@@ -294,6 +301,50 @@ public class QueryGroup {
 
     public void setSort(Sort sort) {
         this.sort = sort;
+    }
+
+    //------------------ Join ------------------
+
+    /**
+     * join other entity with alias ,  Default return entity (E) and Can't Modify ,
+     * Because BaseSearchRepository need return current <T> class.
+     *
+     * @param entityName
+     * @param entityAlias
+     * @return
+     */
+    public QueryGroup join(String entityName, String entityAlias) {
+        if ("E".equalsIgnoreCase(entityAlias)) {
+            throw new IllegalArgumentException("Can't use `E`  assign to entity!");
+        }
+        if (entityAlias.equalsIgnoreCase(this.entityMapping.get(entityName))) {
+            throw new IllegalArgumentException("Join entity mapping already exist! Please fix #" + entityName);
+        }
+        this.entityMapping.put(entityName, entityAlias);
+        return this;
+    }
+
+    /**
+     * on query
+     * like: E.id = O.id
+     *
+     * @param masterColumn
+     * @param otherColumn
+     * @return
+     */
+    public QueryGroup on(String masterColumn, String otherColumn) {
+        queryHandleList.add(new QueryNode(masterColumn, otherColumn, QueryOperate.COLUMN_EQUALS));
+        if (queryHandleList.size() > 1)
+            queryHandleList.add(new QueryOperateNode(QueryLinkOperate.AND));
+        return this;
+    }
+
+    public Map<String, String> getEntityMapping() {
+        return entityMapping;
+    }
+
+    public void setEntityMapping(Map<String, String> entityMapping) {
+        this.entityMapping = entityMapping;
     }
 
     public List<QueryHandle> getQueryHandleList() {
