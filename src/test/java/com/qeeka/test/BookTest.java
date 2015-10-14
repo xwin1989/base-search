@@ -194,8 +194,9 @@ public class BookTest extends SpringTestWithDB {
                 .join("BookAuthor", "BA").on("BA.bookId", "E.id").and(
                         new QueryGroup("E.type", 1).or("E.type", 2).or("E.type", 3)
                 ).and("BA.name", QueryOperate.IS_NOT_NULL).sort(new Sort(Direction.ASC, "E.id"));
-        QueryResponse<Book> response = bookService.search(new QueryRequest(group));
+        QueryResponse<Book> response = bookService.search(new QueryRequest(group).needCount());
         Assert.assertTrue(response.getRecords().size() == 1);
+        Assert.assertTrue(response.getTotalRecords() == 1);
         Assert.assertTrue("book1".equals(response.getRecords().get(0).getName()));
     }
 }

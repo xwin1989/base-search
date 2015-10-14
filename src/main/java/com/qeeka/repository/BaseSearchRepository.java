@@ -156,7 +156,12 @@ public abstract class BaseSearchRepository<T> {
         }
         //Query total
         if (queryRequest.isNeedCount()) {
-            StringBuilder countHql = new StringBuilder("SELECT COUNT(E) FROM ").append(entityName).append(" E ");
+            StringBuilder countHql = new StringBuilder("SELECT COUNT(E) FROM ").append(entityName).append(" AS E ");
+            if (queryRequest.getQueryGroup() != null && queryRequest.getQueryGroup().getEntityMapping() != null) {
+                for (Map.Entry<String, String> entry : queryRequest.getQueryGroup().getEntityMapping().entrySet()) {
+                    countHql.append(" , ").append(entry.getKey()).append(" AS ").append(entry.getValue()).append(' ');
+                }
+            }
             if (StringUtils.hasText(query.getStatement())) {
                 countHql.append(" WHERE ").append(query.getStatement());
             }
