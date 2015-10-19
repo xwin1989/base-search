@@ -113,12 +113,12 @@ public abstract class BaseSearchRepository<T> {
             recordQuery.setParameter(entry.getKey(), entry.getValue());
         }
         recordQuery.setMaxResults(1);
-        if (QueryResultType.SINGLE.equals(queryResultType)) {
+        if (QueryResultType.UNIQUE.equals(queryResultType)) {
             List<T> resultList = recordQuery.getResultList();
             if (resultList != null && !resultList.isEmpty()) {
                 queryResponse.setEntity(resultList.get(0));
             }
-        } else if (QueryResultType.UNIQUE.equals(queryResultType)) {
+        } else if (QueryResultType.SINGLE.equals(queryResultType)) {
             queryResponse.setEntity(recordQuery.getSingleResult());
         }
         return queryResponse;
