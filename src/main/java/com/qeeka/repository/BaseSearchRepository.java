@@ -29,7 +29,6 @@ import java.util.Map;
 public abstract class BaseSearchRepository<T> {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @PersistenceContext
     protected EntityManager entityManager;
     //Get T  Real Class
     protected Class entityClass;
@@ -629,4 +628,8 @@ public abstract class BaseSearchRepository<T> {
         }
     }
 
+    @PersistenceContext
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
 }
