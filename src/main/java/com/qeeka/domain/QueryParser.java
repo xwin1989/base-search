@@ -127,7 +127,7 @@ public class QueryParser {
                     break;
                 case CONTAIN:
                 case NOT_CONTAIN:
-                    queryPart.append(":").append(parameterName);
+                    queryPart.append(':').append(parameterName);
                     node.setValue(String.format("%%%s%%", node.getValue()));
                     break;
                 case SUB_QUERY:
@@ -135,7 +135,7 @@ public class QueryParser {
                     parameterName = null;
                     break;
                 default:
-                    queryPart.append(":").append(parameterName);
+                    queryPart.append(':').append(parameterName);
             }
 
             if (parameterName != null) {

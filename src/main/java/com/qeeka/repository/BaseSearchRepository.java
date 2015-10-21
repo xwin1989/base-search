@@ -35,7 +35,7 @@ public abstract class BaseSearchRepository<T> {
     protected String entityName;
 
     //Init query parse class
-    private QueryParser queryParser = new QueryParser();
+    private final QueryParser queryParser = new QueryParser();
 
     /**
      * constructor and init class properties
