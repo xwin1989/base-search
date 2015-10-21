@@ -39,7 +39,7 @@ public class BookService {
 
     public Integer getTypeById(Integer id) {
         String sql = "select type from book where id = :id";
-        List<Integer> list = repository.findByNativeQuery(sql, Collections.<String, Object>singletonMap("id", id));
+        List<Integer> list = repository.findByNativeQuery(sql, Collections.<String, Object>singletonMap("id", id), Integer.class);
         if (!list.isEmpty()) {
             return list.get(0);
         }
