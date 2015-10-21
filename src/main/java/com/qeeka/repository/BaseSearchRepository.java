@@ -557,6 +557,10 @@ public abstract class BaseSearchRepository<T> {
         return findByNativeQuery(sql, null, offset, size, resultClass);
     }
 
+    public <X> List<X> findByNativeQuery(CharSequence sql, Map<String, Object> params, Integer offset, Integer size) {
+        return findByNativeQuery(sql, null, offset, size, null);
+    }
+
     /**
      * find list by native query & sql & params & offset & size
      *
@@ -571,9 +575,9 @@ public abstract class BaseSearchRepository<T> {
         try {
             Query namedQuery;
             if (resultClass == null) {
-                namedQuery = entityManager.createNativeQuery(sql.toString(), entityClass);
-            } else {
                 namedQuery = entityManager.createNativeQuery(sql.toString());
+            } else {
+                namedQuery = entityManager.createNativeQuery(sql.toString(), resultClass);
             }
             if (params != null) {
                 for (Map.Entry<String, Object> entry : params.entrySet()) {
@@ -600,7 +604,15 @@ public abstract class BaseSearchRepository<T> {
      * @return
      */
     public <X> X findUniqueNativeQuery(CharSequence sql) {
-        return findUniqueNativeQuery(sql, null);
+        return findUniqueNativeQuery(sql, null, null);
+    }
+
+    public <X> X findUniqueNativeQuery(CharSequence sql, Class<X> resultClass) {
+        return findUniqueNativeQuery(sql, null, resultClass);
+    }
+
+    public <X> X findUniqueNativeQuery(CharSequence sql, Map<String, Object> params) {
+        return findUniqueNativeQuery(sql, params, null);
     }
 
     /**
@@ -611,16 +623,21 @@ public abstract class BaseSearchRepository<T> {
      * @param <X>
      * @return
      */
-    public <X> X findUniqueNativeQuery(CharSequence sql, Map<String, Object> params) {
+    public <X> X findUniqueNativeQuery(CharSequence sql, Map<String, Object> params, Class<X> resultClass) {
         StopWatch watch = new StopWatch();
         try {
-            Query query = entityManager.createNativeQuery(sql.toString());
+            Query namedQuery;
+            if (resultClass == null) {
+                namedQuery = entityManager.createNativeQuery(sql.toString());
+            } else {
+                namedQuery = entityManager.createNativeQuery(sql.toString(), resultClass);
+            }
             if (params != null) {
                 for (Map.Entry<String, Object> entry : params.entrySet()) {
-                    query.setParameter(entry.getKey(), entry.getValue());
+                    namedQuery.setParameter(entry.getKey(), entry.getValue());
                 }
             }
-            List<X> results = query.getResultList();
+            List<X> results = namedQuery.getResultList();
             return getUniqueResult(results);
         } finally {
             logger.debug("findUniqueNativeResult, query={}, params={}, elapsedTime={}", sql, params, watch.elapsedTime());

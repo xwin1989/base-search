@@ -38,10 +38,12 @@ public class BookService {
     }
 
     public Integer getTypeById(Integer id) {
+        Book book = repository.findUniqueNativeQuery("select * from book where id = :id", Collections.<String, Object>singletonMap("id", id), Book.class);
         String sql = "select type from book where id = :id";
-        List<Integer> list = repository.findByNativeQuery(sql, Collections.<String, Object>singletonMap("id", id), Integer.class);
+        List<Integer> list = repository.findByNativeQuery(sql, Collections.<String, Object>singletonMap("id", book.getId()));
         if (!list.isEmpty()) {
-            return list.get(0);
+            Integer type = repository.findUniqueNativeQuery("select type from book where id = :id", Collections.<String, Object>singletonMap("id", id));
+            return type;
         }
         return null;
     }
