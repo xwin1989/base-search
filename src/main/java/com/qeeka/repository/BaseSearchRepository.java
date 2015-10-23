@@ -624,24 +624,8 @@ public abstract class BaseSearchRepository<T> {
      * @return
      */
     public <X> X findUniqueNativeQuery(CharSequence sql, Map<String, Object> params, Class<X> resultClass) {
-        StopWatch watch = new StopWatch();
-        try {
-            Query namedQuery;
-            if (resultClass == null) {
-                namedQuery = entityManager.createNativeQuery(sql.toString());
-            } else {
-                namedQuery = entityManager.createNativeQuery(sql.toString(), resultClass);
-            }
-            if (params != null) {
-                for (Map.Entry<String, Object> entry : params.entrySet()) {
-                    namedQuery.setParameter(entry.getKey(), entry.getValue());
-                }
-            }
-            List<X> results = namedQuery.getResultList();
-            return getUniqueResult(results);
-        } finally {
-            logger.debug("findUniqueNativeResult, query={}, params={}, elapsedTime={}", sql, params, watch.elapsedTime());
-        }
+        List<X> results = findByNativeQuery(sql, params, resultClass);
+        return getUniqueResult(results);
     }
 
 
