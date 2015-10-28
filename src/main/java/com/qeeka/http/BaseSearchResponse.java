@@ -13,10 +13,10 @@ import java.util.List;
 @XmlRootElement(name = "base_search_response")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class BaseSearchResponse<T> {
-    @XmlElement(name = "entity")
-    protected T entity;
-    @XmlElementWrapper(name = "record_list")
     @XmlElement(name = "record")
+    protected T entity;
+    @XmlElementWrapper(name = "records")
+    @XmlElement
     protected List<T> recordList;
     @XmlElement(name = "total_records")
     protected Long totalRecords;
@@ -25,7 +25,7 @@ public class BaseSearchResponse<T> {
     @XmlElement(name = "page_size")
     protected Integer pageSize;
     @XmlElement(name = "status")
-    protected String status;
+    protected String status = "success";
     @XmlElement(name = "message")
     protected String message;
 
