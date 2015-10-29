@@ -69,13 +69,11 @@ public class QueryResponse<T> {
         return null;
     }
 
-    private Map<Object, T> getObjectMap(List<T> ts) {
+    private Map<Object, T> getObjectMap(List<T> results) {
         Map<Object, T> recordMap = new HashMap<>();
-        if (ts != null) {
-            for (T t : ts) {
-                if (t instanceof MapHandle) {
-                    recordMap.put(((MapHandle) t).getPrimaryKey(), t);
-                }
+        if (!results.isEmpty() && results.get(0) instanceof MapHandle) {
+            for (T result : results) {
+                recordMap.put(((MapHandle) result).getPrimaryKey(), result);
             }
         }
         return recordMap;
