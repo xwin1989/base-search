@@ -17,7 +17,9 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Neal on 2015/7/27.
@@ -198,5 +200,29 @@ public class BookTest extends SpringTestWithDB {
         Assert.assertTrue(response.getRecords().size() == 1);
         Assert.assertTrue(response.getTotalRecords() == 1);
         Assert.assertTrue("book1".equals(response.getRecords().get(0).getName()));
+    }
+
+    @Test
+    @DatabaseSetup("/BookData.xml")
+    public void testBookMap() {
+        BaseSearchRequest request = new BaseSearchRequest(0, 5);
+        QueryResponse<Book> response = bookService.search(new QueryRequest(new QueryGroup()).needCount().setSearchRequest(request));
+        BaseSearchResponse<Book> bookBaseSearchResponse = response.assignmentToResponse(new BaseSearchResponse<Book>());
+        Map<Object, Book> recordMap = bookBaseSearchResponse.getRecordMap();
+        Assert.assertTrue(recordMap.size() == 3);
+        Assert.assertTrue(recordMap.containsKey(0) && recordMap.containsKey(1) && recordMap.containsKey(3));
+    }
+
+    @Test
+    @DatabaseSetup("/BookData.xml")
+    public void testBookMapWithParam() {
+        BaseSearchRequest request = new BaseSearchRequest(0, 5);
+        List<Integer> ids = Arrays.asList(1, 3);
+        QueryGroup group = new QueryGroup("id", ids, QueryOperate.IN);
+        QueryResponse<Book> queryResponse = bookService.search(new QueryRequest(group).needCount().setSearchRequest(request));
+        BaseSearchResponse<Book> bookBaseSearchResponse = queryResponse.assignmentToResponse(new BaseSearchResponse<Book>());
+        Map<Object, Book> recordMap = bookBaseSearchResponse.getRecordMap();
+        Assert.assertTrue(recordMap.size() == 2);
+        Assert.assertTrue(recordMap.containsKey(1) && recordMap.containsKey(3) && !recordMap.containsKey(0));
     }
 }

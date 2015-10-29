@@ -1,6 +1,10 @@
 package com.qeeka.http;
 
+import com.qeeka.domain.MapHandle;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Neal on 8/9 0009.
@@ -56,11 +60,24 @@ public class QueryResponse<T> {
         if (response != null) {
             response.setEntity(this.entity);
             response.setRecordList(this.records);
+            response.setRecordMap(getObjectMap(this.getRecords()));
             response.setTotalRecords(this.totalRecords);
             response.setPageIndex(this.pageIndex);
             response.setPageSize(this.pageSize);
             return response;
         }
         return null;
+    }
+
+    private Map<Object, T> getObjectMap(List<T> ts) {
+        Map<Object, T> recordMap = new HashMap<>();
+        if (ts != null) {
+            for (T t : ts) {
+                if (t instanceof MapHandle) {
+                    recordMap.put(((MapHandle) t).getPrimaryKey(), t);
+                }
+            }
+        }
+        return recordMap;
     }
 }
