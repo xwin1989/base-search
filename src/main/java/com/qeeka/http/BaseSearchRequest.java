@@ -12,31 +12,28 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class BaseSearchRequest {
     @XmlElement(name = "page_index")
-    protected int pageIndex;
+    protected Integer pageIndex = 0;
     @XmlElement(name = "page_size")
-    protected int pageSize;
+    protected Integer pageSize = 10;
 
-    public BaseSearchRequest() {
-    }
-
-    public BaseSearchRequest(int pageIndex, int pageSize) {
+    public BaseSearchRequest(Integer pageIndex, Integer pageSize) {
         this.pageIndex = pageIndex;
         this.pageSize = pageSize;
     }
 
-    public int getPageIndex() {
+    public Integer getPageIndex() {
         return pageIndex;
     }
 
-    public void setPageIndex(int pageIndex) {
+    public void setPageIndex(Integer pageIndex) {
         this.pageIndex = pageIndex;
     }
 
-    public int getPageSize() {
+    public Integer getPageSize() {
         return pageSize;
     }
 
-    public void setPageSize(int pageSize) {
+    public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
     }
 }

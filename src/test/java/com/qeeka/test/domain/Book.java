@@ -1,5 +1,7 @@
 package com.qeeka.test.domain;
 
+import com.qeeka.domain.MapHandle;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,7 +13,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "book")
-public class Book {
+public class Book implements MapHandle {
     @Id
     @GeneratedValue
     public Integer id;
@@ -55,5 +57,10 @@ public class Book {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    @Override
+    public Object getPrimaryKey() {
+        return this.id;
     }
 }
