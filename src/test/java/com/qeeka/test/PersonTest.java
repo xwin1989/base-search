@@ -39,9 +39,10 @@ public class PersonTest extends SpringTestWithDB {
         QueryGroup group = new QueryGroup("name", "%n%", QueryOperate.LIKE)
                 .and("type", 1).and("status", "type", QueryOperate.COLUMN_EQUALS)
                 .and("password", "p1").and("id", ids, QueryOperate.NOT_IN).or("id", 0, QueryOperate.IN);
-        String json = QueryJSONBinder.toJSON(new QueryRequest(group));
+        String json = QueryJSONBinder.binder(QueryGroup.class).toJSON(group);
 
-        QueryRequest request = QueryJSONBinder.fromJSON(json);
+        QueryRequest request = QueryJSONBinder.binder(QueryRequest.class).fromJSON(json);
+        request.setQueryGroup(group);
         QueryResponse<Person> response = personService.search(request);
         Assert.assertTrue(response.getRecords().get(0).getId() == 0);
         Long count = personService.count(request);

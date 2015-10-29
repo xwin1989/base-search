@@ -1,29 +1,38 @@
 package com.qeeka.util;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import com.qeeka.deserializer.QueryGroupJsonDeserializer;
 import com.qeeka.domain.QueryGroup;
-import com.qeeka.http.QueryRequest;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 
-public class QueryJSONBinder {
+public final class QueryJSONBinder<T> {
     static final ObjectMapper DEFAULT_OBJECT_MAPPER;
 
     static {
         DEFAULT_OBJECT_MAPPER = createMapper();
     }
 
+    public static <T> QueryJSONBinder<T> binder(Class<T> beanClass) {
+        return new QueryJSONBinder<>(beanClass);
+    }
+
+    public static ObjectMapper getObjectMapper() {
+        return DEFAULT_OBJECT_MAPPER;
+    }
+
     private static ObjectMapper createMapper() {
         ObjectMapper mapper = new ObjectMapper();
-
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         mapper.setDateFormat(dateFormat);
         mapper.setAnnotationIntrospector(new JaxbAnnotationIntrospector(TypeFactory.defaultInstance()));
@@ -49,20 +58,36 @@ public class QueryJSONBinder {
         return objectMapper;
     }
 
-    public static QueryRequest fromJSON(String json) {
+    private final Class<T> beanClass;
+    ObjectMapper objectMapper;
+
+    private QueryJSONBinder(Class<T> beanClass) {
+        this.beanClass = beanClass;
+        this.objectMapper = DEFAULT_OBJECT_MAPPER;
+    }
+
+    public T fromJSON(String json) {
         try {
-            return DEFAULT_OBJECT_MAPPER.readValue(json, QueryRequest.class);
+            return objectMapper.readValue(json, beanClass);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static String toJSON(QueryRequest request) {
+    public String toJSON(T object) {
         try {
-            return DEFAULT_OBJECT_MAPPER.writeValueAsString(request);
+            return objectMapper.writeValueAsString(object);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public QueryJSONBinder<T> indentOutput() {
+        if (DEFAULT_OBJECT_MAPPER.equals(objectMapper)) {
+            objectMapper = createMapper();
+        }
+        objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+        return this;
     }
 
 }
