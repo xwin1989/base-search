@@ -1,5 +1,6 @@
 package com.qeeka.repository;
 
+import com.qeeka.domain.MapHandle;
 import com.qeeka.domain.QueryModel;
 import com.qeeka.domain.QueryParser;
 import com.qeeka.http.QueryRequest;
@@ -19,6 +20,7 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaQuery;
 import java.lang.annotation.Annotation;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -348,28 +350,13 @@ public abstract class BaseSearchRepository<T> {
     }
 
     /**
-     * Find by criteria
-     *
-     * @param query
-     * @return
-     */
-    public List<T> find(CriteriaQuery query) {
-        StopWatch watch = new StopWatch();
-        try {
-            return entityManager.createQuery(query).getResultList();
-        } finally {
-            logger.debug("find by CriteriaQuery<T>, elapsedTime={}", watch.elapsedTime());
-        }
-    }
-
-    /**
      * Simple query
      *
      * @param queryString
      * @return
      */
     public List<T> find(CharSequence queryString) {
-        return find(queryString, null);
+        return find(queryString, null, null, null);
     }
 
     /**
@@ -380,17 +367,7 @@ public abstract class BaseSearchRepository<T> {
      * @return
      */
     public List<T> find(CharSequence queryString, Map<String, Object> params) {
-        StopWatch watch = new StopWatch();
-        try {
-            Query query = entityManager.createQuery(queryString.toString());
-            if (params != null)
-                for (Map.Entry<String, Object> entry : params.entrySet()) {
-                    query.setParameter(entry.getKey(), entry.getValue());
-                }
-            return query.getResultList();
-        } finally {
-            logger.debug("find, query={}, params={}, elapsedTime={}", queryString, params, watch.elapsedTime());
-        }
+        return find(queryString, params, null, null);
     }
 
     /**
@@ -401,7 +378,7 @@ public abstract class BaseSearchRepository<T> {
      * @param fetchSize
      * @return
      */
-    public List<T> find(CharSequence queryString, int offset, int fetchSize) {
+    public List<T> find(CharSequence queryString, Integer offset, Integer fetchSize) {
         return find(queryString, null, offset, fetchSize);
     }
 
@@ -414,7 +391,7 @@ public abstract class BaseSearchRepository<T> {
      * @param fetchSize
      * @return
      */
-    public List<T> find(CharSequence queryString, Map<String, Object> params, int offset, int fetchSize) {
+    public List<T> find(CharSequence queryString, Map<String, Object> params, Integer offset, Integer fetchSize) {
         StopWatch watch = new StopWatch();
         try {
             Query query = entityManager.createQuery(queryString.toString());
@@ -423,12 +400,26 @@ public abstract class BaseSearchRepository<T> {
                     query.setParameter(entry.getKey(), entry.getValue());
                 }
             }
-            query.setFirstResult(offset);
-            query.setMaxResults(fetchSize);
+            if (offset != null) {
+                query.setFirstResult(offset);
+            }
+            if (fetchSize != null) {
+                query.setMaxResults(fetchSize);
+            }
             return query.getResultList();
         } finally {
             logger.debug("find, query={}, params={},offset={},fetchSize={}, elapsedTime={}", queryString, params, offset, fetchSize, watch.elapsedTime());
         }
+    }
+
+    /**
+     * Find by criteria
+     *
+     * @param query
+     * @return
+     */
+    public List<T> find(CriteriaQuery query) {
+        return find(query, null, null);
     }
 
     /**
@@ -439,16 +430,101 @@ public abstract class BaseSearchRepository<T> {
      * @param fetchSize
      * @return
      */
-    public List<T> find(CriteriaQuery<T> query, int offset, int fetchSize) {
+    public List<T> find(CriteriaQuery<T> query, Integer offset, Integer fetchSize) {
         StopWatch watch = new StopWatch();
         try {
             TypedQuery<T> typedQuery = entityManager.createQuery(query);
-            typedQuery.setFirstResult(offset);
-            typedQuery.setMaxResults(fetchSize);
+            if (offset != null) {
+                typedQuery.setFirstResult(offset);
+            }
+            if (fetchSize != null) {
+                typedQuery.setMaxResults(fetchSize);
+            }
             return typedQuery.getResultList();
         } finally {
             logger.debug("find by CriteriaQuery<T>,offset={},fetchSize={}, elapsedTime={}", offset, fetchSize, watch.elapsedTime());
         }
+    }
+
+
+    /**
+     * simple query
+     *
+     * @param queryString
+     * @return a map
+     */
+    public Map<Object, T> findToMap(CharSequence queryString) {
+        return findToMap(queryString, null, null, null);
+    }
+
+    /**
+     * query with params
+     *
+     * @param queryString
+     * @param params
+     * @return a map
+     */
+    public Map<Object, T> findToMap(CharSequence queryString, Map<String, Object> params) {
+        return findToMap(queryString, params, null, null);
+    }
+
+    /**
+     * find by query String with paging
+     *
+     * @param queryString
+     * @param offset
+     * @param fetchSize
+     * @return a map
+     */
+    public Map<Object, T> findToMap(CharSequence queryString, Integer offset, Integer fetchSize) {
+        return findToMap(queryString, null, offset, fetchSize);
+    }
+
+    /**
+     * find by query String with paging&param
+     *
+     * @param queryString
+     * @param params
+     * @param offset
+     * @param fetchSize
+     * @return a map
+     */
+    public Map<Object, T> findToMap(CharSequence queryString, Map<String, Object> params, Integer offset, Integer fetchSize) {
+        List<T> results = find(queryString, params, offset, fetchSize);
+        return getObjectMap(results);
+    }
+
+    /**
+     * Find by criteria
+     *
+     * @param query
+     * @return a map
+     */
+    public Map<Object, T> findToMap(CriteriaQuery query) {
+        return findToMap(query, null, null);
+    }
+
+    /**
+     * criteria query
+     *
+     * @param query
+     * @param offset
+     * @param fetchSize
+     * @return a map
+     */
+    public Map<Object, T> findToMap(CriteriaQuery<T> query, Integer offset, Integer fetchSize) {
+        List<T> results = find(query, offset, fetchSize);
+        return getObjectMap(results);
+    }
+
+    private Map<Object, T> getObjectMap(List<T> results) {
+        Map<Object, T> recordMap = new HashMap<>();
+        if (!results.isEmpty() && results.get(0) instanceof MapHandle) {
+            for (T result : results) {
+                recordMap.put(((MapHandle) result).getPrimaryKey(), result);
+            }
+        }
+        return recordMap;
     }
 
     /**
@@ -549,11 +625,11 @@ public abstract class BaseSearchRepository<T> {
      * @param size
      * @return
      */
-    public <X> List<X> findByNativeQuery(CharSequence sql, int offset, int size) {
+    public <X> List<X> findByNativeQuery(CharSequence sql, Integer offset, Integer size) {
         return findByNativeQuery(sql, null, offset, size, null);
     }
 
-    public <X> List<X> findByNativeQuery(CharSequence sql, int offset, int size, Class<X> resultClass) {
+    public <X> List<X> findByNativeQuery(CharSequence sql, Integer offset, Integer size, Class<X> resultClass) {
         return findByNativeQuery(sql, null, offset, size, resultClass);
     }
 

@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Neal on 10/12 0012.
@@ -18,6 +19,8 @@ public class BaseSearchResponse<T> {
     @XmlElementWrapper(name = "records")
     @XmlElement
     protected List<T> recordList;
+    @XmlElement(name = "record_map")
+    protected Map<Object, T> recordMap;
     @XmlElement(name = "total_records")
     protected Long totalRecords;
     @XmlElement(name = "page_index")
@@ -43,6 +46,14 @@ public class BaseSearchResponse<T> {
 
     public void setRecordList(List<T> recordList) {
         this.recordList = recordList;
+    }
+
+    public Map<Object, T> getRecordMap() {
+        return recordMap;
+    }
+
+    public void setRecordMap(Map<Object, T> recordMap) {
+        this.recordMap = recordMap;
     }
 
     public Long getTotalRecords() {
