@@ -490,8 +490,8 @@ public abstract class BaseSearchRepository<T> {
      * @return a map
      */
     public Map<Object, T> findToMap(CharSequence queryString, Map<String, Object> params, Integer offset, Integer fetchSize) {
-        List<T> ts = find(queryString, params, offset, fetchSize);
-        return getObjectMap(ts);
+        List<T> results = find(queryString, params, offset, fetchSize);
+        return getObjectMap(results);
     }
 
     /**
@@ -513,17 +513,15 @@ public abstract class BaseSearchRepository<T> {
      * @return a map
      */
     public Map<Object, T> findToMap(CriteriaQuery<T> query, Integer offset, Integer fetchSize) {
-        List<T> ts = find(query, offset, fetchSize);
-        return getObjectMap(ts);
+        List<T> results = find(query, offset, fetchSize);
+        return getObjectMap(results);
     }
 
-    private Map<Object, T> getObjectMap(List<T> ts) {
+    private Map<Object, T> getObjectMap(List<T> results) {
         Map<Object, T> recordMap = new HashMap<>();
-        if (ts != null) {
-            for (T t : ts) {
-                if (t instanceof MapHandle) {
-                    recordMap.put(((MapHandle) t).getPrimaryKey(), t);
-                }
+        if (!results.isEmpty() && results.get(0) instanceof MapHandle) {
+            for (T result : results) {
+                recordMap.put(((MapHandle) result).getPrimaryKey(), result);
             }
         }
         return recordMap;
