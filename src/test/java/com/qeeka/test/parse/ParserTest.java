@@ -4,7 +4,6 @@ import com.qeeka.domain.QueryGroup;
 import com.qeeka.domain.QueryModel;
 import com.qeeka.domain.QueryNode;
 import com.qeeka.domain.QueryParser;
-import com.qeeka.http.QueryRequest;
 import com.qeeka.operate.QueryOperate;
 import com.qeeka.util.QueryJSONBinder;
 import org.junit.Assert;
@@ -88,9 +87,9 @@ public class ParserTest {
                 new QueryGroup("c", 3).or("d", 5)
         );
 
-        String s = QueryJSONBinder.toJSON(new QueryRequest(group));
-        QueryRequest request = QueryJSONBinder.fromJSON(s);
-        Assert.assertEquals(parser.parse(request.getQueryGroup()).getStatement(), "((a = :a0 AND b = :b1) OR (c = :c2 OR d = :d3))");
+        String s = QueryJSONBinder.binder(QueryGroup.class).toJSON(group);
+        QueryGroup queryGroup = QueryJSONBinder.binder(QueryGroup.class).fromJSON(s);
+        Assert.assertEquals(parser.parse(queryGroup).getStatement(), "((a = :a0 AND b = :b1) OR (c = :c2 OR d = :d3))");
     }
 
     @Test
@@ -98,9 +97,9 @@ public class ParserTest {
         List<Integer> ids = Arrays.asList(1, 2, 3, 4);
         QueryGroup group = new QueryGroup("id", ids, QueryOperate.IN).and("id", ids, QueryOperate.NOT_IN)
                 .and("name", "hello").or(new QueryGroup("key", 1));
-        String s = QueryJSONBinder.toJSON(new QueryRequest(group));
-        QueryRequest request = QueryJSONBinder.fromJSON(s);
-        Assert.assertEquals(parser.parse(request.getQueryGroup()).getStatement(), "(((id IN (:id0) AND id NOT IN (:id1)) AND name = :name2) OR key = :key3)");
+        String s = QueryJSONBinder.binder(QueryGroup.class).toJSON(group);
+        QueryGroup queryGroup = QueryJSONBinder.binder(QueryGroup.class).fromJSON(s);
+        Assert.assertEquals(parser.parse(queryGroup).getStatement(), "(((id IN (:id0) AND id NOT IN (:id1)) AND name = :name2) OR key = :key3)");
     }
 
     @Test
