@@ -95,4 +95,11 @@ public class BaseSearchResponse<T> {
     public void setMessage(String message) {
         this.message = message;
     }
+
+    public void acquireFromRequest(BaseSearchRequest request) {
+        if (request != null) {
+            this.setPageIndex(request.getPageIndex());
+            this.setPageSize(request.getPageSize());
+        }
+    }
 }

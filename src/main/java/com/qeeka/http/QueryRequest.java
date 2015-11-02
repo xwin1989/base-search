@@ -50,6 +50,11 @@ public class QueryRequest {
         this.queryResultType = queryResultType;
     }
 
+    public QueryRequest(QueryGroup queryGroup, QueryResultType queryResultType) {
+        this.queryGroup = queryGroup;
+        this.queryResultType = queryResultType;
+    }
+
     public QueryGroup getQueryGroup() {
         return queryGroup;
     }
