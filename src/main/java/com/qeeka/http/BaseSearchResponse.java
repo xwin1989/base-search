@@ -16,7 +16,7 @@ import java.util.Map;
 public class BaseSearchResponse<T> {
     @XmlElement(name = "record")
     protected T entity;
-    @XmlElementWrapper(name = "records")
+    @XmlElementWrapper(name = "record_list")
     @XmlElement
     protected List<T> recordList;
     @XmlElement(name = "record_map")
