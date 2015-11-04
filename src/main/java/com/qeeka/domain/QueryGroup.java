@@ -172,10 +172,11 @@ public class QueryGroup {
         if (group == null) {
             throw new IllegalArgumentException("query can't null!");
         }
+        boolean beginHandel = !queryHandleList.isEmpty();
         for (QueryHandle handle : group.getQueryHandleList()) {
             queryHandleList.add(handle);
         }
-        if (!group.getQueryHandleList().isEmpty()) {
+        if (beginHandel && !group.getQueryHandleList().isEmpty()) {
             queryHandleList.add(new QueryOperateNode(QueryLinkOperate.AND));
         }
         return this;
