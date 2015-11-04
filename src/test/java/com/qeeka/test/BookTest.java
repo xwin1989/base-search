@@ -245,7 +245,7 @@ public class BookTest extends SpringTestWithDB {
     @Test
     @DatabaseSetup("/BookData.xml")
     public void testJoinFetch() {
-        QueryGroup group = new QueryGroup().join("E.bookInfoList", "BI", true).and("BI.name", "book2", QueryOperate.CONTAIN);
+        QueryGroup group = new QueryGroup().joinFetch("E.bookInfoList", "BI").and("BI.name", "book2", QueryOperate.CONTAIN);
         QueryResponse<Book> queryResponse = bookService.search(new QueryRequest(group).needCount().needDistinct());
         Assert.assertEquals(queryResponse.getTotalRecords().intValue(), 1);
     }
@@ -262,7 +262,7 @@ public class BookTest extends SpringTestWithDB {
     @Test
     @DatabaseSetup("/BookData.xml")
     public void testLeftJoinFetch() {
-        QueryGroup group = new QueryGroup().leftJoin("E.bookInfoList", "BI", true).and("BI.name", "book2", QueryOperate.CONTAIN);
+        QueryGroup group = new QueryGroup().leftJoinFetch("E.bookInfoList", "BI").and("BI.name", "book2", QueryOperate.CONTAIN);
         QueryResponse<Book> queryResponse = bookService.search(new QueryRequest(group));
         Assert.assertEquals(queryResponse.getRecords().size(), 1);
     }

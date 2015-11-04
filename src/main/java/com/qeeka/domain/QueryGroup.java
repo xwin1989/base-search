@@ -318,21 +318,26 @@ public class QueryGroup {
      *
      * @param entityName
      * @param entityAlias
-     * @param needFetch
      * @return
      */
-    public QueryGroup join(String entityName, String entityAlias, boolean needFetch) {
+    public QueryGroup joinFetch(String entityName, String entityAlias) {
         joinEntityCheck(entityName, entityAlias, QueryLinkOperate.CROSS_JOIN, null);
-        if (needFetch) {
-            this.entityMapping.put(entityName, Collections.singletonMap(QueryLinkOperate.INNER_JOIN_FETCH, entityAlias));
-        } else {
-            this.entityMapping.put(entityName, Collections.singletonMap(QueryLinkOperate.INNER_JOIN, entityAlias));
-        }
+        this.entityMapping.put(entityName, Collections.singletonMap(QueryLinkOperate.INNER_JOIN_FETCH, entityAlias));
         return this;
     }
 
+    /**
+     * inner join fetch other entity with alias ,  Default return entity (E) and Can't Modify ,
+     * Because BaseSearchRepository need return current <T> class.
+     *
+     * @param entityName
+     * @param entityAlias
+     * @return
+     */
     public QueryGroup join(String entityName, String entityAlias) {
-        return join(entityName, entityAlias, false);
+        joinEntityCheck(entityName, entityAlias, QueryLinkOperate.CROSS_JOIN, null);
+        this.entityMapping.put(entityName, Collections.singletonMap(QueryLinkOperate.INNER_JOIN, entityAlias));
+        return this;
     }
 
     /**
@@ -355,21 +360,26 @@ public class QueryGroup {
      *
      * @param entityName
      * @param entityAlias
-     * @param needFetch
      * @return
      */
-    public QueryGroup leftJoin(String entityName, String entityAlias, boolean needFetch) {
+    public QueryGroup leftJoin(String entityName, String entityAlias) {
         joinEntityCheck(entityName, entityAlias, QueryLinkOperate.CROSS_JOIN, null);
-        if (needFetch) {
-            this.entityMapping.put(entityName, Collections.singletonMap(QueryLinkOperate.LEFT_JOIN_FETCH, entityAlias));
-        } else {
-            this.entityMapping.put(entityName, Collections.singletonMap(QueryLinkOperate.LEFT_JOIN, entityAlias));
-        }
+        this.entityMapping.put(entityName, Collections.singletonMap(QueryLinkOperate.LEFT_JOIN, entityAlias));
         return this;
     }
 
-    public QueryGroup leftJoin(String entityName, String entityAlias) {
-        return leftJoin(entityName, entityAlias, false);
+    /**
+     * left join fetch other entity with alias ,  Default return entity (E) and Can't Modify ,
+     * Because BaseSearchRepository need return current <T> class.
+     *
+     * @param entityName
+     * @param entityAlias
+     * @return
+     */
+    public QueryGroup leftJoinFetch(String entityName, String entityAlias) {
+        joinEntityCheck(entityName, entityAlias, QueryLinkOperate.CROSS_JOIN, null);
+        this.entityMapping.put(entityName, Collections.singletonMap(QueryLinkOperate.LEFT_JOIN_FETCH, entityAlias));
+        return this;
     }
 
     private void joinEntityCheck(String entityName, String entityAlias, QueryLinkOperate excludeOperate, QueryLinkOperate aloneOperate) {
