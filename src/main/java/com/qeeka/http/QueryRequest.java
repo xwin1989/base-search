@@ -25,6 +25,9 @@ public class QueryRequest {
     //only need count
     private boolean needRecord = true;
 
+    //need distinct
+    private boolean needDistinct = false;
+
     public QueryRequest() {
     }
 
@@ -100,6 +103,19 @@ public class QueryRequest {
     public QueryRequest needCount() {
         this.needCount = true;
         return this;
+    }
+
+    public QueryRequest needDistinct() {
+        this.needDistinct = true;
+        return this;
+    }
+
+    public boolean isNeedDistinct() {
+        return needDistinct;
+    }
+
+    public void setNeedDistinct(boolean needDistinct) {
+        this.needDistinct = needDistinct;
     }
 
     public boolean isNeedRecord() {

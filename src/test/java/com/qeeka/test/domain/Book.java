@@ -2,11 +2,8 @@ package com.qeeka.test.domain;
 
 import com.qeeka.domain.MapHandle;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.List;
 
 /**
  * Created by Neal on 8/9 0009.
@@ -16,16 +13,19 @@ import javax.persistence.Table;
 public class Book implements MapHandle {
     @Id
     @GeneratedValue
-    public Integer id;
+    private Integer id;
 
     @Column(name = "name")
-    public String name;
+    private String name;
 
     @Column(name = "type")
-    public Integer type;
+    private Integer type;
 
     @Column(name = "status")
-    public Integer status;
+    private Integer status;
+
+    @OneToMany(mappedBy = "book")
+    private List<BookInfo> bookInfoList;
 
     public Integer getId() {
         return id;
@@ -57,6 +57,14 @@ public class Book implements MapHandle {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public List<BookInfo> getBookInfoList() {
+        return bookInfoList;
+    }
+
+    public void setBookInfoList(List<BookInfo> bookInfoList) {
+        this.bookInfoList = bookInfoList;
     }
 
     @Override

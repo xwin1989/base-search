@@ -133,8 +133,39 @@ public class OperatorTest {
     }
 
     @Test
-    public void testJoin() {
-        QueryGroup group = new QueryGroup("E.a", 1).or("E.b", 2).join("OtherEntity", "O").on("O.id", "E.id");
+    public void testCrossJoin() {
+        QueryGroup group = new QueryGroup("E.a", 1).or("E.b", 2).crossJoin("OtherEntity", "O").on("O.id", "E.id");
         assertEquals(parser.parse(group).getStatement(), "((E.a = :E_a0 OR E.b = :E_b1) AND O.id = E.id)");
+    }
+
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCrossJoinAndInner() {
+        QueryGroup group = new QueryGroup("E.a", 1).or("E.b", 2).join("OtherEntity2", "O2").crossJoin("OtherEntity", "O");
+        assertEquals(parser.parse(group).getStatement(), "(E.a = :E_a0 OR E.b = :E_b1)");
+    }
+
+    @Test
+    public void testInnerJoin() {
+        QueryGroup group = new QueryGroup("E.a", 1).or("E.b", 2).join("OtherEntity", "O");
+        assertEquals(parser.parse(group).getStatement(), "(E.a = :E_a0 OR E.b = :E_b1)");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testInnerJoinCross() {
+        QueryGroup group = new QueryGroup("E.a", 1).join("OtherEntity", "O").on("O.id", "E.id").crossJoin("CrossEntity", "CE");
+        assertEquals(parser.parse(group).getStatement(), "(E.a = :E_a0 OR E.b = :E_b1)");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testLeftJoin() {
+        QueryGroup group = new QueryGroup("E.a", 1).or("E.b", 2).leftJoin("OtherEntity", "O").on("O.id", "E.id");
+        assertEquals(parser.parse(group).getStatement(), "(E.a = :E_a0 OR E.b = :E_b1)");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testLeftJoinCrossJoin() {
+        QueryGroup group = new QueryGroup("E.a", 1).or("E.b", 2).leftJoin("OtherEntity", "O").on("O.id", "E.id").crossJoin("CrossEntity", "CE");
+        assertEquals(parser.parse(group).getStatement(), "(E.a = :E_a0 OR E.b = :E_b1)");
     }
 }

@@ -1,10 +1,6 @@
 package com.qeeka.test.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 /**
  * Created by neal.xu on 2015/10/14
@@ -19,8 +15,9 @@ public class BookInfo {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "book_id")
-    private Integer bookId;
+    @ManyToOne
+    @JoinColumn(name = "book_id")
+    private Book book;
 
     public Integer getId() {
         return id;
@@ -38,11 +35,11 @@ public class BookInfo {
         this.name = name;
     }
 
-    public Integer getBookId() {
-        return bookId;
+    public Book getBook() {
+        return book;
     }
 
-    public void setBookId(Integer bookId) {
-        this.bookId = bookId;
+    public void setBook(Book book) {
+        this.book = book;
     }
 }

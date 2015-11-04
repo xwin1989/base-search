@@ -191,12 +191,12 @@ public class BookTest extends SpringTestWithDB {
 
     @Test
     @DatabaseSetup("/BookData.xml")
-    public void testJoinSelect() {
-        QueryGroup group = new QueryGroup("E.status", 1).join("BookInfo", "B").on("E.id", "B.bookId")
-                .join("BookAuthor", "BA").on("BA.bookId", "E.id").and(
+    public void testCrossJoinSelect() {
+        QueryGroup group = new QueryGroup("E.status", 1).crossJoin("BookInfo", "B").on("E.id", "B.book.id")
+                .crossJoin("BookAuthor", "BA").on("BA.bookId", "E.id").and(
                         new QueryGroup("E.type", 1).or("E.type", 2).or("E.type", 3)
                 ).and("BA.name", QueryOperate.IS_NOT_NULL).sort(new Sort(Direction.ASC, "E.id"));
-        QueryResponse<Book> response = bookService.search(new QueryRequest(group).needCount());
+        QueryResponse<Book> response = bookService.search(new QueryRequest(group).needCount().setPageSize(5));
         Assert.assertTrue(response.getRecords().size() == 1);
         Assert.assertTrue(response.getTotalRecords() == 1);
         Assert.assertTrue("book1".equals(response.getRecords().get(0).getName()));
@@ -224,5 +224,46 @@ public class BookTest extends SpringTestWithDB {
         Map<Object, Book> recordMap = bookBaseSearchResponse.getRecordMap();
         Assert.assertTrue(recordMap.size() == 2);
         Assert.assertTrue(recordMap.containsKey(1) && recordMap.containsKey(3) && !recordMap.containsKey(0));
+    }
+
+    @Test
+    @DatabaseSetup("/BookData.xml")
+    public void testJoin() {
+        QueryGroup group = new QueryGroup().join("E.bookInfoList", "BI").and("BI.name", "book2", QueryOperate.CONTAIN);
+        QueryResponse<Book> queryResponse = bookService.search(new QueryRequest(group).needCount().needDistinct());
+        Assert.assertEquals(queryResponse.getTotalRecords().intValue(), 1);
+    }
+
+    @Test
+    @DatabaseSetup("/BookData.xml")
+    public void testLeftJoin2() {
+        QueryGroup group = new QueryGroup("E.id", Arrays.asList(1, 2, 3, 4, 0), QueryOperate.IN).leftJoin("E.bookInfoList", "BI");
+        QueryResponse<Book> queryResponse = bookService.search(new QueryRequest(group));
+        Assert.assertEquals(queryResponse.getRecords().size(), 3);
+    }
+
+    @Test
+    @DatabaseSetup("/BookData.xml")
+    public void testJoinFetch() {
+        QueryGroup group = new QueryGroup().join("E.bookInfoList", "BI", true).and("BI.name", "book2", QueryOperate.CONTAIN);
+        QueryResponse<Book> queryResponse = bookService.search(new QueryRequest(group).needCount().needDistinct());
+        Assert.assertEquals(queryResponse.getTotalRecords().intValue(), 1);
+    }
+
+
+    @Test
+    @DatabaseSetup("/BookData.xml")
+    public void testLeftJoin() {
+        QueryGroup group = new QueryGroup().leftJoin("E.bookInfoList", "BI").and("BI.name", "book2", QueryOperate.CONTAIN);
+        QueryResponse<Book> queryResponse = bookService.search(new QueryRequest(group));
+        Assert.assertEquals(queryResponse.getRecords().size(), 1);
+    }
+
+    @Test
+    @DatabaseSetup("/BookData.xml")
+    public void testLeftJoinFetch() {
+        QueryGroup group = new QueryGroup().leftJoin("E.bookInfoList", "BI", true).and("BI.name", "book2", QueryOperate.CONTAIN);
+        QueryResponse<Book> queryResponse = bookService.search(new QueryRequest(group));
+        Assert.assertEquals(queryResponse.getRecords().size(), 1);
     }
 }

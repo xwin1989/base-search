@@ -12,7 +12,6 @@ public enum QueryOperate {
     GREAT_THAN(" > "), GREAT_THAN_EQUALS(" >= "),
     IN(" IN "), NOT_IN(" NOT IN "), SUB_QUERY(" ");
 
-
     private String value;
 
     QueryOperate(String value) {

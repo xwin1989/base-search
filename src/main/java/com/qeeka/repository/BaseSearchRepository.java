@@ -5,6 +5,7 @@ import com.qeeka.domain.QueryModel;
 import com.qeeka.domain.QueryParser;
 import com.qeeka.http.QueryRequest;
 import com.qeeka.http.QueryResponse;
+import com.qeeka.operate.QueryLinkOperate;
 import com.qeeka.operate.QueryResultType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,10 +77,26 @@ public abstract class BaseSearchRepository<T> {
     public QueryResponse<T> search(QueryRequest queryRequest) {
         //parse query group to simple query domain
         QueryModel query = queryParser.parse(queryRequest.getQueryGroup());
-        StringBuilder hql = new StringBuilder("SELECT E FROM ").append(entityName).append(" AS E ");
+        StringBuilder hql = new StringBuilder("SELECT ");
+        if (queryRequest.isNeedDistinct()) {
+            hql.append("DISTINCT(E)");
+        } else {
+            hql.append('E');
+        }
+        hql.append(" FROM ").append(entityName).append(" AS E ");
         if (queryRequest.getQueryGroup() != null && queryRequest.getQueryGroup().getEntityMapping() != null) {
-            for (Map.Entry<String, String> entry : queryRequest.getQueryGroup().getEntityMapping().entrySet()) {
-                hql.append(" , ").append(entry.getKey()).append(" AS ").append(entry.getValue()).append(' ');
+            for (Map.Entry<String, Map<QueryLinkOperate, String>> joinMap : queryRequest.getQueryGroup().getEntityMapping().entrySet()) {
+                for (Map.Entry<QueryLinkOperate, String> entry : joinMap.getValue().entrySet()) {
+                    if (entry.getKey().equals(QueryLinkOperate.CROSS_JOIN)) {
+                        hql.append(" , ").append(joinMap.getKey()).append(" AS ").append(entry.getValue()).append(' ');
+                    } else {
+                        hql.append(entry.getKey().getValue());
+                        if (entry.getKey().isNeedFetch()) {
+                            hql.append(" FETCH ");
+                        }
+                        hql.append(joinMap.getKey()).append(" AS ").append(entry.getValue());
+                    }
+                }
             }
         }
         if (StringUtils.hasText(query.getStatement())) {
@@ -157,10 +174,22 @@ public abstract class BaseSearchRepository<T> {
         }
         //Query total
         if (queryRequest.isNeedCount()) {
-            StringBuilder countHql = new StringBuilder("SELECT COUNT(E) FROM ").append(entityName).append(" AS E ");
+            StringBuilder countHql = new StringBuilder("SELECT ");
+            if (queryRequest.isNeedDistinct()) {
+                countHql.append("COUNT(DISTINCT E)");
+            } else {
+                countHql.append("COUNT(E)");
+            }
+            countHql.append(" FROM ").append(entityName).append(" AS E ");
             if (queryRequest.getQueryGroup() != null && queryRequest.getQueryGroup().getEntityMapping() != null) {
-                for (Map.Entry<String, String> entry : queryRequest.getQueryGroup().getEntityMapping().entrySet()) {
-                    countHql.append(" , ").append(entry.getKey()).append(" AS ").append(entry.getValue()).append(' ');
+                for (Map.Entry<String, Map<QueryLinkOperate, String>> joinMap : queryRequest.getQueryGroup().getEntityMapping().entrySet()) {
+                    for (Map.Entry<QueryLinkOperate, String> entry : joinMap.getValue().entrySet()) {
+                        if (entry.getKey().equals(QueryLinkOperate.CROSS_JOIN)) {
+                            countHql.append(" , ").append(joinMap.getKey()).append(" AS ").append(entry.getValue()).append(' ');
+                        } else {
+                            countHql.append(entry.getKey().getValue()).append(joinMap.getKey()).append(" AS ").append(entry.getValue());
+                        }
+                    }
                 }
             }
             if (StringUtils.hasText(query.getStatement())) {
