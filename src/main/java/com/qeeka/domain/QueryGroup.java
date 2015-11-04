@@ -21,7 +21,7 @@ public class QueryGroup {
     /**
      * query handle node list
      */
-    private List<QueryHandle> queryHandleList = new LinkedList<>();
+    private final List<QueryHandle> queryHandleList = new LinkedList<>();
     /**
      * query sort column
      */
@@ -30,12 +30,7 @@ public class QueryGroup {
     /**
      * join other entity
      */
-    private Map<String, Map<QueryLinkOperate, String>> entityMapping = new LinkedHashMap<>();
-
-    /**
-     * join on operator
-     */
-    private Map<String, String> joinOperatorMap = new LinkedHashMap<>();
+    private final Map<String, Map<QueryLinkOperate, String>> entityMapping = new LinkedHashMap<>();
 
     public QueryGroup() {
     }
@@ -313,7 +308,7 @@ public class QueryGroup {
     //------------------ Join ------------------
 
     /**
-     * inner join other entity with alias ,  Default return entity (E) and Can't Modify ,
+     * inner join fetch other entity with alias ,  Default return entity (E) and Can't Modify ,
      * Because BaseSearchRepository need return current <T> class.
      *
      * @param entityName
@@ -327,7 +322,7 @@ public class QueryGroup {
     }
 
     /**
-     * inner join fetch other entity with alias ,  Default return entity (E) and Can't Modify ,
+     * inner join other entity with alias ,  Default return entity (E) and Can't Modify ,
      * Because BaseSearchRepository need return current <T> class.
      *
      * @param entityName
@@ -437,23 +432,7 @@ public class QueryGroup {
         return entityMapping;
     }
 
-    public void setEntityMapping(Map<String, Map<QueryLinkOperate, String>> entityMapping) {
-        this.entityMapping = entityMapping;
-    }
-
-    public Map<String, String> getJoinOperatorMap() {
-        return joinOperatorMap;
-    }
-
-    public void setJoinOperatorMap(Map<String, String> joinOperatorMap) {
-        this.joinOperatorMap = joinOperatorMap;
-    }
-
     public List<QueryHandle> getQueryHandleList() {
         return queryHandleList;
-    }
-
-    public void setQueryHandleList(List<QueryHandle> queryHandleList) {
-        this.queryHandleList = queryHandleList;
     }
 }
