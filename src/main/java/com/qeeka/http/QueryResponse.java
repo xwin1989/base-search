@@ -60,7 +60,6 @@ public class QueryResponse<T> {
         if (response != null) {
             response.setEntity(this.entity);
             response.setRecordList(this.records);
-            response.setRecordMap(getObjectMap(this.getRecords()));
             response.setTotalRecords(this.totalRecords);
             response.setPageIndex(this.pageIndex);
             response.setPageSize(this.pageSize);
@@ -69,10 +68,10 @@ public class QueryResponse<T> {
         return null;
     }
 
-    private Map<Object, T> getObjectMap(List<T> results) {
+    public Map<Object, T> getRecordsMap() {
         Map<Object, T> recordMap = new HashMap<>();
-        if (!results.isEmpty() && results.get(0) instanceof MapHandle) {
-            for (T result : results) {
+        if (this.records != null && !this.records.isEmpty() && this.records.get(0) instanceof MapHandle) {
+            for (T result : this.records) {
                 recordMap.put(((MapHandle) result).getPrimaryKey(), result);
             }
         }
