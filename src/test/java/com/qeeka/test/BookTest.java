@@ -214,6 +214,14 @@ public class BookTest extends SpringTestWithDB {
 
     @Test
     @DatabaseSetup("/BookData.xml")
+    public void testBookCount() {
+        QueryResponse<Book> response = bookService.search(new QueryRequest(new QueryGroup()).onlyCount());
+        Assert.assertTrue(response.getRecords() == null);
+        Assert.assertTrue(response.getTotalRecords() == 3L);
+    }
+
+    @Test
+    @DatabaseSetup("/BookData.xml")
     public void testBookMapWithParam() {
         BaseSearchRequest request = new BaseSearchRequest(0, 5);
         List<Integer> ids = Arrays.asList(1, 3);

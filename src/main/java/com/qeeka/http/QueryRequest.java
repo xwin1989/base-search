@@ -105,6 +105,13 @@ public class QueryRequest {
         return this;
     }
 
+    public QueryRequest onlyCount() {
+        this.needCount = true;
+        this.needRecord = false;
+        this.needDistinct = false;
+        return this;
+    }
+
     public QueryRequest needDistinct() {
         this.needDistinct = true;
         return this;
