@@ -39,4 +39,11 @@ public class BaseSearchRequest {
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
     }
+
+    public Integer getOffset() {
+        if (this.pageIndex == null || this.pageSize == null) {
+            return 0;
+        }
+        return this.pageIndex * this.getPageSize();
+    }
 }
