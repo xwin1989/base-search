@@ -30,7 +30,7 @@ public class QueryParser {
 
         //Handle alone node
         if (queryHandleList.size() == 1) {
-            queryModel.setStatement(generateParameterHql(queryHandleList.get(0), queryModel.getParameters()));
+            queryModel.setStatement(generateParameterHql(queryHandleList.get(0), queryModel.getParameters()).toString());
             return queryModel;
         }
 
@@ -78,7 +78,7 @@ public class QueryParser {
         return queryModel;
     }
 
-    private static String generateOrderStatement(Sort sort) {
+    private String generateOrderStatement(Sort sort) {
         if (sort == null) {
             return null;
         }
@@ -97,7 +97,7 @@ public class QueryParser {
         return orderStatement.toString();
     }
 
-    private static String generateParameterHql(QueryHandle handle, Map<String, Object> parameters) {
+    private CharSequence generateParameterHql(QueryHandle handle, Map<String, Object> parameters) {
         if (handle instanceof QueryNode) {
             QueryNode node = (QueryNode) handle;
 
@@ -141,7 +141,7 @@ public class QueryParser {
             if (parameterName != null) {
                 parameters.put(parameterName.toString(), node.getValue());
             }
-            return queryPart.toString();
+            return queryPart;
         }
         return "";
     }
