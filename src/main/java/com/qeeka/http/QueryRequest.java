@@ -17,7 +17,7 @@ public class QueryRequest {
     private Integer pageIndex = 0;
 
     //page size and set default
-    private Integer pageSize = 10;
+    private Integer pageSize = 0;
 
     //need total record
     private boolean needCount = false;
