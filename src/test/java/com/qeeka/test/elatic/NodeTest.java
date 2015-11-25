@@ -1,17 +1,22 @@
 package com.qeeka.test.elatic;
 
 import com.qeeka.domain.elastic.ESSearchGroup;
+import com.qeeka.domain.elastic.custom.ESAggsTermsNode;
 import com.qeeka.domain.elastic.custom.ESBoolGroup;
 import com.qeeka.domain.elastic.custom.ESExistsNode;
 import com.qeeka.domain.elastic.custom.ESMissingNode;
 import com.qeeka.domain.elastic.custom.ESRangeNode;
 import com.qeeka.domain.elastic.custom.ESTermNode;
+import com.qeeka.domain.elastic.custom.ESTermsNode;
 import com.qeeka.domain.elastic.custom.ESWildcardNode;
+import com.qeeka.domain.elastic.node.ESAggregationNode;
 import com.qeeka.domain.elastic.node.ESQueryNode;
 import com.qeeka.operate.Direction;
 import com.qeeka.util.QueryJSONBinder;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 /**
  * Created by neal.xu on 2015/10/20
@@ -126,5 +131,23 @@ public class NodeTest {
         ESSearchGroup searchGroup = new ESSearchGroup();
         searchGroup.generateFilterNode().addMust(new ESRangeNode("updateTime", "2015-01-23 16:51:50", false, "2015-01-23 16:51:50||+1M", false));
         Assert.assertEquals(searchGroup.generateScript(), "{\"query\":{\"filtered\":{\"filter\":{\"bool\":{\"must\":[{\"range\":{\"updateTime\":{\"gt\":\"2015-01-23 16:51:50\",\"lt\":\"2015-01-23 16:51:50||+1M\"}}}]}}}}}");
+    }
+
+    @Test
+    public void testGroupBy() {
+        ESSearchGroup searchGroup = new ESSearchGroup();
+        searchGroup.setFrom(0).setSize(0);
+
+        searchGroup.generateQueryNode().addMust(new ESWildcardNode("status", "*pass*"));
+        searchGroup.generateFilterNode().addMust(new ESTermsNode("designateDesignerId", Arrays.asList(101526953, 101528895)));
+
+
+        ESAggregationNode aggregationNode = new ESAggsTermsNode("designateDesignerId")
+                .addAggregations("status", new ESAggsTermsNode("status")
+                        .addAggregations("user_id", new ESAggsTermsNode("userId")));
+
+        searchGroup.addAggregations("designate_designer_id", aggregationNode);
+        System.out.println(searchGroup.generateScript());
+        Assert.assertEquals(searchGroup.generateScript(), "{\"from\":0,\"size\":0,\"query\":{\"filtered\":{\"query\":{\"bool\":{\"must\":[{\"wildcard\":{\"status\":\"*pass*\"}}]}},\"filter\":{\"bool\":{\"must\":[{\"terms\":{\"designateDesignerId\":[101526953,101528895]}}]}}}},\"aggs\":{\"designate_designer_id\":{\"aggs\":{\"status\":{\"aggs\":{\"user_id\":{\"terms\":{\"field\":\"userId\"}}},\"terms\":{\"field\":\"status\"}}},\"terms\":{\"field\":\"designateDesignerId\"}}}}");
     }
 }

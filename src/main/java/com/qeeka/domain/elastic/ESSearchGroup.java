@@ -2,6 +2,7 @@ package com.qeeka.domain.elastic;
 
 import com.qeeka.domain.elastic.group.ESFilteredGroup;
 import com.qeeka.domain.elastic.group.ESQueryGroup;
+import com.qeeka.domain.elastic.node.ESAggregationNode;
 import com.qeeka.domain.elastic.node.ESFilterNode;
 import com.qeeka.domain.elastic.node.ESQueryNode;
 import com.qeeka.operate.Direction;
@@ -10,6 +11,7 @@ import com.qeeka.util.QueryJSONBinder;
 import javax.xml.bind.annotation.XmlElement;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +30,9 @@ public class ESSearchGroup {
 
     @XmlElement(name = "sort")
     private List<Map<String, Map<String, String>>> sort;
+
+    @XmlElement(name = "aggs")
+    private Map<String, ESAggregationNode> aggregationNode;
 
     private void checkQueryNodeStatus() {
         if (query == null) {
@@ -82,6 +87,14 @@ public class ESSearchGroup {
         ESFilterNode filterNode = new ESFilterNode();
         this.query.getFiltered().setFilter(filterNode);
         return filterNode;
+    }
+
+    public ESSearchGroup addAggregations(String columnName, ESAggregationNode aggregationNode) {
+        if (this.aggregationNode == null) {
+            this.aggregationNode = new LinkedHashMap<>();
+        }
+        this.aggregationNode.put(columnName, aggregationNode);
+        return this;
     }
 
     public String generateScript() {
