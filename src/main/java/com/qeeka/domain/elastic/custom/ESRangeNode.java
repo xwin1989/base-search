@@ -4,7 +4,7 @@ import com.qeeka.domain.elastic.ESTree;
 
 import javax.xml.bind.annotation.XmlElement;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -15,7 +15,7 @@ public class ESRangeNode implements ESTree {
     private Map<String, Map<String, Object>> range;
 
     public ESRangeNode(String fieldName, Object gtValue, Boolean gtEquals, Object ltValue, Boolean ltEquals) {
-        Map<String, Object> rangeMap = new HashMap<>();
+        Map<String, Object> rangeMap = new LinkedHashMap<>();
         if (gtValue != null) {
             if (gtEquals) {
                 rangeMap.put("gte", gtValue);

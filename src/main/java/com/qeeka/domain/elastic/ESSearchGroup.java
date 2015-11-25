@@ -1,5 +1,7 @@
 package com.qeeka.domain.elastic;
 
+import com.qeeka.domain.elastic.custom.ESGroupByNode;
+import com.qeeka.domain.elastic.group.ESAggsGroup;
 import com.qeeka.domain.elastic.group.ESFilteredGroup;
 import com.qeeka.domain.elastic.group.ESQueryGroup;
 import com.qeeka.domain.elastic.node.ESFilterNode;
@@ -28,6 +30,9 @@ public class ESSearchGroup {
 
     @XmlElement(name = "sort")
     private List<Map<String, Map<String, String>>> sort;
+
+    @XmlElement(name = "aggs")
+    private ESAggsGroup aggs;
 
     private void checkQueryNodeStatus() {
         if (query == null) {
@@ -82,6 +87,18 @@ public class ESSearchGroup {
         ESFilterNode filterNode = new ESFilterNode();
         this.query.getFiltered().setFilter(filterNode);
         return filterNode;
+    }
+
+    public ESGroupByNode generateGroupByNode() {
+        if (this.aggs == null) {
+            this.aggs = new ESAggsGroup();
+        }
+        if (this.aggs.getGroupByNode() != null) {
+            return this.aggs.getGroupByNode();
+        }
+        ESGroupByNode groupByNode = new ESGroupByNode();
+        this.aggs.setGroupByNode(groupByNode);
+        return groupByNode;
     }
 
     public String generateScript() {
