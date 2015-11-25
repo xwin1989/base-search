@@ -147,7 +147,6 @@ public class NodeTest {
                         .addAggregations("user_id", new ESAggsTermsNode("userId")));
 
         searchGroup.addAggregations("designate_designer_id", aggregationNode);
-        System.out.println(searchGroup.generateScript());
         Assert.assertEquals(searchGroup.generateScript(), "{\"from\":0,\"size\":0,\"query\":{\"filtered\":{\"query\":{\"bool\":{\"must\":[{\"wildcard\":{\"status\":\"*pass*\"}}]}},\"filter\":{\"bool\":{\"must\":[{\"terms\":{\"designateDesignerId\":[101526953,101528895]}}]}}}},\"aggs\":{\"designate_designer_id\":{\"aggs\":{\"status\":{\"aggs\":{\"user_id\":{\"terms\":{\"field\":\"userId\"}}},\"terms\":{\"field\":\"status\"}}},\"terms\":{\"field\":\"designateDesignerId\"}}}}");
     }
 }
