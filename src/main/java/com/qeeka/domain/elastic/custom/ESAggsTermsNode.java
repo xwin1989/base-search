@@ -1,46 +1,27 @@
 package com.qeeka.domain.elastic.custom;
 
-import com.qeeka.domain.elastic.ESTree;
-import com.qeeka.domain.elastic.group.ESAggsGroup;
+import com.qeeka.domain.elastic.node.ESAggregationNode;
 
 import javax.xml.bind.annotation.XmlElement;
-import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * Created by kimi.lai on 11/25/2015.
  */
-public class ESAggsTermsNode implements ESTree {
-    private static final String FIELD = "field";
-    @XmlElement(name = "aggs")
-    private ESAggsGroup aggsGroup;
-
+public class ESAggsTermsNode extends ESAggregationNode {
     @XmlElement(name = "terms")
-    private Map<String, Object> termsNode;
+    private Map<String, String> termsNode = new LinkedHashMap<>();
 
-    public ESAggsTermsNode(Object value) {
-        Map<String, Object> node = Collections.singletonMap(FIELD, value);
-        this.termsNode = node;
+    public ESAggsTermsNode(String fieldName) {
+        termsNode.put("field", fieldName);
     }
 
-    public ESAggsTermsNode addAggs(ESAggsGroup aggs) {
-        this.aggsGroup = aggs;
-        return this;
-    }
-
-    public ESAggsGroup getAggsGroup() {
-        return aggsGroup;
-    }
-
-    public void setAggsGroup(ESAggsGroup aggsGroup) {
-        this.aggsGroup = aggsGroup;
-    }
-
-    public Map<String, Object> getTermsNode() {
+    public Map<String, String> getTermsNode() {
         return termsNode;
     }
 
-    public void setTermsNode(Map<String, Object> termsNode) {
+    public void setTermsNode(Map<String, String> termsNode) {
         this.termsNode = termsNode;
     }
 }

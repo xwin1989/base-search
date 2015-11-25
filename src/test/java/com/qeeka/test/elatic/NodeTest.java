@@ -9,7 +9,7 @@ import com.qeeka.domain.elastic.custom.ESRangeNode;
 import com.qeeka.domain.elastic.custom.ESTermNode;
 import com.qeeka.domain.elastic.custom.ESTermsNode;
 import com.qeeka.domain.elastic.custom.ESWildcardNode;
-import com.qeeka.domain.elastic.group.ESAggsGroup;
+import com.qeeka.domain.elastic.node.ESAggregationNode;
 import com.qeeka.domain.elastic.node.ESQueryNode;
 import com.qeeka.operate.Direction;
 import com.qeeka.util.QueryJSONBinder;
@@ -140,7 +140,14 @@ public class NodeTest {
 
         searchGroup.generateQueryNode().addMust(new ESWildcardNode("status", "*pass*"));
         searchGroup.generateFilterNode().addMust(new ESTermsNode("designateDesignerId", Arrays.asList(101526953, 101528895)));
-        searchGroup.generateAggsGroup().addTerms(new ESAggsTermsNode("designateDesignerId").addAggs(new ESAggsGroup().addTerms(new ESAggsTermsNode("status"))));
-        Assert.assertEquals(searchGroup.generateScript(), "{\"from\":0,\"size\":0,\"query\":{\"filtered\":{\"query\":{\"bool\":{\"must\":[{\"wildcard\":{\"status\":\"*pass*\"}}]}},\"filter\":{\"bool\":{\"must\":[{\"terms\":{\"designateDesignerId\":[101526953,101528895]}}]}}}},\"aggs\":{\"group_by\":{\"aggs\":{\"group_by\":{\"terms\":{\"field\":\"status\"}}},\"terms\":{\"field\":\"designateDesignerId\"}}}}");
+
+
+        ESAggregationNode aggregationNode = new ESAggsTermsNode("designateDesignerId")
+                .addAggregations("status", new ESAggsTermsNode("status")
+                        .addAggregations("user_id", new ESAggsTermsNode("userId")));
+
+        searchGroup.addAggregations("designate_designer_id", aggregationNode);
+        System.out.println(searchGroup.generateScript());
+        Assert.assertEquals(searchGroup.generateScript(), "{\"from\":0,\"size\":0,\"query\":{\"filtered\":{\"query\":{\"bool\":{\"must\":[{\"wildcard\":{\"status\":\"*pass*\"}}]}},\"filter\":{\"bool\":{\"must\":[{\"terms\":{\"designateDesignerId\":[101526953,101528895]}}]}}}},\"aggs\":{\"designate_designer_id\":{\"aggs\":{\"status\":{\"aggs\":{\"user_id\":{\"terms\":{\"field\":\"userId\"}}},\"terms\":{\"field\":\"status\"}}},\"terms\":{\"field\":\"designateDesignerId\"}}}}");
     }
 }
