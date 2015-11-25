@@ -1,6 +1,6 @@
 package com.qeeka.domain.elastic.group;
 
-import com.qeeka.domain.elastic.custom.ESGroupByNode;
+import com.qeeka.domain.elastic.ESTree;
 
 import javax.xml.bind.annotation.XmlElement;
 
@@ -9,13 +9,18 @@ import javax.xml.bind.annotation.XmlElement;
  */
 public class ESAggsGroup {
     @XmlElement(name = "group_by")
-    private ESGroupByNode groupByNode;
+    private ESTree terms;
 
-    public ESGroupByNode getGroupByNode() {
-        return groupByNode;
+    public ESTree getTerms() {
+        return terms;
     }
 
-    public void setGroupByNode(ESGroupByNode groupByNode) {
-        this.groupByNode = groupByNode;
+    public void setTerms(ESTree terms) {
+        this.terms = terms;
+    }
+
+    public ESAggsGroup addTerms(ESTree node) {
+        this.terms = node;
+        return this;
     }
 }

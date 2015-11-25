@@ -10,13 +10,23 @@ import java.util.Map;
 /**
  * Created by kimi.lai on 11/25/2015.
  */
-public class ESGroupByNode implements ESTree {
+public class ESAggsTermsNode implements ESTree {
     private static final String FIELD = "field";
     @XmlElement(name = "aggs")
     private ESAggsGroup aggsGroup;
 
     @XmlElement(name = "terms")
     private Map<String, Object> termsNode;
+
+    public ESAggsTermsNode(Object value) {
+        Map<String, Object> node = Collections.singletonMap(FIELD, value);
+        this.termsNode = node;
+    }
+
+    public ESAggsTermsNode addAggs(ESAggsGroup aggs) {
+        this.aggsGroup = aggs;
+        return this;
+    }
 
     public ESAggsGroup getAggsGroup() {
         return aggsGroup;
@@ -32,11 +42,5 @@ public class ESGroupByNode implements ESTree {
 
     public void setTermsNode(Map<String, Object> termsNode) {
         this.termsNode = termsNode;
-    }
-
-    public ESGroupByNode addFiled(Object value) {
-        Map<String, Object> node = Collections.singletonMap(FIELD, value);
-        this.termsNode = node;
-        return this;
     }
 }

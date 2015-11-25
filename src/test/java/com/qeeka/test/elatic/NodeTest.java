@@ -1,6 +1,7 @@
 package com.qeeka.test.elatic;
 
 import com.qeeka.domain.elastic.ESSearchGroup;
+import com.qeeka.domain.elastic.custom.ESAggsTermsNode;
 import com.qeeka.domain.elastic.custom.ESBoolGroup;
 import com.qeeka.domain.elastic.custom.ESExistsNode;
 import com.qeeka.domain.elastic.custom.ESMissingNode;
@@ -8,6 +9,7 @@ import com.qeeka.domain.elastic.custom.ESRangeNode;
 import com.qeeka.domain.elastic.custom.ESTermNode;
 import com.qeeka.domain.elastic.custom.ESTermsNode;
 import com.qeeka.domain.elastic.custom.ESWildcardNode;
+import com.qeeka.domain.elastic.group.ESAggsGroup;
 import com.qeeka.domain.elastic.node.ESQueryNode;
 import com.qeeka.operate.Direction;
 import com.qeeka.util.QueryJSONBinder;
@@ -138,7 +140,7 @@ public class NodeTest {
 
         searchGroup.generateQueryNode().addMust(new ESWildcardNode("status", "*pass*"));
         searchGroup.generateFilterNode().addMust(new ESTermsNode("designateDesignerId", Arrays.asList(101526953, 101528895)));
-        searchGroup.generateGroupByNode().addFiled("designateDesignerId");
-        Assert.assertEquals(searchGroup.generateScript(), "{\"from\":0,\"size\":0,\"query\":{\"filtered\":{\"query\":{\"bool\":{\"must\":[{\"wildcard\":{\"status\":\"*pass*\"}}]}},\"filter\":{\"bool\":{\"must\":[{\"terms\":{\"designateDesignerId\":[101526953,101528895]}}]}}}},\"aggs\":{\"group_by\":{\"terms\":{\"field\":\"designateDesignerId\"}}}}");
+        searchGroup.generateAggsGroup().addTerms(new ESAggsTermsNode("designateDesignerId").addAggs(new ESAggsGroup().addTerms(new ESAggsTermsNode("status"))));
+        Assert.assertEquals(searchGroup.generateScript(), "{\"from\":0,\"size\":0,\"query\":{\"filtered\":{\"query\":{\"bool\":{\"must\":[{\"wildcard\":{\"status\":\"*pass*\"}}]}},\"filter\":{\"bool\":{\"must\":[{\"terms\":{\"designateDesignerId\":[101526953,101528895]}}]}}}},\"aggs\":{\"group_by\":{\"aggs\":{\"group_by\":{\"terms\":{\"field\":\"status\"}}},\"terms\":{\"field\":\"designateDesignerId\"}}}}");
     }
 }

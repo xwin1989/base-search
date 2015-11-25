@@ -1,6 +1,5 @@
 package com.qeeka.domain.elastic;
 
-import com.qeeka.domain.elastic.custom.ESGroupByNode;
 import com.qeeka.domain.elastic.group.ESAggsGroup;
 import com.qeeka.domain.elastic.group.ESFilteredGroup;
 import com.qeeka.domain.elastic.group.ESQueryGroup;
@@ -89,16 +88,11 @@ public class ESSearchGroup {
         return filterNode;
     }
 
-    public ESGroupByNode generateGroupByNode() {
+    public ESAggsGroup generateAggsGroup() {
         if (this.aggs == null) {
             this.aggs = new ESAggsGroup();
         }
-        if (this.aggs.getGroupByNode() != null) {
-            return this.aggs.getGroupByNode();
-        }
-        ESGroupByNode groupByNode = new ESGroupByNode();
-        this.aggs.setGroupByNode(groupByNode);
-        return groupByNode;
+        return this.aggs;
     }
 
     public String generateScript() {
