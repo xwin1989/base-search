@@ -669,7 +669,7 @@ public abstract class BaseSearchRepository<T> {
     }
 
     public <X> List<X> findByNativeQuery(CharSequence sql, Map<String, Object> params, Integer offset, Integer size) {
-        return findByNativeQuery(sql, null, offset, size, null);
+        return findByNativeQuery(sql, params, offset, size, null);
     }
 
     /**
