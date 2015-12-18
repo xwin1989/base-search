@@ -55,11 +55,13 @@ public class ESSearchGroup {
         return this;
     }
 
-    public ESSearchGroup addHighlight(String columnName) {
+    public ESSearchGroup addHighlight(String... columnNames) {
         if (highlight == null) {
             highlight = Collections.singletonMap("fields", new HashMap<String, Map<String, Object>>());
         }
-        highlight.get("fields").put(columnName, new HashMap<String, Object>());
+        for (String columnName : columnNames) {
+            highlight.get("fields").put(columnName, new HashMap<String, Object>());
+        }
         return this;
     }
 
