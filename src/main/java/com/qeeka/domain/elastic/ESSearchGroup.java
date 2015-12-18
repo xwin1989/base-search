@@ -11,6 +11,7 @@ import com.qeeka.util.QueryJSONBinder;
 import javax.xml.bind.annotation.XmlElement;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,9 @@ public class ESSearchGroup {
     @XmlElement(name = "aggs")
     private Map<String, ESAggregationNode> aggregationNode;
 
+    @XmlElement(name = "highlight")
+    private Map<String, HashMap<String, Map<String, Object>>> highlight;
+
     private void checkQueryNodeStatus() {
         if (query == null) {
             query = new ESQueryGroup();
@@ -48,6 +52,16 @@ public class ESSearchGroup {
             sort = new ArrayList<>();
         }
         sort.add(Collections.singletonMap(columnName, Collections.singletonMap("order", direction.getValue().toLowerCase())));
+        return this;
+    }
+
+    public ESSearchGroup addHighlight(String... columnNames) {
+        if (highlight == null) {
+            highlight = Collections.singletonMap("fields", new HashMap<String, Map<String, Object>>());
+        }
+        for (String columnName : columnNames) {
+            highlight.get("fields").put(columnName, new HashMap<String, Object>());
+        }
         return this;
     }
 
