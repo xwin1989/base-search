@@ -153,7 +153,7 @@ public class NodeTest {
     @Test
     public void testHighlight() {
         ESSearchGroup searchGroup = new ESSearchGroup();
-        searchGroup.addHighlight("title", "labels");
-        Assert.assertEquals(searchGroup.generateScript(), "{\"query\":{\"filtered\":{}},\"highlight\":{\"fields\":{\"title\":{},\"labels\":{}}}}");
+        searchGroup.generateHighlightNode().addHighlightFields("title", "labels").addHighlightPreTag("<font color=\"#777755\">").addHighlightPostTag("</font>");
+        Assert.assertEquals(searchGroup.generateScript(), "{\"query\":{\"filtered\":{}},\"highlight\":{\"pre_tags\":[\"<font color=\\\"#777755\\\">\"],\"post_tags\":[\"</font>\"],\"fields\":{\"title\":{},\"labels\":{}}}}");
     }
 }
