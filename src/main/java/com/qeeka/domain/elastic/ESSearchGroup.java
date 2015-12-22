@@ -5,13 +5,13 @@ import com.qeeka.domain.elastic.group.ESQueryGroup;
 import com.qeeka.domain.elastic.node.ESAggregationNode;
 import com.qeeka.domain.elastic.node.ESFilterNode;
 import com.qeeka.domain.elastic.node.ESQueryNode;
+import com.qeeka.domain.elastic.node.HighlightNode;
 import com.qeeka.operate.Direction;
 import com.qeeka.util.QueryJSONBinder;
 
 import javax.xml.bind.annotation.XmlElement;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +36,7 @@ public class ESSearchGroup {
     private Map<String, ESAggregationNode> aggregationNode;
 
     @XmlElement(name = "highlight")
-    private Map<String, HashMap<String, Map<String, Object>>> highlight;
+    private HighlightNode highlight;
 
     private void checkQueryNodeStatus() {
         if (query == null) {
@@ -55,15 +55,13 @@ public class ESSearchGroup {
         return this;
     }
 
-    public ESSearchGroup addHighlight(String... columnNames) {
+    public HighlightNode generateHighlightNode() {
         if (highlight == null) {
-            highlight = Collections.singletonMap("fields", new HashMap<String, Map<String, Object>>());
+            highlight = new HighlightNode();
         }
-        for (String columnName : columnNames) {
-            highlight.get("fields").put(columnName, new HashMap<String, Object>());
-        }
-        return this;
+        return highlight;
     }
+
 
     public Integer getFrom() {
         return from;
