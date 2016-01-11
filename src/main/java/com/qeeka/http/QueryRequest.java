@@ -142,4 +142,19 @@ public class QueryRequest {
         this.queryResultType = queryResultType;
         return this;
     }
+
+    public QueryRequest uniqueResult() {
+        this.queryResultType = QueryResultType.UNIQUE;
+        return this;
+    }
+
+    public QueryRequest singleResult() {
+        this.queryResultType = QueryResultType.SINGLE;
+        return this;
+    }
+
+    public QueryRequest listResult() {
+        this.queryResultType = QueryResultType.LIST;
+        return this;
+    }
 }

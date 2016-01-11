@@ -8,7 +8,6 @@ import com.qeeka.http.QueryRequest;
 import com.qeeka.http.QueryResponse;
 import com.qeeka.operate.Direction;
 import com.qeeka.operate.QueryOperate;
-import com.qeeka.operate.QueryResultType;
 import com.qeeka.operate.Sort;
 import com.qeeka.test.domain.Book;
 import com.qeeka.test.service.BookService;
@@ -131,7 +130,7 @@ public class BookTest extends SpringTestWithDB {
 
         QueryRequest request = new QueryRequest(
                 new QueryGroup("name", "book5")
-        ).setQueryResultType(QueryResultType.UNIQUE);
+        ).uniqueResult();
 
         Book book2 = bookService.search(request).getEntity();
         Assert.assertTrue(book2.getStatus() == 0);
@@ -261,7 +260,7 @@ public class BookTest extends SpringTestWithDB {
     @DatabaseSetup("/BookData.xml")
     public void testLeftJoin() {
         QueryGroup group = new QueryGroup().leftJoin("E.bookInfoList", "BI").and("BI.name", "book2", QueryOperate.CONTAIN);
-        QueryResponse<Book> queryResponse = bookService.search(new QueryRequest(group));
+        QueryResponse<Book> queryResponse = bookService.search(group);
         Assert.assertEquals(queryResponse.getRecords().size(), 1);
     }
 
@@ -269,7 +268,7 @@ public class BookTest extends SpringTestWithDB {
     @DatabaseSetup("/BookData.xml")
     public void testLeftJoinFetch() {
         QueryGroup group = new QueryGroup().leftJoinFetch("E.bookInfoList", "BI").and("BI.name", "book2", QueryOperate.CONTAIN);
-        QueryResponse<Book> queryResponse = bookService.search(new QueryRequest(group));
+        QueryResponse<Book> queryResponse = bookService.search(group);
         Assert.assertEquals(queryResponse.getRecords().size(), 1);
     }
 }

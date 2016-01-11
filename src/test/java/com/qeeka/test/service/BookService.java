@@ -1,5 +1,6 @@
 package com.qeeka.test.service;
 
+import com.qeeka.domain.QueryGroup;
 import com.qeeka.http.QueryRequest;
 import com.qeeka.http.QueryResponse;
 import com.qeeka.test.domain.Book;
@@ -24,6 +25,11 @@ public class BookService {
 
     public QueryResponse<Book> search(QueryRequest request) {
         return repository.search(request);
+    }
+
+
+    public QueryResponse<Book> search(QueryGroup queryGroup) {
+        return repository.search(queryGroup);
     }
 
     public List<Book> findAll() {

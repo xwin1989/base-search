@@ -1,6 +1,7 @@
 package com.qeeka.repository;
 
 import com.qeeka.domain.MapHandle;
+import com.qeeka.domain.QueryGroup;
 import com.qeeka.domain.QueryModel;
 import com.qeeka.domain.QueryParser;
 import com.qeeka.http.QueryRequest;
@@ -66,6 +67,15 @@ public abstract class BaseSearchRepository<T> {
                 throw new IllegalArgumentException("repository must extend with generic type Entity");
             }
         }
+    }
+
+    /**
+     * Search by default query request
+     * @param queryGroup
+     * @return
+     */
+    public QueryResponse<T> search(QueryGroup queryGroup) {
+        return search(new QueryRequest(queryGroup));
     }
 
     /**
