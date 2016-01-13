@@ -181,6 +181,8 @@ public class BookTest extends SpringTestWithDB {
     @DatabaseSetup("/BookData.xml")
     public void testNativeQuery() {
         List<Book> all = bookService.findAll();
+        List<Book> all2 = bookService.findAll2();
+        Assert.assertEquals(all.size(), all2.size());
         Integer total = bookService.count();
         Integer typeById = bookService.getTypeById(1);
         Assert.assertTrue(all.size() == 3);

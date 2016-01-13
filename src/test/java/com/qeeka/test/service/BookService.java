@@ -37,6 +37,10 @@ public class BookService {
         return repository.findByNativeQuery(sql);
     }
 
+    public List<Book> findAll2() {
+        return repository.search().getRecords();
+    }
+
     public Integer count() {
         String sql = "select count(1) from book";
         BigInteger total = repository.findUniqueNativeQuery(sql);

@@ -71,6 +71,16 @@ public abstract class BaseSearchRepository<T> {
 
     /**
      * Search by default query request
+     *
+     * @return
+     */
+    public QueryResponse<T> search() {
+        return search(new QueryRequest(new QueryGroup()));
+    }
+
+    /**
+     * Search by default query request
+     *
      * @param queryGroup
      * @return
      */
