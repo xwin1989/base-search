@@ -232,12 +232,25 @@ public abstract class BaseSearchRepository<T> {
         return queryResponse;
     }
 
+    /**
+     * count all elements
+     * @return
+     */
+    public Long count() {
+        return count(new QueryGroup());
+    }
+
+    /**
+     * * count elements by query request
+     * @param queryRequest
+     * @return
+     */
     public Long count(QueryRequest queryRequest) {
         return count(queryRequest.getQueryGroup());
     }
 
     /**
-     * count by query request
+     * count by query group
      *
      * @param queryGroup
      * @return record total

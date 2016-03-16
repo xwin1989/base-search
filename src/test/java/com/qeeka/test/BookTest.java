@@ -286,5 +286,7 @@ public class BookTest extends SpringTestWithDB {
         Assert.assertEquals(count, 3);
         Long statusCount = bookService.count(new QueryGroup("status", 5));
         Assert.assertEquals(statusCount.intValue(), 3);
+        Long countAll = bookService.countAll();
+        Assert.assertEquals(countAll.intValue(), 3);
     }
 }

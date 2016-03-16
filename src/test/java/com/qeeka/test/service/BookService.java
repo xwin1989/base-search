@@ -53,6 +53,10 @@ public class BookService {
         return repository.count(queryGroup);
     }
 
+    public Long countAll() {
+        return repository.count();
+    }
+
     public Integer getTypeById(Integer id) {
         Book book = repository.findUniqueNativeQuery("select * from book where id = :id", Collections.<String, Object>singletonMap("id", id), Book.class);
         String sql = "select type from book where id = :id";
