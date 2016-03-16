@@ -46,7 +46,9 @@ public class PersonTest extends SpringTestWithDB {
         QueryResponse<Person> response = personService.search(request);
         Assert.assertTrue(response.getRecords().get(0).getId() == 0);
         Long count = personService.count(request);
+        Long count2 = personService.count(request.getQueryGroup());
         Assert.assertTrue(count == 1);
+        Assert.assertEquals(count2, count);
     }
 
 }

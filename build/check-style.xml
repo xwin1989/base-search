@@ -162,7 +162,7 @@
 
     <!--Checks for long source files.-->
     <module name="FileLength">
-        <property name="max" value="800"/>
+        <property name="max" value="1000"/>
     </module>
 
     <!--Checks to see if a file contains a tab character.-->

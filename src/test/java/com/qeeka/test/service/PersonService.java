@@ -1,5 +1,6 @@
 package com.qeeka.test.service;
 
+import com.qeeka.domain.QueryGroup;
 import com.qeeka.domain.QueryParser;
 import com.qeeka.http.QueryRequest;
 import com.qeeka.http.QueryResponse;
@@ -40,5 +41,9 @@ public class PersonService {
 
     public Long count(QueryRequest request) {
         return repository.count(request);
+    }
+
+    public Long count(QueryGroup queryGroup) {
+        return repository.count(queryGroup);
     }
 }

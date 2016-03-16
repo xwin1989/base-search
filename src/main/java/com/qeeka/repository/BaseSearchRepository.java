@@ -232,14 +232,18 @@ public abstract class BaseSearchRepository<T> {
         return queryResponse;
     }
 
+    public Long count(QueryRequest queryRequest) {
+        return count(queryRequest.getQueryGroup());
+    }
+
     /**
      * count by query request
      *
-     * @param queryRequest
+     * @param queryGroup
      * @return record total
      */
-    public Long count(QueryRequest queryRequest) {
-        QueryModel query = queryParser.parse(queryRequest.getQueryGroup());
+    public Long count(QueryGroup queryGroup) {
+        QueryModel query = queryParser.parse(queryGroup);
         StringBuilder countHql = new StringBuilder("SELECT COUNT(E) FROM ").append(entityName).append(" E ");
         if (StringUtils.hasText(query.getStatement())) {
             countHql.append(" WHERE ").append(query.getStatement());
@@ -322,7 +326,7 @@ public abstract class BaseSearchRepository<T> {
      * @param queryString
      * @return
      */
-    public int update(String queryString) {
+    public int update(CharSequence queryString) {
         return update(queryString, null);
     }
 
@@ -759,6 +763,38 @@ public abstract class BaseSearchRepository<T> {
         return getUniqueResult(results);
     }
 
+    /**
+     * update by sql
+     *
+     * @param sql
+     * @return
+     */
+    public int updateNaive(CharSequence sql) {
+        return updateNaive(sql, null);
+    }
+
+    /**
+     * update by sql with params
+     *
+     * @param sql
+     * @param params
+     * @return
+     */
+    public int updateNaive(CharSequence sql, Map<String, Object> params) {
+        StopWatch watch = new StopWatch();
+        try {
+            Query nativeQuery = entityManager.createNativeQuery(sql.toString());
+            if (params != null) {
+                for (Map.Entry<String, Object> entry : params.entrySet()) {
+                    nativeQuery.setParameter(entry.getKey(), entry.getValue());
+                }
+            }
+            return nativeQuery.executeUpdate();
+        } finally {
+            logger.debug("nativeQuery, query={}, params={}, elapsedTime={}", sql, params, watch.elapsedTime());
+        }
+
+    }
 
     private final class StopWatch {
         private long start;

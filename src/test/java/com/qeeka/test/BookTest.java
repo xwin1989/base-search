@@ -273,4 +273,18 @@ public class BookTest extends SpringTestWithDB {
         QueryResponse<Book> queryResponse = bookService.search(group);
         Assert.assertEquals(queryResponse.getRecords().size(), 1);
     }
+
+    @Test
+    @DatabaseSetup("/BookData.xml")
+    @Transactional
+    public void testNativeUpdate() {
+        int i = bookService.updateBookStatus(1, 3);
+        Assert.assertEquals(i, 1);
+        Book book = bookService.search(new QueryRequest(new QueryGroup("id", 1)).uniqueResult()).getEntity();
+        Assert.assertTrue(book.getStatus() == 3);
+        int count = bookService.updateAllBookStatus(5);
+        Assert.assertEquals(count, 3);
+        Long statusCount = bookService.count(new QueryGroup("status", 5));
+        Assert.assertEquals(statusCount.intValue(), 3);
+    }
 }

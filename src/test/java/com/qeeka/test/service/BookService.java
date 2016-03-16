@@ -11,7 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Neal on 2015/7/27.
@@ -47,6 +49,10 @@ public class BookService {
         return total.intValue();
     }
 
+    public Long count(QueryGroup queryGroup) {
+        return repository.count(queryGroup);
+    }
+
     public Integer getTypeById(Integer id) {
         Book book = repository.findUniqueNativeQuery("select * from book where id = :id", Collections.<String, Object>singletonMap("id", id), Book.class);
         String sql = "select type from book where id = :id";
@@ -56,6 +62,19 @@ public class BookService {
             return type;
         }
         return null;
+    }
+
+    @Transactional
+    public int updateBookStatus(Integer bookId, Integer status) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", bookId);
+        params.put("status", status);
+        return repository.updateNaive("update book set status = :status where id = :id", params);
+    }
+
+    @Transactional
+    public int updateAllBookStatus(Integer status) {
+        return repository.updateNaive("update book set status = :status", Collections.<String, Object>singletonMap("status", status));
     }
 
     @Transactional
