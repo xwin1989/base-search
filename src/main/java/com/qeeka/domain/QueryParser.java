@@ -131,7 +131,10 @@ public class QueryParser {
                     node.setValue(String.format("%%%s%%", node.getValue()));
                     break;
                 case SUB_QUERY:
-                    queryPart.append(node.getValue());
+                    if (node.getValue() instanceof Map) {
+                        Map<String, Object> parameter = (Map<String, Object>) node.getValue();
+                        parameters.putAll(parameter);
+                    }
                     parameterName = null;
                     break;
                 default:

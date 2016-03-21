@@ -11,7 +11,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by neal.xu on 7/31 0031.
@@ -104,9 +106,9 @@ public class ParserTest {
 
     @Test
     public void testSubQuery() {
-        QueryGroup group = new QueryGroup("id", "in (select * from a)", QueryOperate.SUB_QUERY).and("name", "hello", QueryOperate.CONTAIN);
+        QueryGroup group = new QueryGroup("E.id in (select * from a)", QueryOperate.SUB_QUERY).and("name", "hello", QueryOperate.CONTAIN);
         QueryModel queryModel = parser.parse(group);
-        Assert.assertEquals(queryModel.getStatement(), "(id in (select * from a) AND name LIKE :name0)");
+        Assert.assertEquals(queryModel.getStatement(), "(E.id in (select * from a)  AND name LIKE :name0)");
         Assert.assertTrue(queryModel.getParameters().size() == 1);
     }
 
@@ -114,22 +116,35 @@ public class ParserTest {
     public void testSubQuery2() {
         QueryGroup group = new QueryGroup("exist (select * from a)", QueryOperate.SUB_QUERY).and("name", "hello");
         QueryModel queryModel = parser.parse(group);
-        Assert.assertEquals(queryModel.getStatement(), "( exist (select * from a) AND name = :name0)");
+        Assert.assertEquals(queryModel.getStatement(), "(exist (select * from a)  AND name = :name0)");
         Assert.assertTrue(queryModel.getParameters().size() == 1);
+    }
+
+    @Test
+    public void testSubQuery3() {
+        Map<String, Object> subParams = new HashMap<>();
+        subParams.put("subId", 10);
+        subParams.put("subName", "neal");
+        subParams.put("status", 2);
+
+        QueryGroup group = new QueryGroup("myId", 1).and("exist (select * from EE a where a.id = :subId and a.subName = :subName and a.status = :subStatus)", subParams, QueryOperate.SUB_QUERY)
+                .and("status", 1);
+        QueryModel queryModel = parser.parse(group);
+        Assert.assertEquals(queryModel.getStatement(), "((myId = :myId0 AND exist (select * from EE a where a.id = :subId and a.subName = :subName and a.status = :subStatus) ) AND status = :status4)");
     }
 
     @Test
     public void testSubQueryOr() {
         QueryGroup group = new QueryGroup("name", "a").or("exist (select * from a)", QueryOperate.SUB_QUERY);
         QueryModel queryModel = parser.parse(group);
-        Assert.assertEquals(queryModel.getStatement(), "(name = :name0 OR  exist (select * from a))");
+        Assert.assertEquals(queryModel.getStatement(), "(name = :name0 OR exist (select * from a) )");
     }
 
     @Test
     public void testSubQueryAnd() {
         QueryGroup group = new QueryGroup("name", "a").and("exist (select * from a)", QueryOperate.SUB_QUERY);
         QueryModel queryModel = parser.parse(group);
-        Assert.assertEquals(queryModel.getStatement(), "(name = :name0 AND  exist (select * from a))");
+        Assert.assertEquals(queryModel.getStatement(), "(name = :name0 AND exist (select * from a) )");
     }
 
     @Test
