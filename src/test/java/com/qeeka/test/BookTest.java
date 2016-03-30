@@ -289,4 +289,9 @@ public class BookTest extends SpringTestWithDB {
         Long countAll = bookService.countAll();
         Assert.assertEquals(countAll.intValue(), 3);
     }
+
+    @Test
+    public void testLog() {
+        bookService.testLog();
+    }
 }
