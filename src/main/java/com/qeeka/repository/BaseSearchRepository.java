@@ -31,7 +31,7 @@ import java.util.Map;
  * Created by Neal on 8/3 0003.
  */
 public abstract class BaseSearchRepository<T> {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     protected EntityManager entityManager;
     //Get T  Real Class
@@ -39,7 +39,7 @@ public abstract class BaseSearchRepository<T> {
     protected String entityName;
 
     //Init query parse class
-    private final QueryParser queryParser = new QueryParser();
+    protected final QueryParser queryParser = new QueryParser();
 
     /**
      * constructor and init class properties

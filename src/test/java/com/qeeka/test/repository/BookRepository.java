@@ -9,4 +9,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class BookRepository extends BaseSearchRepository<Book> {
+    public void testLog() {
+        logger.info("logger info output success!");
+    }
 }

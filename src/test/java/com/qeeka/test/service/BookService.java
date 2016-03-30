@@ -68,6 +68,10 @@ public class BookService {
         return null;
     }
 
+    public void testLog() {
+        repository.testLog();
+    }
+
     @Transactional
     public int updateBookStatus(Integer bookId, Integer status) {
         Map<String, Object> params = new HashMap<>();
