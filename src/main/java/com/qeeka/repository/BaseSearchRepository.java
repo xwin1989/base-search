@@ -540,6 +540,7 @@ public abstract class BaseSearchRepository<T> {
      * @param query
      * @return
      */
+    @Deprecated
     public <X> X uniqueResult(CriteriaQuery<X> query) {
         StopWatch watch = new StopWatch();
         try {
@@ -556,6 +557,7 @@ public abstract class BaseSearchRepository<T> {
      * @param queryString
      * @return
      */
+    @Deprecated
     public <X> X uniqueResult(CharSequence queryString) {
         return uniqueResult(queryString, null);
     }
@@ -567,7 +569,29 @@ public abstract class BaseSearchRepository<T> {
      * @param params
      * @return
      */
+    @Deprecated
     public <X> X uniqueResult(CharSequence queryString, Map<String, Object> params) {
+        return findUnique(queryString, params);
+    }
+
+    /**
+     * find unique by query string
+     *
+     * @param queryString
+     * @return
+     */
+    public <X> X findUnique(CharSequence queryString) {
+        return findUnique(queryString, null);
+    }
+
+    /**
+     * find unique by query string & params
+     *
+     * @param queryString
+     * @param params
+     * @return
+     */
+    public <X> X findUnique(CharSequence queryString, Map<String, Object> params) {
         StopWatch watch = new StopWatch();
         try {
             Query query = entityManager.createQuery(queryString.toString());
@@ -579,9 +603,10 @@ public abstract class BaseSearchRepository<T> {
             List<X> results = query.getResultList();
             return getUniqueResult(results);
         } finally {
-            logger.debug("uniqueResult, query={}, params={}, elapsedTime={}", queryString, params, watch.elapsedTime());
+            logger.debug("find unique, query={}, params={}, elapsedTime={}", queryString, params, watch.elapsedTime());
         }
     }
+
 
     protected <X> X getUniqueResult(List<X> results) {
         if (results.isEmpty()) return null;

@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +38,18 @@ public class BookTest extends SpringTestWithDB {
         request.setNeedCount(true);
         QueryResponse<Book> response = bookService.search(request);
         Assert.assertTrue(response.getTotalRecords() == 3);
+    }
+
+    @Test
+    @DatabaseSetup("/BookData.xml")
+    public void testUnique() {
+        QueryRequest request = new QueryRequest();
+        request.setNeedCount(true);
+        Book book1 = bookService.findUnique("from Book where id = :id", Collections.<String, Object>singletonMap("id", 1));
+        Book book2 = bookService.findUnique("from Book where id = 1");
+        Assert.assertEquals(book1.getId(), book2.getId());
+        Assert.assertEquals(book1.getName(), "book2");
+        Assert.assertEquals(book2.getName(), "book2");
     }
 
     @Test

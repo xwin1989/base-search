@@ -29,6 +29,13 @@ public class BookService {
         return repository.search(request);
     }
 
+    public Book findUnique(String hql, Map<String, Object> params) {
+        return repository.findUnique(hql, params);
+    }
+
+    public Book findUnique(String hql) {
+        return repository.findUnique(hql);
+    }
 
     public QueryResponse<Book> search(QueryGroup queryGroup) {
         return repository.search(queryGroup);
