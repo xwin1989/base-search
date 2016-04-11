@@ -34,9 +34,9 @@ public class BookService {
         return repository.search(queryGroup);
     }
 
-    public List<Book> findAll() {
+    public List<Book> queryAll() {
         String sql = "select * from book";
-        return repository.findByNativeQuery(sql);
+        return repository.query(sql);
     }
 
     public List<Book> findAll2() {
@@ -45,7 +45,7 @@ public class BookService {
 
     public Integer count() {
         String sql = "select count(1) from book";
-        BigInteger total = repository.findUniqueNativeQuery(sql);
+        BigInteger total = repository.queryForObject(sql, BigInteger.class);
         return total.intValue();
     }
 
@@ -58,11 +58,11 @@ public class BookService {
     }
 
     public Integer getTypeById(Integer id) {
-        Book book = repository.findUniqueNativeQuery("select * from book where id = :id", Collections.<String, Object>singletonMap("id", id), Book.class);
+        Book book = repository.queryUnique("select * from book where id = :id", Collections.<String, Object>singletonMap("id", id), Book.class);
         String sql = "select type from book where id = :id";
-        List<Integer> list = repository.findByNativeQuery(sql, Collections.<String, Object>singletonMap("id", book.getId()));
-        if (!list.isEmpty()) {
-            Integer type = repository.findUniqueNativeQuery("select type from book where id = :id", Collections.<String, Object>singletonMap("id", id));
+        Integer type = repository.queryForObject(sql, Collections.<String, Object>singletonMap("id", book.getId()), Integer.class);
+        if (type != null) {
+            type = repository.queryForObject("select type from book where id = :id", Collections.<String, Object>singletonMap("id", id), Integer.class);
             return type;
         }
         return null;
@@ -77,12 +77,12 @@ public class BookService {
         Map<String, Object> params = new HashMap<>();
         params.put("id", bookId);
         params.put("status", status);
-        return repository.updateNaive("update book set status = :status where id = :id", params);
+        return repository.updateNative("update book set status = :status where id = :id", params);
     }
 
     @Transactional
     public int updateAllBookStatus(Integer status) {
-        return repository.updateNaive("update book set status = :status", Collections.<String, Object>singletonMap("status", status));
+        return repository.updateNative("update book set status = :status", Collections.<String, Object>singletonMap("status", status));
     }
 
     @Transactional

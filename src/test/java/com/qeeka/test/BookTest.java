@@ -180,12 +180,12 @@ public class BookTest extends SpringTestWithDB {
     @Test
     @DatabaseSetup("/BookData.xml")
     public void testNativeQuery() {
-        List<Book> all = bookService.findAll();
+        List<Book> all1 = bookService.queryAll();
         List<Book> all2 = bookService.findAll2();
-        Assert.assertEquals(all.size(), all2.size());
+        Assert.assertEquals(all1.size(), all2.size());
         Integer total = bookService.count();
         Integer typeById = bookService.getTypeById(1);
-        Assert.assertTrue(all.size() == 3);
+        Assert.assertTrue(all1.size() == 3);
         Assert.assertTrue(total == 3);
         Assert.assertTrue(typeById == 2);
     }
