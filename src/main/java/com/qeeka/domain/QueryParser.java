@@ -89,7 +89,7 @@ public class QueryParser {
                 orderStatement.append("ISNULL(").append(order.getProperty()).append(") ").append(order.getDirection().getValue()).append(',');
             } else if (order.getDirection().equals(Direction.ASC_FIELD)) {
                 orderStatement.append("FIELD(").append(order.getProperty()).append(") ASC,");
-            }else if (order.getDirection().equals(Direction.DESC_FIELD)) {
+            } else if (order.getDirection().equals(Direction.DESC_FIELD)) {
                 orderStatement.append("FIELD(").append(order.getProperty()).append(") DESC,");
             } else {
                 orderStatement.append(order.getProperty()).append(' ').append(order.getDirection().getValue()).append(',');
