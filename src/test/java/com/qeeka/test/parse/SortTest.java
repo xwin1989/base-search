@@ -54,12 +54,12 @@ public class SortTest {
     public void sortField() {
         List<Sort.Order> orders = new ArrayList<>();
         orders.add(new Sort.Order(Direction.ASC, "id"));
-        orders.add(new Sort.Order(Direction.FIELD, "userId,1,2,3,4"));
+        orders.add(new Sort.Order(Direction.ASC_FIELD, "userId,1,2,3,4"));
         orders.add(new Sort.Order(Direction.DESC, "updateTime"));
         Assert.assertEquals(queryParser.parse(new QueryGroup().sort(orders)).getOrderStatement(),
-                "id ASC,FIELD(userId,1,2,3,4),updateTime DESC");
-        Assert.assertEquals(queryParser.parse(new QueryGroup().sort(Direction.FIELD, "id,1,2,3,4")).getOrderStatement(),
-                "FIELD(id,1,2,3,4)");
+                "id ASC,FIELD(userId,1,2,3,4) ASC,updateTime DESC");
+        Assert.assertEquals(queryParser.parse(new QueryGroup().sort(Direction.DESC_FIELD, "id,1,2,3,4")).getOrderStatement(),
+                "FIELD(id,1,2,3,4) DESC");
     }
 
 }
