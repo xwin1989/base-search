@@ -1,7 +1,7 @@
 package com.qeeka.operate;
 
 public enum Direction {
-    ASC("ASC"), DESC("DESC"), ASC_NULL("ASC"), DESC_NULL("DESC");
+    ASC("ASC"), DESC("DESC"), ASC_NULL("ASC"), DESC_NULL("DESC"), FIELD("FIELD");
     private String value;
 
     Direction(String value) {

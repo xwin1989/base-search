@@ -49,4 +49,17 @@ public class SortTest {
         Assert.assertEquals(queryParser.parse(new QueryGroup().sort(orders)).getOrderStatement(),
                 "a ASC,b DESC,ISNULL(c) ASC,ISNULL(d) DESC");
     }
+
+    @Test
+    public void sortField() {
+        List<Sort.Order> orders = new ArrayList<>();
+        orders.add(new Sort.Order(Direction.ASC, "id"));
+        orders.add(new Sort.Order(Direction.FIELD, "userId,1,2,3,4"));
+        orders.add(new Sort.Order(Direction.DESC, "updateTime"));
+        Assert.assertEquals(queryParser.parse(new QueryGroup().sort(orders)).getOrderStatement(),
+                "id ASC,FIELD(userId,1,2,3,4),updateTime DESC");
+        Assert.assertEquals(queryParser.parse(new QueryGroup().sort(Direction.FIELD, "id,1,2,3,4")).getOrderStatement(),
+                "FIELD(id,1,2,3,4)");
+    }
+
 }

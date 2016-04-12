@@ -93,6 +93,22 @@ public class QueryGroup {
     }
 
     /**
+     * Sort by column names
+     *
+     * @param direction
+     * @param columnNames
+     * @return
+     */
+    public QueryGroup sort(Direction direction, List<String> columnNames) {
+        this.sort = new Sort(direction, columnNames);
+        return this;
+    }
+
+    /**
+     *
+     */
+
+    /**
      * add node by parameters
      *
      * @param columnName column name

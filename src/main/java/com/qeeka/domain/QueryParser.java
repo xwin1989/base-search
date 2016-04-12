@@ -87,6 +87,8 @@ public class QueryParser {
         for (Sort.Order order : sort) {
             if (order.getDirection().equals(Direction.ASC_NULL) || order.getDirection().equals(Direction.DESC_NULL)) {
                 orderStatement.append("ISNULL(").append(order.getProperty()).append(") ").append(order.getDirection().getValue()).append(',');
+            } else if (order.getDirection().equals(Direction.FIELD)) {
+                orderStatement.append("FIELD(").append(order.getProperty()).append("),");
             } else {
                 orderStatement.append(order.getProperty()).append(' ').append(order.getDirection().getValue()).append(',');
             }
