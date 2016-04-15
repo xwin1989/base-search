@@ -87,6 +87,10 @@ public class QueryParser {
         for (Sort.Order order : sort) {
             if (order.getDirection().equals(Direction.ASC_NULL) || order.getDirection().equals(Direction.DESC_NULL)) {
                 orderStatement.append("ISNULL(").append(order.getProperty()).append(") ").append(order.getDirection().getValue()).append(',');
+            } else if (order.getDirection().equals(Direction.ASC_FIELD)) {
+                orderStatement.append("FIELD(").append(order.getProperty()).append(") ASC,");
+            } else if (order.getDirection().equals(Direction.DESC_FIELD)) {
+                orderStatement.append("FIELD(").append(order.getProperty()).append(") DESC,");
             } else {
                 orderStatement.append(order.getProperty()).append(' ').append(order.getDirection().getValue()).append(',');
             }

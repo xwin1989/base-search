@@ -2,6 +2,7 @@ package com.qeeka.domain;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.qeeka.deserializer.QueryGroupJsonDeserializer;
+import com.qeeka.operate.Direction;
 import com.qeeka.operate.QueryLinkOperate;
 import com.qeeka.operate.QueryOperate;
 import com.qeeka.operate.Sort;
@@ -67,6 +68,45 @@ public class QueryGroup {
         this.sort = sort;
         return this;
     }
+
+    /**
+     * Sort by orders
+     *
+     * @param orders
+     * @return
+     */
+    public QueryGroup sort(List<Sort.Order> orders) {
+        this.sort = new Sort(orders);
+        return this;
+    }
+
+    /**
+     * Sort by direction & column name
+     *
+     * @param direction
+     * @param columnNames
+     * @return
+     */
+    public QueryGroup sort(Direction direction, String... columnNames) {
+        this.sort = new Sort(direction, columnNames);
+        return this;
+    }
+
+    /**
+     * Sort by column names
+     *
+     * @param direction
+     * @param columnNames
+     * @return
+     */
+    public QueryGroup sort(Direction direction, List<String> columnNames) {
+        this.sort = new Sort(direction, columnNames);
+        return this;
+    }
+
+    /**
+     *
+     */
 
     /**
      * add node by parameters
