@@ -73,8 +73,9 @@ public class CompanyTest extends SpringTestWithDB {
     @Transactional
     @DatabaseSetup("/CompanyData.xml")
     public void testQuery() {
-        CompanyInfo company = companyService.queryUnique("select * from company_info where id = :id", Collections.<String, Object>singletonMap("id", 1), CompanyInfo.class);
-        Assert.assertEquals(company.getFirstName(), "neal");
+        CompanyInfo company = companyService.queryUnique("select id,first_name as firstColumn ,lastName from company_info where id = :id", Collections.<String, Object>singletonMap("id", 1), CompanyInfo.class);
+        Assert.assertEquals(company.getFirstColumn(), "neal");
+        Assert.assertNull(company.getFirstName());
         Assert.assertEquals(company.getLastName(), "xu");
         Assert.assertNotNull(companyService.queryUnique("select * from company where id = 1"));
     }

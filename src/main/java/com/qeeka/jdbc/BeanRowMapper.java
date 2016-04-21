@@ -48,7 +48,7 @@ public final class BeanRowMapper<T> implements RowMapper<T> {
         ResultSetMetaData meta = resultSet.getMetaData();
         int count = meta.getColumnCount();
         for (int i = 1; i < count + 1; i++) {
-            String column = meta.getColumnName(i);
+            String column = meta.getColumnLabel(i);
             Field field = columnMappings.get(column.toLowerCase());
             if (field != null) {
                 resultSetFieldMappings.put(i, field);

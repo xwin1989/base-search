@@ -14,6 +14,16 @@ public class CompanyInfo {
     @Transient
     public String lastName;
 
+    public String firstColumn;
+
+    public String getFirstColumn() {
+        return firstColumn;
+    }
+
+    public void setFirstColumn(String firstColumn) {
+        this.firstColumn = firstColumn;
+    }
+
     public String getLastName() {
         return lastName;
     }
