@@ -4,7 +4,6 @@ import com.qeeka.jdbc.BeanRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-import javax.persistence.Query;
 import javax.sql.DataSource;
 import java.util.List;
 import java.util.Map;
@@ -249,16 +248,10 @@ public abstract class BaseJdbcRepository<T> extends BaseSearchRepository<T> {
         StopWatch watch = new StopWatch();
         int size = 0;
         try {
-            Query nativeQuery = entityManager.createNativeQuery(sql.toString());
-            if (params != null) {
-                for (Map.Entry<String, Object> entry : params.entrySet()) {
-                    nativeQuery.setParameter(entry.getKey(), entry.getValue());
-                }
-            }
-            size = nativeQuery.executeUpdate();
+            size = jdbcTemplate.update(sql.toString(), params);
             return size;
         } finally {
-            logger.debug("nativeQuery, query={}, params={}, updateSize={}, elapsedTime={}", sql, params, size, watch.elapsedTime());
+            logger.debug("native update, query={}, params={}, updateSize={}, elapsedTime={}", sql, params, size, watch.elapsedTime());
         }
     }
 
