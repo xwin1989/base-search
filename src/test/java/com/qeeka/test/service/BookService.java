@@ -89,7 +89,12 @@ public class BookService {
 
     @Transactional
     public int updateAllBookStatus(Integer status) {
-        return repository.updateNative("update book set status = :status", Collections.<String, Object>singletonMap("status", status));
+        return repository.update("update Book set status = :status,userId=1", Collections.<String, Object>singletonMap("status", status));
+    }
+
+    @Transactional
+    public int updateNativeAllBookStatus(Integer status) {
+        return repository.updateNative("update book set status = :status,user_id=2", Collections.<String, Object>singletonMap("status", status));
     }
 
     @Transactional
