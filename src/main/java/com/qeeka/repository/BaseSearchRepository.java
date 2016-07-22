@@ -600,6 +600,7 @@ public abstract class BaseSearchRepository<T> {
                     query.setParameter(entry.getKey(), entry.getValue());
                 }
             }
+            query.setMaxResults(1);
             List<X> results = query.getResultList();
             return getUniqueResult(results);
         } finally {
