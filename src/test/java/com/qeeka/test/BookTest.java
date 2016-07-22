@@ -45,7 +45,7 @@ public class BookTest extends SpringTestWithDB {
     public void testUnique() {
         QueryRequest request = new QueryRequest();
         request.setNeedCount(true);
-        Book book1 = bookService.findUnique("from Book where id = :id", Collections.<String, Object>singletonMap("id", 1));
+        Book book1 = bookService.findUnique("from Book where id > :id order by id", Collections.<String, Object>singletonMap("id", 0));
         Book book2 = bookService.findUnique("from Book where id = 1");
         Assert.assertEquals(book1.getId(), book2.getId());
         Assert.assertEquals(book1.getName(), "book2");
