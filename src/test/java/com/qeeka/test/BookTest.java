@@ -198,9 +198,11 @@ public class BookTest extends SpringTestWithDB {
         Assert.assertEquals(all1.size(), all2.size());
         Integer total = bookService.count();
         Integer typeById = bookService.getTypeById(1);
+        Long count = bookService.countByUnique();
         Assert.assertTrue(all1.size() == 3);
         Assert.assertTrue(total == 3);
         Assert.assertTrue(typeById == 2);
+        Assert.assertTrue(count == 3);
     }
 
     @Test

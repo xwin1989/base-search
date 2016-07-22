@@ -64,6 +64,11 @@ public class BookService {
         return repository.count();
     }
 
+    public Long countByUnique() {
+        String hql = "select count(B) from Book B";
+        return repository.findUnique(hql);
+    }
+
     public Integer getTypeById(Integer id) {
         Book book = repository.queryUnique("select * from book where id = :id", Collections.<String, Object>singletonMap("id", id), Book.class);
         String sql = "select type from book where id = :id";
