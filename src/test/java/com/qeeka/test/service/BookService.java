@@ -46,6 +46,10 @@ public class BookService {
         return repository.query(sql);
     }
 
+    public List<Book> findAll() {
+        return repository.find("from Book");
+    }
+
     public List<Book> findAll2() {
         return repository.search().getRecords();
     }
@@ -82,6 +86,14 @@ public class BookService {
 
     public void testLog() {
         repository.testLog();
+    }
+
+    public List<Object[]> findGroup() {
+        return repository.find("select status,COUNT(ID) from Book group by status");
+    }
+
+    public Map<String, Object> queryGroup() {
+        return repository.queryForMap("select status,count(id) as c1 from book group by status");
     }
 
     @Transactional

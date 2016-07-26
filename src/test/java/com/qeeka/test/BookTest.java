@@ -192,10 +192,12 @@ public class BookTest extends SpringTestWithDB {
 
     @Test
     @DatabaseSetup("/BookData.xml")
-    public void testNativeQuery() {
+    public void testQuery() {
         List<Book> all1 = bookService.queryAll();
-        List<Book> all2 = bookService.findAll2();
+        List<Book> all2 = bookService.findAll();
+        List<Book> all3 = bookService.findAll2();
         Assert.assertEquals(all1.size(), all2.size());
+        Assert.assertEquals(all1.size(), all3.size());
         Integer total = bookService.count();
         Integer typeById = bookService.getTypeById(1);
         Long count = bookService.countByUnique();
@@ -203,6 +205,15 @@ public class BookTest extends SpringTestWithDB {
         Assert.assertTrue(total == 3);
         Assert.assertTrue(typeById == 2);
         Assert.assertTrue(count == 3);
+    }
+
+    @Test
+    @DatabaseSetup("/BookData.xml")
+    public void testGroup() {
+        Map<String, Object> stringObjectMap = bookService.queryGroup();
+        List<Object[]> objects = bookService.findGroup();
+        Assert.assertTrue(objects.get(0)[0] == stringObjectMap.get("status"));
+        Assert.assertTrue(objects.get(0)[1] == stringObjectMap.get("c1"));
     }
 
     @Test

@@ -443,7 +443,7 @@ public abstract class BaseSearchRepository<T> {
      * @param queryString
      * @return
      */
-    public List<T> find(CharSequence queryString) {
+    public <X> List<X> find(CharSequence queryString) {
         return find(queryString, null, null, null);
     }
 
@@ -454,7 +454,7 @@ public abstract class BaseSearchRepository<T> {
      * @param params
      * @return
      */
-    public List<T> find(CharSequence queryString, Map<String, Object> params) {
+    public <X> List<X> find(CharSequence queryString, Map<String, Object> params) {
         return find(queryString, params, null, null);
     }
 
@@ -466,7 +466,7 @@ public abstract class BaseSearchRepository<T> {
      * @param fetchSize
      * @return
      */
-    public List<T> find(CharSequence queryString, Integer offset, Integer fetchSize) {
+    public <X> List<X> find(CharSequence queryString, Integer offset, Integer fetchSize) {
         return find(queryString, null, offset, fetchSize);
     }
 
@@ -479,7 +479,7 @@ public abstract class BaseSearchRepository<T> {
      * @param fetchSize
      * @return
      */
-    public List<T> find(CharSequence queryString, Map<String, Object> params, Integer offset, Integer fetchSize) {
+    public <X> List<X> find(CharSequence queryString, Map<String, Object> params, Integer offset, Integer fetchSize) {
         StopWatch watch = new StopWatch();
         try {
             Query query = entityManager.createQuery(queryString.toString());
@@ -506,7 +506,7 @@ public abstract class BaseSearchRepository<T> {
      * @param query
      * @return
      */
-    public List<T> find(CriteriaQuery query) {
+    public <X> List<X> find(CriteriaQuery query) {
         return find(query, null, null);
     }
 
@@ -518,10 +518,10 @@ public abstract class BaseSearchRepository<T> {
      * @param fetchSize
      * @return
      */
-    public List<T> find(CriteriaQuery<T> query, Integer offset, Integer fetchSize) {
+    public <X> List<X> find(CriteriaQuery<X> query, Integer offset, Integer fetchSize) {
         StopWatch watch = new StopWatch();
         try {
-            TypedQuery<T> typedQuery = entityManager.createQuery(query);
+            TypedQuery<X> typedQuery = entityManager.createQuery(query);
             if (offset != null) {
                 typedQuery.setFirstResult(offset);
             }
