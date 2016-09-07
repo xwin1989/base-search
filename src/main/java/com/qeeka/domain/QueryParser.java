@@ -152,7 +152,7 @@ public class QueryParser {
         return "";
     }
 
-    public QueryGroup deepQueryGroupCopy(QueryGroup queryGroup) {
+    public static QueryGroup deepQueryGroupCopy(QueryGroup queryGroup) {
         //Copy Node
         if (queryGroup != null) {
             QueryGroup group = new QueryGroup();
