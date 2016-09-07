@@ -3,6 +3,8 @@ package com.qeeka.repository;
 import com.qeeka.jdbc.BeanRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 
 import javax.sql.DataSource;
 import java.util.List;
@@ -251,7 +253,17 @@ public abstract class BaseJdbcRepository<T> extends BaseSearchRepository<T> {
             size = jdbcTemplate.update(sql.toString(), params);
             return size;
         } finally {
-            logger.debug("native update, query={}, params={}, updateSize={}, elapsedTime={}", sql, params, size, watch.elapsedTime());
+            logger.debug("native update, query={}, updateSize={}, elapsedTime={}", sql, size, watch.elapsedTime());
+        }
+    }
+
+    public int[] batchUpdateNative(CharSequence sql, List<T> objects) {
+        StopWatch watch = new StopWatch();
+        SqlParameterSource[] params = SqlParameterSourceUtils.createBatch(objects.toArray());
+        try {
+            return jdbcTemplate.batchUpdate(sql.toString(), params);
+        } finally {
+            logger.debug("native batch update, query={}, updateSize={}, elapsedTime={}", sql, objects.size(), watch.elapsedTime());
         }
     }
 

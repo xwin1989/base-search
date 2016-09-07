@@ -1,7 +1,6 @@
 package com.qeeka.test.service;
 
 import com.qeeka.domain.QueryGroup;
-import com.qeeka.domain.QueryParser;
 import com.qeeka.http.QueryRequest;
 import com.qeeka.http.QueryResponse;
 import com.qeeka.test.domain.Person;
@@ -24,9 +23,6 @@ public class PersonService {
 
     @Autowired
     private PersonRepository repository;
-
-    @Autowired
-    private QueryParser queryParser;
 
 
     public void remove(int personId) {

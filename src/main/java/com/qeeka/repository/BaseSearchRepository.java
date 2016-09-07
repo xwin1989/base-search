@@ -704,6 +704,44 @@ public abstract class BaseSearchRepository<T> {
     }
 
     /**
+     * batch update
+     *
+     * @param entityList
+     */
+    public List<T> batchUpdate(List<T> entityList) {
+        StopWatch watch = new StopWatch();
+        try {
+            for (T t : entityList) {
+                update(t);
+            }
+        } finally {
+            logger.debug("update batch, size={}, elapsedTime={}", entityList.size(), watch.elapsedTime());
+        }
+        entityManager.flush();
+        entityManager.clear();
+        return entityList;
+    }
+
+    /**
+     * batch save
+     *
+     * @param entityList
+     */
+    public List<T> batchSave(List<T> entityList) {
+        StopWatch watch = new StopWatch();
+        try {
+            for (T t : entityList) {
+                save(t);
+            }
+            entityManager.flush();
+            entityManager.clear();
+        } finally {
+            logger.debug("save batch, size={}, elapsedTime={}", entityList.size(), watch.elapsedTime());
+        }
+        return entityList;
+    }
+
+    /**
      * refresh
      *
      * @param entity
