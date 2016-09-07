@@ -541,38 +541,16 @@ public abstract class BaseSearchRepository<T> {
      * @param query
      * @return
      */
-    @Deprecated
-    public <X> X uniqueResult(CriteriaQuery<X> query) {
+    public <X> X findUnique(CriteriaQuery<X> query) {
         StopWatch watch = new StopWatch();
         try {
-            List<X> results = entityManager.createQuery(query).getResultList();
+            TypedQuery<X> typedQuery = entityManager.createQuery(query);
+            typedQuery.setMaxResults(1);
+            List<X> results = typedQuery.getResultList();
             return getUniqueResult(results);
         } finally {
             logger.debug("uniqueResult by CriteriaQuery<T>, elapsedTime={}", watch.elapsedTime());
         }
-    }
-
-    /**
-     * find unique by query string
-     *
-     * @param queryString
-     * @return
-     */
-    @Deprecated
-    public <X> X uniqueResult(CharSequence queryString) {
-        return uniqueResult(queryString, null);
-    }
-
-    /**
-     * find unique by query string & params
-     *
-     * @param queryString
-     * @param params
-     * @return
-     */
-    @Deprecated
-    public <X> X uniqueResult(CharSequence queryString, Map<String, ?> params) {
-        return findUnique(queryString, params);
     }
 
     /**
