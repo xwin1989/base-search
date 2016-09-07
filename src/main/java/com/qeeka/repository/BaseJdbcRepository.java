@@ -3,6 +3,8 @@ package com.qeeka.repository;
 import com.qeeka.jdbc.BeanRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 
 import javax.sql.DataSource;
 import java.util.List;
@@ -38,7 +40,7 @@ public abstract class BaseJdbcRepository<T> extends BaseSearchRepository<T> {
     }
 
 
-    public <X> List<X> query(CharSequence sql, Map<String, Object> params) {
+    public <X> List<X> query(CharSequence sql, Map<String, ?> params) {
         return query(sql, params, null);
     }
 
@@ -50,7 +52,7 @@ public abstract class BaseJdbcRepository<T> extends BaseSearchRepository<T> {
      * @param params
      * @return list
      */
-    public <X> List<X> query(CharSequence sql, Map<String, Object> params, Class<X> clazz) {
+    public <X> List<X> query(CharSequence sql, Map<String, ?> params, Class<X> clazz) {
         StopWatch watch = new StopWatch();
         int returnSize = 0;
         try {
@@ -91,7 +93,7 @@ public abstract class BaseJdbcRepository<T> extends BaseSearchRepository<T> {
      * @param params
      * @return entity class
      */
-    public T queryUnique(CharSequence sql, Map<String, Object> params) {
+    public T queryUnique(CharSequence sql, Map<String, ?> params) {
         return queryUnique(sql, params, entityClass);
     }
 
@@ -104,7 +106,7 @@ public abstract class BaseJdbcRepository<T> extends BaseSearchRepository<T> {
      * @param <X>
      * @return object
      */
-    public <X> X queryUnique(CharSequence sql, Map<String, Object> params, Class<X> resultClass) {
+    public <X> X queryUnique(CharSequence sql, Map<String, ?> params, Class<X> resultClass) {
         StopWatch watch = new StopWatch();
         try {
             List<X> resultList = jdbcTemplate.query(sql.toString(), params, BeanRowMapper.forClass(resultClass));
@@ -130,7 +132,7 @@ public abstract class BaseJdbcRepository<T> extends BaseSearchRepository<T> {
      * @param sql
      * @return
      */
-    public List<Object> queryForList(final CharSequence sql, Map<String, Object> params) {
+    public List<Object> queryForList(final CharSequence sql, Map<String, ?> params) {
         return queryForList(sql, params, Object.class);
     }
 
@@ -157,7 +159,7 @@ public abstract class BaseJdbcRepository<T> extends BaseSearchRepository<T> {
      * @param <X>
      * @return list
      */
-    public <X> List<X> queryForList(final CharSequence sql, Map<String, Object> params, Class<X> clazz) {
+    public <X> List<X> queryForList(final CharSequence sql, Map<String, ?> params, Class<X> clazz) {
         StopWatch watch = new StopWatch();
         try {
             return jdbcTemplate.queryForList(sql.toString(), params, clazz);
@@ -189,7 +191,7 @@ public abstract class BaseJdbcRepository<T> extends BaseSearchRepository<T> {
      * @param <X>
      * @return object
      */
-    public <X> X queryForObject(final CharSequence sql, Map<String, Object> params, Class<X> clazz) {
+    public <X> X queryForObject(final CharSequence sql, Map<String, ?> params, Class<X> clazz) {
         StopWatch watch = new StopWatch();
         try {
             return jdbcTemplate.queryForObject(sql.toString(), params, clazz);
@@ -215,7 +217,7 @@ public abstract class BaseJdbcRepository<T> extends BaseSearchRepository<T> {
      * @param params
      * @return map
      */
-    public Map<String, Object> queryForMap(final CharSequence sql, Map<String, Object> params) {
+    public Map<String, Object> queryForMap(final CharSequence sql, Map<String, ?> params) {
         StopWatch watch = new StopWatch();
         int returnSize = 0;
         try {
@@ -244,14 +246,33 @@ public abstract class BaseJdbcRepository<T> extends BaseSearchRepository<T> {
      * @param params
      * @return
      */
-    public int updateNative(CharSequence sql, Map<String, Object> params) {
+    public int updateNative(CharSequence sql, Map<String, ?> params) {
         StopWatch watch = new StopWatch();
         int size = 0;
         try {
             size = jdbcTemplate.update(sql.toString(), params);
             return size;
         } finally {
-            logger.debug("native update, query={}, params={}, updateSize={}, elapsedTime={}", sql, params, size, watch.elapsedTime());
+            logger.debug("native update, query={}, updateSize={}, elapsedTime={}", sql, size, watch.elapsedTime());
+        }
+    }
+
+    public int[] batchUpdateNative(CharSequence sql, List<?> objects) {
+        StopWatch watch = new StopWatch();
+        SqlParameterSource[] params = SqlParameterSourceUtils.createBatch(objects.toArray());
+        try {
+            return jdbcTemplate.batchUpdate(sql.toString(), params);
+        } finally {
+            logger.debug("native batch update, query={}, updateSize={}, elapsedTime={}", sql, objects.size(), watch.elapsedTime());
+        }
+    }
+
+    public int[] batchUpdateNative(CharSequence sql, Map<String, ?>[] batchValues) {
+        StopWatch watch = new StopWatch();
+        try {
+            return jdbcTemplate.batchUpdate(sql.toString(), batchValues);
+        } finally {
+            logger.debug("native batch update, query={}, updateSize={}, elapsedTime={}", sql, batchValues.length, watch.elapsedTime());
         }
     }
 

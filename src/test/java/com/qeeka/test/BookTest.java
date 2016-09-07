@@ -322,6 +322,80 @@ public class BookTest extends SpringTestWithDB {
         Assert.assertEquals(countAll.intValue(), 3);
     }
 
+//    @Test
+//    @Transactional
+//    public void testBatchSave() {
+//        List<Book> books = bookService.batchSave();
+//        for (int i = 1; i < 5; i++) {
+//            Book book = books.get(i - 1);
+//            Assert.assertEquals(book.getName(), "book" + i);
+//            Assert.assertEquals(book.getId(), Integer.valueOf(i));
+//            book.setName("new book" + i);
+//        }
+//        books = bookService.batchUpdate(books);
+//        for (int i = 1; i < 5; i++) {
+//            Book book = books.get(i - 1);
+//            Assert.assertEquals(book.getName(), "new book" + i);
+//            Assert.assertEquals(book.getId(), Integer.valueOf(i));
+//        }
+//    }
+//
+//    @Test
+//    @Transactional
+//    public void testBatchNativeUpdate() {
+//        List<Book> books = new ArrayList<>();
+//        for (int i = 0; i < 100; i++) {
+//            Book book = new Book();
+//            book.setName("book" + i);
+//            books.add(book);
+//        }
+//        bookService.batchNativeUpdate("insert into book(name) values(:name)", books);
+//        Assert.assertEquals(bookService.count(), Integer.valueOf(100));
+//
+//        bookService.batchNativeUpdate("insert into book(name) values(:name)", books);
+//        Assert.assertEquals(bookService.count(), Integer.valueOf(200));
+//    }
+//
+//    @Test
+//    @DatabaseSetup("/BookData.xml")
+//    @Transactional
+//    public void testBatchNativeUpdate2() {
+//        List<Book> bookList = new ArrayList<>(10);
+//        for (int i = 0; i < 2; i++) {
+//            Book book1 = new Book();
+//            book1.setId(i);
+//            book1.setName("new book" + i);
+//            book1.setUserId(i);
+//            bookList.add(book1);
+//        }
+//        bookService.batchNativeUpdate("update book set name=:name,user_id=:userId where id = :id", bookList);
+//        Book book = bookService.getBook(0);
+//        Assert.assertEquals(book.getName(), "new book0");
+//        Assert.assertEquals(book.getType(), Integer.valueOf(1));
+//        Assert.assertEquals(book.getStatus(), Integer.valueOf(1));
+//        Assert.assertEquals(book.getUserId(), Integer.valueOf(0));
+//    }
+//
+//    @Test
+//    @DatabaseSetup("/BookData.xml")
+//    @Transactional
+//    public void testBatchNativeUpdate3() {
+//        Map<String, Object>[] values = new HashMap[2];
+//        for (int i = 0; i < 2; i++) {
+//            Map<String, Object> map = new HashMap<>();
+//            map.put("name", "map book" + i);
+//            map.put("id", i);
+//            map.put("userId", i);
+//            values[i] = map;
+//        }
+//        bookService.batchNativeUpdate("update book set name=:name,user_id=:userId where id = :id", values);
+//        Book book = bookService.getBook(0);
+//        Assert.assertEquals(book.getName(), "map book0");
+//        Assert.assertEquals(book.getType(), Integer.valueOf(1));
+//        Assert.assertEquals(book.getStatus(), Integer.valueOf(1));
+//        Assert.assertEquals(book.getUserId(), Integer.valueOf(0));
+//    }
+
     @Test
     public void testLog() {
         bookService.testLog();

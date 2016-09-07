@@ -13,14 +13,13 @@ import java.util.Stack;
 public class QueryParser {
 
     public QueryModel parse(QueryGroup queryGroup) {
-        QueryGroup group = deepQueryGroupCopy(queryGroup);
         QueryModel queryModel = new QueryModel();
-        if (group == null) {
+        if (queryGroup == null) {
             return queryModel;
         }
-        List<QueryHandle> queryHandleList = group.getQueryHandleList();
+        List<QueryHandle> queryHandleList = queryGroup.getQueryHandleList();
         //Set order statement
-        String orderStatement = generateOrderStatement(group.getSort());
+        String orderStatement = generateOrderStatement(queryGroup.getSort());
         queryModel.setOrderStatement(orderStatement);
 
 
@@ -153,7 +152,7 @@ public class QueryParser {
         return "";
     }
 
-    private QueryGroup deepQueryGroupCopy(QueryGroup queryGroup) {
+    public static QueryGroup deepQueryGroupCopy(QueryGroup queryGroup) {
         //Copy Node
         if (queryGroup != null) {
             QueryGroup group = new QueryGroup();

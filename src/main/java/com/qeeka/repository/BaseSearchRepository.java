@@ -20,6 +20,7 @@ import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
@@ -190,7 +191,7 @@ public abstract class BaseSearchRepository<T> {
         QueryResponse<T> queryResponse = new QueryResponse<>();
 
         TypedQuery<T> recordQuery = entityManager.createQuery(hql.toString(), entityClass);
-        for (Map.Entry<String, Object> entry : query.getParameters().entrySet()) {
+        for (Map.Entry<String, ?> entry : query.getParameters().entrySet()) {
             recordQuery.setParameter(entry.getKey(), entry.getValue());
         }
         recordQuery.setMaxResults(1);
@@ -218,7 +219,7 @@ public abstract class BaseSearchRepository<T> {
         //Query record
         if (queryRequest.isNeedRecord()) {
             TypedQuery<T> recordQuery = entityManager.createQuery(hql.toString(), entityClass);
-            for (Map.Entry<String, Object> entry : query.getParameters().entrySet()) {
+            for (Map.Entry<String, ?> entry : query.getParameters().entrySet()) {
                 recordQuery.setParameter(entry.getKey(), entry.getValue());
             }
             //Page search , need page index and size
@@ -264,7 +265,7 @@ public abstract class BaseSearchRepository<T> {
                 countHql.append(" WHERE ").append(query.getStatement());
             }
             TypedQuery<Long> countQuery = entityManager.createQuery(countHql.toString(), Long.class);
-            for (Map.Entry<String, Object> entry : query.getParameters().entrySet()) {
+            for (Map.Entry<String, ?> entry : query.getParameters().entrySet()) {
                 countQuery.setParameter(entry.getKey(), entry.getValue());
             }
             Long total = countQuery.getSingleResult();
@@ -306,7 +307,7 @@ public abstract class BaseSearchRepository<T> {
             countHql.append(" WHERE ").append(query.getStatement());
         }
         TypedQuery<Long> countQuery = entityManager.createQuery(countHql.toString(), Long.class);
-        for (Map.Entry<String, Object> entry : query.getParameters().entrySet()) {
+        for (Map.Entry<String, ?> entry : query.getParameters().entrySet()) {
             countQuery.setParameter(entry.getKey(), entry.getValue());
         }
         return countQuery.getSingleResult();
@@ -394,12 +395,12 @@ public abstract class BaseSearchRepository<T> {
      * @param params
      * @return
      */
-    public int update(CharSequence queryString, Map<String, Object> params) {
+    public int update(CharSequence queryString, Map<String, ?> params) {
         StopWatch watch = new StopWatch();
         try {
             Query query = entityManager.createQuery(queryString.toString());
             if (params != null)
-                for (Map.Entry<String, Object> entry : params.entrySet()) {
+                for (Map.Entry<String, ?> entry : params.entrySet()) {
                     query.setParameter(entry.getKey(), entry.getValue());
                 }
             return query.executeUpdate();
@@ -454,7 +455,7 @@ public abstract class BaseSearchRepository<T> {
      * @param params
      * @return
      */
-    public <X> List<X> find(CharSequence queryString, Map<String, Object> params) {
+    public <X> List<X> find(CharSequence queryString, Map<String, ?> params) {
         return find(queryString, params, null, null);
     }
 
@@ -479,12 +480,12 @@ public abstract class BaseSearchRepository<T> {
      * @param fetchSize
      * @return
      */
-    public <X> List<X> find(CharSequence queryString, Map<String, Object> params, Integer offset, Integer fetchSize) {
+    public <X> List<X> find(CharSequence queryString, Map<String, ?> params, Integer offset, Integer fetchSize) {
         StopWatch watch = new StopWatch();
         try {
             Query query = entityManager.createQuery(queryString.toString());
             if (params != null) {
-                for (Map.Entry<String, Object> entry : params.entrySet()) {
+                for (Map.Entry<String, ?> entry : params.entrySet()) {
                     query.setParameter(entry.getKey(), entry.getValue());
                 }
             }
@@ -540,38 +541,16 @@ public abstract class BaseSearchRepository<T> {
      * @param query
      * @return
      */
-    @Deprecated
-    public <X> X uniqueResult(CriteriaQuery<X> query) {
+    public <X> X findUnique(CriteriaQuery<X> query) {
         StopWatch watch = new StopWatch();
         try {
-            List<X> results = entityManager.createQuery(query).getResultList();
+            TypedQuery<X> typedQuery = entityManager.createQuery(query);
+            typedQuery.setMaxResults(1);
+            List<X> results = typedQuery.getResultList();
             return getUniqueResult(results);
         } finally {
             logger.debug("uniqueResult by CriteriaQuery<T>, elapsedTime={}", watch.elapsedTime());
         }
-    }
-
-    /**
-     * find unique by query string
-     *
-     * @param queryString
-     * @return
-     */
-    @Deprecated
-    public <X> X uniqueResult(CharSequence queryString) {
-        return uniqueResult(queryString, null);
-    }
-
-    /**
-     * find unique by query string & params
-     *
-     * @param queryString
-     * @param params
-     * @return
-     */
-    @Deprecated
-    public <X> X uniqueResult(CharSequence queryString, Map<String, Object> params) {
-        return findUnique(queryString, params);
     }
 
     /**
@@ -591,12 +570,12 @@ public abstract class BaseSearchRepository<T> {
      * @param params
      * @return
      */
-    public <X> X findUnique(CharSequence queryString, Map<String, Object> params) {
+    public <X> X findUnique(CharSequence queryString, Map<String, ?> params) {
         StopWatch watch = new StopWatch();
         try {
             Query query = entityManager.createQuery(queryString.toString());
             if (params != null) {
-                for (Map.Entry<String, Object> entry : params.entrySet()) {
+                for (Map.Entry<String, ?> entry : params.entrySet()) {
                     query.setParameter(entry.getKey(), entry.getValue());
                 }
             }
@@ -634,7 +613,7 @@ public abstract class BaseSearchRepository<T> {
      * @param params
      * @return a map
      */
-    public Map<Object, T> findToMap(CharSequence queryString, Map<String, Object> params) {
+    public Map<Object, T> findToMap(CharSequence queryString, Map<String, ?> params) {
         return findToMap(queryString, params, null, null);
     }
 
@@ -659,7 +638,7 @@ public abstract class BaseSearchRepository<T> {
      * @param fetchSize
      * @return a map
      */
-    public Map<Object, T> findToMap(CharSequence queryString, Map<String, Object> params, Integer offset, Integer fetchSize) {
+    public Map<Object, T> findToMap(CharSequence queryString, Map<String, ?> params, Integer offset, Integer fetchSize) {
         List<T> results = find(queryString, params, offset, fetchSize);
         return getObjectMap(results);
     }
@@ -701,6 +680,48 @@ public abstract class BaseSearchRepository<T> {
             }
         }
         return recordMap;
+    }
+
+    /**
+     * batch update
+     *
+     * @param entityList
+     */
+    public List<T> batchUpdate(List<T> entityList) {
+        StopWatch watch = new StopWatch();
+        try {
+            for (T t : entityList) {
+                update(t);
+            }
+        } finally {
+            logger.debug("update batch, size={}, elapsedTime={}", entityList.size(), watch.elapsedTime());
+        }
+        entityManager.flush();
+        entityManager.clear();
+        return entityList;
+    }
+
+    /**
+     * batch save
+     *
+     * @param entityList
+     */
+    public List<T> batchSave(List<T> entityList) {
+        StopWatch watch = new StopWatch();
+        try {
+            for (T t : entityList) {
+                save(t);
+            }
+            entityManager.flush();
+            entityManager.clear();
+        } finally {
+            logger.debug("save batch, size={}, elapsedTime={}", entityList.size(), watch.elapsedTime());
+        }
+        return entityList;
+    }
+
+    public CriteriaBuilder criteriaBuilder() {
+        return entityManager.getCriteriaBuilder();
     }
 
     /**

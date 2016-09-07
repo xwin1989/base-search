@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -132,4 +133,31 @@ public class BookService {
     public void delete(Integer id) {
         repository.deleteById(id);
     }
+
+    @Transactional
+    public List<Book> batchSave() {
+        List<Book> books = new ArrayList<>();
+        for (int i = 1; i < 501; i++) {
+            Book book = new Book();
+            book.setName("book" + i);
+            books.add(book);
+        }
+        return repository.batchSave(books);
+    }
+
+    @Transactional
+    public List<Book> batchUpdate(List<Book> books) {
+        return repository.batchUpdate(books);
+    }
+
+    @Transactional
+    public int[] batchNativeUpdate(String sql, List<Book> books) {
+        return repository.batchUpdateNative(sql, books);
+    }
+
+    @Transactional
+    public int[] batchNativeUpdate(String sql, Map<String, ?>[] batchValues) {
+        return repository.batchUpdateNative(sql, batchValues);
+    }
+
 }
