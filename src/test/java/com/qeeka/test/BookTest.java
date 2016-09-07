@@ -375,6 +375,26 @@ public class BookTest extends SpringTestWithDB {
 //        Assert.assertEquals(book.getStatus(), Integer.valueOf(1));
 //        Assert.assertEquals(book.getUserId(), Integer.valueOf(0));
 //    }
+//
+//    @Test
+//    @DatabaseSetup("/BookData.xml")
+//    @Transactional
+//    public void testBatchNativeUpdate3() {
+//        Map<String, Object>[] values = new HashMap[2];
+//        for (int i = 0; i < 2; i++) {
+//            Map<String, Object> map = new HashMap<>();
+//            map.put("name", "map book" + i);
+//            map.put("id", i);
+//            map.put("userId", i);
+//            values[i] = map;
+//        }
+//        bookService.batchNativeUpdate("update book set name=:name,user_id=:userId where id = :id", values);
+//        Book book = bookService.getBook(0);
+//        Assert.assertEquals(book.getName(), "map book0");
+//        Assert.assertEquals(book.getType(), Integer.valueOf(1));
+//        Assert.assertEquals(book.getStatus(), Integer.valueOf(1));
+//        Assert.assertEquals(book.getUserId(), Integer.valueOf(0));
+//    }
 
     @Test
     public void testLog() {

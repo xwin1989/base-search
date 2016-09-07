@@ -190,7 +190,7 @@ public abstract class BaseSearchRepository<T> {
         QueryResponse<T> queryResponse = new QueryResponse<>();
 
         TypedQuery<T> recordQuery = entityManager.createQuery(hql.toString(), entityClass);
-        for (Map.Entry<String, Object> entry : query.getParameters().entrySet()) {
+        for (Map.Entry<String, ?> entry : query.getParameters().entrySet()) {
             recordQuery.setParameter(entry.getKey(), entry.getValue());
         }
         recordQuery.setMaxResults(1);
@@ -218,7 +218,7 @@ public abstract class BaseSearchRepository<T> {
         //Query record
         if (queryRequest.isNeedRecord()) {
             TypedQuery<T> recordQuery = entityManager.createQuery(hql.toString(), entityClass);
-            for (Map.Entry<String, Object> entry : query.getParameters().entrySet()) {
+            for (Map.Entry<String, ?> entry : query.getParameters().entrySet()) {
                 recordQuery.setParameter(entry.getKey(), entry.getValue());
             }
             //Page search , need page index and size
@@ -264,7 +264,7 @@ public abstract class BaseSearchRepository<T> {
                 countHql.append(" WHERE ").append(query.getStatement());
             }
             TypedQuery<Long> countQuery = entityManager.createQuery(countHql.toString(), Long.class);
-            for (Map.Entry<String, Object> entry : query.getParameters().entrySet()) {
+            for (Map.Entry<String, ?> entry : query.getParameters().entrySet()) {
                 countQuery.setParameter(entry.getKey(), entry.getValue());
             }
             Long total = countQuery.getSingleResult();
@@ -306,7 +306,7 @@ public abstract class BaseSearchRepository<T> {
             countHql.append(" WHERE ").append(query.getStatement());
         }
         TypedQuery<Long> countQuery = entityManager.createQuery(countHql.toString(), Long.class);
-        for (Map.Entry<String, Object> entry : query.getParameters().entrySet()) {
+        for (Map.Entry<String, ?> entry : query.getParameters().entrySet()) {
             countQuery.setParameter(entry.getKey(), entry.getValue());
         }
         return countQuery.getSingleResult();
@@ -394,12 +394,12 @@ public abstract class BaseSearchRepository<T> {
      * @param params
      * @return
      */
-    public int update(CharSequence queryString, Map<String, Object> params) {
+    public int update(CharSequence queryString, Map<String, ?> params) {
         StopWatch watch = new StopWatch();
         try {
             Query query = entityManager.createQuery(queryString.toString());
             if (params != null)
-                for (Map.Entry<String, Object> entry : params.entrySet()) {
+                for (Map.Entry<String, ?> entry : params.entrySet()) {
                     query.setParameter(entry.getKey(), entry.getValue());
                 }
             return query.executeUpdate();
@@ -454,7 +454,7 @@ public abstract class BaseSearchRepository<T> {
      * @param params
      * @return
      */
-    public <X> List<X> find(CharSequence queryString, Map<String, Object> params) {
+    public <X> List<X> find(CharSequence queryString, Map<String, ?> params) {
         return find(queryString, params, null, null);
     }
 
@@ -479,12 +479,12 @@ public abstract class BaseSearchRepository<T> {
      * @param fetchSize
      * @return
      */
-    public <X> List<X> find(CharSequence queryString, Map<String, Object> params, Integer offset, Integer fetchSize) {
+    public <X> List<X> find(CharSequence queryString, Map<String, ?> params, Integer offset, Integer fetchSize) {
         StopWatch watch = new StopWatch();
         try {
             Query query = entityManager.createQuery(queryString.toString());
             if (params != null) {
-                for (Map.Entry<String, Object> entry : params.entrySet()) {
+                for (Map.Entry<String, ?> entry : params.entrySet()) {
                     query.setParameter(entry.getKey(), entry.getValue());
                 }
             }
@@ -570,7 +570,7 @@ public abstract class BaseSearchRepository<T> {
      * @return
      */
     @Deprecated
-    public <X> X uniqueResult(CharSequence queryString, Map<String, Object> params) {
+    public <X> X uniqueResult(CharSequence queryString, Map<String, ?> params) {
         return findUnique(queryString, params);
     }
 
@@ -591,12 +591,12 @@ public abstract class BaseSearchRepository<T> {
      * @param params
      * @return
      */
-    public <X> X findUnique(CharSequence queryString, Map<String, Object> params) {
+    public <X> X findUnique(CharSequence queryString, Map<String, ?> params) {
         StopWatch watch = new StopWatch();
         try {
             Query query = entityManager.createQuery(queryString.toString());
             if (params != null) {
-                for (Map.Entry<String, Object> entry : params.entrySet()) {
+                for (Map.Entry<String, ?> entry : params.entrySet()) {
                     query.setParameter(entry.getKey(), entry.getValue());
                 }
             }
@@ -634,7 +634,7 @@ public abstract class BaseSearchRepository<T> {
      * @param params
      * @return a map
      */
-    public Map<Object, T> findToMap(CharSequence queryString, Map<String, Object> params) {
+    public Map<Object, T> findToMap(CharSequence queryString, Map<String, ?> params) {
         return findToMap(queryString, params, null, null);
     }
 
@@ -659,7 +659,7 @@ public abstract class BaseSearchRepository<T> {
      * @param fetchSize
      * @return a map
      */
-    public Map<Object, T> findToMap(CharSequence queryString, Map<String, Object> params, Integer offset, Integer fetchSize) {
+    public Map<Object, T> findToMap(CharSequence queryString, Map<String, ?> params, Integer offset, Integer fetchSize) {
         List<T> results = find(queryString, params, offset, fetchSize);
         return getObjectMap(results);
     }

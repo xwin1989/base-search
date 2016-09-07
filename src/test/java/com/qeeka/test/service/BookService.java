@@ -154,4 +154,10 @@ public class BookService {
     public int[] batchNativeUpdate(String sql, List<Book> books) {
         return repository.batchUpdateNative(sql, books);
     }
+
+    @Transactional
+    public int[] batchNativeUpdate(String sql, Map<String, ?>[] batchValues) {
+        return repository.batchUpdateNative(sql, batchValues);
+    }
+
 }
