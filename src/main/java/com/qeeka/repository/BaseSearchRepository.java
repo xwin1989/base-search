@@ -20,6 +20,7 @@ import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
@@ -739,6 +740,10 @@ public abstract class BaseSearchRepository<T> {
             logger.debug("save batch, size={}, elapsedTime={}", entityList.size(), watch.elapsedTime());
         }
         return entityList;
+    }
+
+    public CriteriaBuilder criteriaBuilder() {
+        return entityManager.getCriteriaBuilder();
     }
 
     /**
