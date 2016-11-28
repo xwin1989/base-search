@@ -100,7 +100,7 @@ public class QueryParser {
         return orderStatement.toString();
     }
 
-    private CharSequence generateParameterHql(QueryHandle handle, Map<String, Object> parameters) {
+    public static CharSequence generateParameterHql(QueryHandle handle, Map<String, Object> parameters) {
         if (handle instanceof QueryNode) {
             QueryNode node = (QueryNode) handle;
 

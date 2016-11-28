@@ -42,6 +42,10 @@ public class BookService {
         return repository.search(queryGroup);
     }
 
+    public QueryResponse<Book> query(QueryRequest queryRequest) {
+        return repository.query(queryRequest);
+    }
+
     public List<Book> queryAll() {
         String sql = "select * from book";
         return repository.query(sql);

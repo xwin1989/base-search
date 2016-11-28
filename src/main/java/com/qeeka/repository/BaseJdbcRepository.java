@@ -1,12 +1,24 @@
 package com.qeeka.repository;
 
+import com.qeeka.domain.MappingNode;
+import com.qeeka.domain.QueryGroup;
+import com.qeeka.domain.QueryModel;
+import com.qeeka.domain.QueryNode;
+import com.qeeka.domain.QueryParser;
+import com.qeeka.http.QueryRequest;
+import com.qeeka.http.QueryResponse;
 import com.qeeka.jdbc.BeanRowMapper;
+import com.qeeka.operate.QueryResultType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
+import org.springframework.util.StringUtils;
 
+import javax.persistence.Table;
 import javax.sql.DataSource;
+import java.math.BigInteger;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +28,124 @@ import java.util.Map;
 public abstract class BaseJdbcRepository<T> extends BaseSearchRepository<T> {
 
     protected NamedParameterJdbcTemplate jdbcTemplate;
+    protected String tableName;
+
+    public BaseJdbcRepository() {
+        super();
+        String tName = entityClass.getSimpleName();
+        Table annotation = entityClass.getAnnotation(Table.class);
+        if (annotation != null && annotation.name() != null && !"".equals(annotation.name())) {
+            tName = annotation.name();
+        }
+        this.tableName = tName;
+    }
+
+    public QueryResponse<T> query(QueryRequest queryRequest) {
+        return query(queryRequest, entityClass);
+    }
+
+    public <X> QueryResponse<X> query(QueryRequest queryRequest, Class<X> clazz) {
+        //parse query group to simple query domain
+        QueryGroup queryGroup = queryRequest.getQueryGroup();
+        QueryModel model = queryParser.parse(queryGroup);
+        StringBuilder conditionSql = new StringBuilder();
+
+        conditionSql.append(" FROM ").append(tableName).append(" AS E ");
+        buildEntityMapping(queryGroup, conditionSql, model);
+
+        if (StringUtils.hasText(model.getStatement())) {
+            conditionSql.append(" WHERE ").append(model.getStatement());
+        }
+        if (StringUtils.hasText(model.getOrderStatement())) {
+            conditionSql.append(" ORDER BY ").append(model.getOrderStatement());
+        }
+
+        if (QueryResultType.LIST.equals(queryRequest.getQueryResultType())) {
+            return listQuery(queryRequest, model, conditionSql, clazz);
+        } else {
+            return singleQuery(model, conditionSql, queryRequest.getQueryResultType(), clazz);
+        }
+    }
+
+    private <X> QueryResponse<X> listQuery(QueryRequest queryRequest, QueryModel model, StringBuilder conditionSql, Class<X> clazz) {
+        QueryResponse<X> queryResponse = new QueryResponse<>();
+        if (queryRequest.isNeedRecord()) {
+            StringBuilder sql = new StringBuilder("SELECT ");
+            if (queryRequest.isNeedDistinct()) {
+                sql.append("DISTINCT ").append(queryRequest.getSelects());
+            } else {
+                sql.append(queryRequest.getSelects());
+            }
+            sql.append(conditionSql);
+            //Page search , need page index and size
+            if (queryRequest.getPageIndex() != 0 || queryRequest.getPageSize() != 0) {
+                sql.append(" limit ");
+                if (queryRequest.getPageIndex() != 0) {
+                    sql.append(queryRequest.getPageIndex() * queryRequest.getPageSize()).append(',');
+                }
+                sql.append(queryRequest.getPageSize());
+            }
+            List<X> list = query(sql, model.getParameters(), clazz);
+            //Set query record
+            queryResponse.setRecords(list);
+            queryResponse.setPageIndex(queryRequest.getPageIndex());
+            queryResponse.setPageSize(queryRequest.getPageSize());
+        }
+        //Query count
+        if (queryRequest.isNeedCount()) {
+            StringBuilder countSql = new StringBuilder("SELECT ");
+            if (queryRequest.isNeedDistinct()) {
+                countSql.append("COUNT(DISTINCT ").append(queryRequest.getSelects()).append(')');
+            } else {
+                countSql.append("COUNT(1)");
+            }
+            countSql.append(conditionSql);
+            BigInteger total = queryForObject(countSql, model.getParameters(), BigInteger.class);
+            queryResponse.setTotalRecords(total.longValue());
+        }
+        return queryResponse;
+    }
+
+
+    /**
+     * build jdbc entity join logic
+     *
+     * @param queryGroup
+     * @param sql
+     * @param sql
+     */
+    private void buildEntityMapping(QueryGroup queryGroup, StringBuilder sql, QueryModel model) {
+        if (queryGroup == null || queryGroup.getEntityMapping() == null) {
+            return;
+        }
+        for (MappingNode node : queryGroup.getEntityMapping()) {
+            sql.append(node.getLinkOperate().getValue()).
+                    append(node.getEntityName()).append(" AS ").append(node.getEntityAlias());
+
+            Iterator<QueryNode> iterator = node.getLinkMapping().iterator();
+            if (iterator.hasNext()) {
+                sql.append(" ON ");
+                QueryNode next = iterator.next();
+                CharSequence queryPart = QueryParser.generateParameterHql(next, model.getParameters());
+                sql.append(queryPart);
+            }
+            while (iterator.hasNext()) {
+                QueryNode next = iterator.next();
+                CharSequence queryPart = QueryParser.generateParameterHql(next, model.getParameters());
+                sql.append(" AND ").append(queryPart);
+            }
+        }
+    }
+
+
+    private <X> QueryResponse<X> singleQuery(QueryModel model, StringBuilder hql, QueryResultType queryResultType, Class<X> clazz) {
+        QueryResponse<X> queryResponse = new QueryResponse<>();
+        if (QueryResultType.SINGLE.equals(queryResultType))
+            queryResponse.setEntity(querySingle(hql, model.getParameters(), clazz));
+        else if (QueryResultType.UNIQUE.equals(queryResultType))
+            queryResponse.setEntity(queryUnique(hql, model.getParameters(), clazz));
+        return queryResponse;
+    }
 
     /**
      * find list by native query with sql
@@ -40,8 +170,8 @@ public abstract class BaseJdbcRepository<T> extends BaseSearchRepository<T> {
     }
 
 
-    public <X> List<X> query(CharSequence sql, Map<String, ?> params) {
-        return query(sql, params, null);
+    public List<T> query(CharSequence sql, Map<String, ?> params) {
+        return query(sql, params, entityClass);
     }
 
 
@@ -111,6 +241,58 @@ public abstract class BaseJdbcRepository<T> extends BaseSearchRepository<T> {
         try {
             List<X> resultList = jdbcTemplate.query(sql.toString(), params, BeanRowMapper.forClass(resultClass));
             return getUniqueResult(resultList);
+        } finally {
+            logger.debug("native unique query, query={}, params={}, elapsedTime={}", sql, params, watch.elapsedTime());
+        }
+    }
+
+    /**
+     * find single with sql
+     *
+     * @param sql
+     * @return entity class
+     */
+    public T querySingle(CharSequence sql) {
+        return querySingle(sql, null, entityClass);
+    }
+
+    /**
+     * find single with sql & class
+     *
+     * @param sql
+     * @param clazz
+     * @param <X>
+     * @return object
+     */
+    public <X> X querySingle(CharSequence sql, Class<X> clazz) {
+        return querySingle(sql, null, clazz);
+    }
+
+    /**
+     * find single with sql & params
+     *
+     * @param sql
+     * @param params
+     * @return entity class
+     */
+    public T querySingle(CharSequence sql, Map<String, ?> params) {
+        return querySingle(sql, params, entityClass);
+    }
+
+    /**
+     * find single with sql & params & class
+     *
+     * @param sql
+     * @param params
+     * @param resultClass
+     * @param <X>
+     * @return
+     */
+    public <X> X querySingle(CharSequence sql, Map<String, ?> params, Class<X> resultClass) {
+        StopWatch watch = new StopWatch();
+        try {
+            List<X> resultList = jdbcTemplate.query(sql.toString(), params, BeanRowMapper.forClass(resultClass));
+            return getSingleResult(resultList);
         } finally {
             logger.debug("native unique query, query={}, params={}, elapsedTime={}", sql, params, watch.elapsedTime());
         }
@@ -196,7 +378,7 @@ public abstract class BaseJdbcRepository<T> extends BaseSearchRepository<T> {
         try {
             return jdbcTemplate.queryForObject(sql.toString(), params, clazz);
         } finally {
-            logger.debug("queryForObject, query={}, params={}, resultSize={}, elapsedTime={}", sql, params, watch.elapsedTime());
+            logger.debug("queryForObject, query={}, params={}, elapsedTime={}", sql, params, watch.elapsedTime());
         }
     }
 

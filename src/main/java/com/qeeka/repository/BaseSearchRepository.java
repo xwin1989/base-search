@@ -1,8 +1,11 @@
 package com.qeeka.repository;
 
 import com.qeeka.domain.MapHandle;
+import com.qeeka.domain.MappingNode;
 import com.qeeka.domain.QueryGroup;
 import com.qeeka.domain.QueryModel;
+import com.qeeka.domain.QueryNode;
+import com.qeeka.domain.QueryOperateNode;
 import com.qeeka.domain.QueryParser;
 import com.qeeka.http.QueryRequest;
 import com.qeeka.http.QueryResponse;
@@ -138,7 +141,7 @@ public abstract class BaseSearchRepository<T> {
     public QueryResponse<T> search(QueryRequest queryRequest) {
         StopWatch watch = new StopWatch();
         //parse query group to simple query domain
-        QueryModel query = queryParser.parse(queryRequest.getQueryGroup());
+        QueryGroup queryGroup = queryRequest.getQueryGroup();
         StringBuilder hql = new StringBuilder("SELECT ");
         if (queryRequest.isNeedDistinct()) {
             hql.append("DISTINCT(E)");
@@ -146,32 +149,20 @@ public abstract class BaseSearchRepository<T> {
             hql.append('E');
         }
         hql.append(" FROM ").append(entityName).append(" AS E ");
-        if (queryRequest.getQueryGroup() != null && queryRequest.getQueryGroup().getEntityMapping() != null) {
-            for (Map.Entry<String, Map<QueryLinkOperate, String>> joinMap : queryRequest.getQueryGroup().getEntityMapping().entrySet()) {
-                for (Map.Entry<QueryLinkOperate, String> entry : joinMap.getValue().entrySet()) {
-                    if (entry.getKey().equals(QueryLinkOperate.CROSS_JOIN)) {
-                        hql.append(" , ").append(joinMap.getKey()).append(" AS ").append(entry.getValue()).append(' ');
-                    } else {
-                        hql.append(entry.getKey().getValue());
-                        if (entry.getKey().isNeedFetch()) {
-                            hql.append(" FETCH ");
-                        }
-                        hql.append(joinMap.getKey()).append(" AS ").append(entry.getValue());
-                    }
-                }
-            }
+        buildEntityMapping(queryGroup, hql, false);
+
+        QueryModel model = queryParser.parse(queryGroup);
+        if (StringUtils.hasText(model.getStatement())) {
+            hql.append(" WHERE ").append(model.getStatement());
         }
-        if (StringUtils.hasText(query.getStatement())) {
-            hql.append(" WHERE ").append(query.getStatement());
-        }
-        if (StringUtils.hasText(query.getOrderStatement())) {
-            hql.append(" ORDER BY ").append(query.getOrderStatement());
+        if (StringUtils.hasText(model.getOrderStatement())) {
+            hql.append(" ORDER BY ").append(model.getOrderStatement());
         }
         try {
             if (QueryResultType.LIST.equals(queryRequest.getQueryResultType())) {
-                return listQuery(queryRequest, query, hql);
+                return listQuery(queryRequest, model, hql);
             } else {
-                return singleQuery(query, hql, queryRequest.getQueryResultType());
+                return singleQuery(model, hql, queryRequest.getQueryResultType());
             }
         } finally {
             logger.debug("search, query={}, pageIndex={}, pageSize={}, elapsedTime={}", hql, queryRequest.getPageIndex(), queryRequest.getPageSize(), watch.elapsedTime());
@@ -179,19 +170,51 @@ public abstract class BaseSearchRepository<T> {
     }
 
     /**
+     * build jpa entity join logic
+     *
+     * @param queryGroup
+     * @param hql
+     * @param isCount
+     */
+    private void buildEntityMapping(QueryGroup queryGroup, StringBuilder hql, boolean isCount) {
+        if (queryGroup == null || queryGroup.getEntityMapping() == null) {
+            return;
+        }
+        for (MappingNode mappingNode : queryGroup.getEntityMapping()) {
+            if (mappingNode.getLinkOperate().equals(QueryLinkOperate.CROSS_JOIN)) {
+                hql.append(" , ").append(mappingNode.getEntityName()).append(" AS ").append(mappingNode.getEntityAlias()).append(' ');
+                //handle on operator
+                if (!isCount) {
+                    for (QueryNode node : mappingNode.getLinkMapping()) {
+                        queryGroup.getQueryHandleList().add(node);
+                        if (queryGroup.getQueryHandleList().size() > 1)
+                            queryGroup.getQueryHandleList().add(new QueryOperateNode(QueryLinkOperate.AND));
+                    }
+                }
+            } else {
+                hql.append(mappingNode.getLinkOperate().getValue());
+                if (!isCount && mappingNode.getLinkOperate().isNeedFetch()) {
+                    hql.append(" FETCH ");
+                }
+                hql.append(mappingNode.getEntityName()).append(" AS ").append(mappingNode.getEntityAlias());
+            }
+        }
+    }
+
+    /**
      * query by query request
      *
-     * @param query           1. QueryResultType.UNIQUE : return unique entity, one or null
+     * @param model           1. QueryResultType.UNIQUE : return unique entity, one or null
      *                        2. QueryResultType.SINGLE : must be return one
      * @param hql
      * @param queryResultType
      * @return response with single record
      */
-    private QueryResponse<T> singleQuery(QueryModel query, StringBuilder hql, QueryResultType queryResultType) {
+    private QueryResponse<T> singleQuery(QueryModel model, StringBuilder hql, QueryResultType queryResultType) {
         QueryResponse<T> queryResponse = new QueryResponse<>();
 
         TypedQuery<T> recordQuery = entityManager.createQuery(hql.toString(), entityClass);
-        for (Map.Entry<String, ?> entry : query.getParameters().entrySet()) {
+        for (Map.Entry<String, ?> entry : model.getParameters().entrySet()) {
             recordQuery.setParameter(entry.getKey(), entry.getValue());
         }
         recordQuery.setMaxResults(1);
@@ -210,16 +233,16 @@ public abstract class BaseSearchRepository<T> {
      * query by query request
      *
      * @param queryRequest
-     * @param query
+     * @param model
      * @param hql
      * @return response with record list
      */
-    private QueryResponse<T> listQuery(QueryRequest queryRequest, QueryModel query, StringBuilder hql) {
+    private QueryResponse<T> listQuery(QueryRequest queryRequest, QueryModel model, StringBuilder hql) {
         QueryResponse<T> queryResponse = new QueryResponse<>();
         //Query record
         if (queryRequest.isNeedRecord()) {
             TypedQuery<T> recordQuery = entityManager.createQuery(hql.toString(), entityClass);
-            for (Map.Entry<String, ?> entry : query.getParameters().entrySet()) {
+            for (Map.Entry<String, ?> entry : model.getParameters().entrySet()) {
                 recordQuery.setParameter(entry.getKey(), entry.getValue());
             }
             //Page search , need page index and size
@@ -250,22 +273,12 @@ public abstract class BaseSearchRepository<T> {
                 countHql.append("COUNT(E)");
             }
             countHql.append(" FROM ").append(entityName).append(" AS E ");
-            if (queryRequest.getQueryGroup() != null && queryRequest.getQueryGroup().getEntityMapping() != null) {
-                for (Map.Entry<String, Map<QueryLinkOperate, String>> joinMap : queryRequest.getQueryGroup().getEntityMapping().entrySet()) {
-                    for (Map.Entry<QueryLinkOperate, String> entry : joinMap.getValue().entrySet()) {
-                        if (entry.getKey().equals(QueryLinkOperate.CROSS_JOIN)) {
-                            countHql.append(" , ").append(joinMap.getKey()).append(" AS ").append(entry.getValue()).append(' ');
-                        } else {
-                            countHql.append(entry.getKey().getValue()).append(joinMap.getKey()).append(" AS ").append(entry.getValue());
-                        }
-                    }
-                }
-            }
-            if (StringUtils.hasText(query.getStatement())) {
-                countHql.append(" WHERE ").append(query.getStatement());
+            buildEntityMapping(queryRequest.getQueryGroup(), countHql, true);
+            if (StringUtils.hasText(model.getStatement())) {
+                countHql.append(" WHERE ").append(model.getStatement());
             }
             TypedQuery<Long> countQuery = entityManager.createQuery(countHql.toString(), Long.class);
-            for (Map.Entry<String, ?> entry : query.getParameters().entrySet()) {
+            for (Map.Entry<String, ?> entry : model.getParameters().entrySet()) {
                 countQuery.setParameter(entry.getKey(), entry.getValue());
             }
             Long total = countQuery.getSingleResult();
@@ -592,6 +605,14 @@ public abstract class BaseSearchRepository<T> {
         if (results.isEmpty()) return null;
         if (results.size() > 1) {
             throw new NonUniqueResultException("result returned more than one element, returnedSize=" + results.size());
+        }
+        return results.get(0);
+    }
+
+    protected <X> X getSingleResult(List<X> results) {
+        if (results.isEmpty()) return null;
+        if (results.size() != 1) {
+            throw new NonUniqueResultException("result returned not one element, returnedSize=" + results.size());
         }
         return results.get(0);
     }
