@@ -165,7 +165,6 @@ public class QueryRequest {
         return this;
     }
 
-    //todo add class properties mapping
     public CharSequence getSelects() {
         if (needDistinct && selects == null) {
             throw new IllegalArgumentException("Use distinct, Must set selects!");
