@@ -30,6 +30,9 @@ public class PersonService {
         this.entityManager.remove(person);
     }
 
+    public QueryResponse<Person> query(QueryRequest request) {
+        return repository.query(request);
+    }
 
     public QueryResponse<Person> search(QueryRequest request) {
         return repository.search(request);

@@ -7,11 +7,9 @@ import com.qeeka.operate.QueryLinkOperate;
 import com.qeeka.operate.QueryOperate;
 import com.qeeka.operate.Sort;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by neal.xu on 7/31 0031.
@@ -31,7 +29,7 @@ public class QueryGroup {
     /**
      * join other entity
      */
-    private final Map<String, Map<QueryLinkOperate, String>> entityMapping = new LinkedHashMap<>();
+    private final List<MappingNode> entityMapping = new ArrayList<>();
 
     public QueryGroup() {
     }
@@ -344,8 +342,7 @@ public class QueryGroup {
      * @return
      */
     public QueryGroup joinFetch(String entityName, String entityAlias) {
-        joinEntityCheck(entityName, entityAlias, QueryLinkOperate.CROSS_JOIN, null);
-        this.entityMapping.put(entityName, Collections.singletonMap(QueryLinkOperate.INNER_JOIN_FETCH, entityAlias));
+        this.entityMapping.add(new MappingNode(entityName, entityAlias, QueryLinkOperate.INNER_JOIN_FETCH));
         return this;
     }
 
@@ -358,8 +355,7 @@ public class QueryGroup {
      * @return
      */
     public QueryGroup join(String entityName, String entityAlias) {
-        joinEntityCheck(entityName, entityAlias, QueryLinkOperate.CROSS_JOIN, null);
-        this.entityMapping.put(entityName, Collections.singletonMap(QueryLinkOperate.INNER_JOIN, entityAlias));
+        this.entityMapping.add(new MappingNode(entityName, entityAlias, QueryLinkOperate.INNER_JOIN));
         return this;
     }
 
@@ -372,8 +368,8 @@ public class QueryGroup {
      * @return
      */
     public QueryGroup crossJoin(String entityName, String entityAlias) {
-        joinEntityCheck(entityName, entityAlias, null, QueryLinkOperate.CROSS_JOIN);
-        this.entityMapping.put(entityName, Collections.singletonMap(QueryLinkOperate.CROSS_JOIN, entityAlias));
+        this.entityMapping.add(new MappingNode(entityName, entityAlias, QueryLinkOperate.CROSS_JOIN));
+
         return this;
     }
 
@@ -386,8 +382,7 @@ public class QueryGroup {
      * @return
      */
     public QueryGroup leftJoin(String entityName, String entityAlias) {
-        joinEntityCheck(entityName, entityAlias, QueryLinkOperate.CROSS_JOIN, null);
-        this.entityMapping.put(entityName, Collections.singletonMap(QueryLinkOperate.LEFT_JOIN, entityAlias));
+        this.entityMapping.add(new MappingNode(entityName, entityAlias, QueryLinkOperate.LEFT_JOIN));
         return this;
     }
 
@@ -400,42 +395,13 @@ public class QueryGroup {
      * @return
      */
     public QueryGroup leftJoinFetch(String entityName, String entityAlias) {
-        joinEntityCheck(entityName, entityAlias, QueryLinkOperate.CROSS_JOIN, null);
-        this.entityMapping.put(entityName, Collections.singletonMap(QueryLinkOperate.LEFT_JOIN_FETCH, entityAlias));
+        this.entityMapping.add(new MappingNode(entityName, entityAlias, QueryLinkOperate.LEFT_JOIN_FETCH));
         return this;
-    }
-
-    private void joinEntityCheck(String entityName, String entityAlias, QueryLinkOperate excludeOperate, QueryLinkOperate aloneOperate) {
-        if ("E".equalsIgnoreCase(entityAlias)) {
-            throw new IllegalArgumentException("Can't use `E`  assign to entity!");
-        }
-        Map<QueryLinkOperate, String> operateStringMap = this.entityMapping.get(entityName);
-        if (operateStringMap != null) {
-            throw new IllegalArgumentException("Entity already exist! Please fix #" + entityName);
-        }
-        if (excludeOperate != null) {
-            for (Map<QueryLinkOperate, String> queryLinkOperateStringMap : entityMapping.values()) {
-                for (QueryLinkOperate queryLinkOperate : queryLinkOperateStringMap.keySet()) {
-                    if (queryLinkOperate.equals(excludeOperate)) {
-                        throw new IllegalArgumentException("join operate can't support other query link operate! #" + excludeOperate.getValue());
-                    }
-                }
-            }
-        }
-        if (aloneOperate != null) {
-            for (Map<QueryLinkOperate, String> queryLinkOperateStringMap : entityMapping.values()) {
-                for (QueryLinkOperate queryLinkOperate : queryLinkOperateStringMap.keySet()) {
-                    if (!queryLinkOperate.equals(aloneOperate)) {
-                        throw new IllegalArgumentException("join operate only support query link operate! #" + aloneOperate.getValue());
-                    }
-                }
-            }
-        }
     }
 
     /**
      * on query
-     * like: E.id = O.id
+     * default equals
      *
      * @param masterColumn
      * @param otherColumn
@@ -445,18 +411,29 @@ public class QueryGroup {
         if (entityMapping.isEmpty()) {
             throw new IllegalArgumentException("on must after join operator!");
         }
-        for (Map<QueryLinkOperate, String> queryLinkOperateStringMap : entityMapping.values()) {
-            if (!queryLinkOperateStringMap.keySet().contains(QueryLinkOperate.CROSS_JOIN)) {
-                throw new IllegalArgumentException("on operator only support cross join!");
-            }
-        }
-        queryHandleList.add(new QueryNode(masterColumn, otherColumn, QueryOperate.COLUMN_EQUALS));
-        if (queryHandleList.size() > 1)
-            queryHandleList.add(new QueryOperateNode(QueryLinkOperate.AND));
+        MappingNode lastNode = entityMapping.get(entityMapping.size() - 1);
+        lastNode.getLinkMapping().add(new QueryNode(masterColumn, otherColumn, QueryOperate.COLUMN_EQUALS));
         return this;
     }
 
-    public Map<String, Map<QueryLinkOperate, String>> getEntityMapping() {
+    /**
+     * on query with operator
+     *
+     * @param masterColumn
+     * @param otherColumn
+     * @param queryOperate
+     * @return
+     */
+    public QueryGroup on(String masterColumn, String otherColumn, QueryOperate queryOperate) {
+        if (entityMapping.isEmpty()) {
+            throw new IllegalArgumentException("on must after join operator!");
+        }
+        MappingNode lastNode = entityMapping.get(entityMapping.size() - 1);
+        lastNode.getLinkMapping().add(new QueryNode(masterColumn, otherColumn, queryOperate));
+        return this;
+    }
+
+    public List<MappingNode> getEntityMapping() {
         return entityMapping;
     }
 

@@ -4,7 +4,6 @@
 <!--refer to http://checkstyle.sourceforge.net/availablechecks.html-->
 <module name="Checker">
     <module name="RegexpSingleline">
-        <!-- Checks that FIXME is not used in comments. TODO is preferred. -->
         <property name="format" value="((//.*)|(\*.*))FIXME"/>
         <property name="message"
                   value='TODO is preferred to FIXME.  e.g. "TODO(johndoe): Refactor when v2 is released."'/>

@@ -35,6 +35,12 @@ public class Book implements MapHandle {
     @OneToMany(mappedBy = "book")
     private List<BookInfo> bookInfoList;
 
+    @Column(name = "author_id")
+    private Integer authorId;
+
+    private String authorName;
+    private String bookDescription;
+
     public Integer getId() {
         return id;
     }
@@ -81,6 +87,30 @@ public class Book implements MapHandle {
 
     public void setBookInfoList(List<BookInfo> bookInfoList) {
         this.bookInfoList = bookInfoList;
+    }
+
+    public Integer getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(Integer authorId) {
+        this.authorId = authorId;
+    }
+
+    public String getAuthorName() {
+        return authorName;
+    }
+
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
+    }
+
+    public String getBookDescription() {
+        return bookDescription;
+    }
+
+    public void setBookDescription(String bookDescription) {
+        this.bookDescription = bookDescription;
     }
 
     @Override

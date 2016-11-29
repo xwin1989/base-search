@@ -28,6 +28,8 @@ public class QueryRequest {
     //need distinct
     private boolean needDistinct = false;
 
+    private CharSequence[] selects;
+
     public QueryRequest() {
     }
 
@@ -156,5 +158,26 @@ public class QueryRequest {
     public QueryRequest listResult() {
         this.queryResultType = QueryResultType.LIST;
         return this;
+    }
+
+    public QueryRequest selects(CharSequence... selectFields) {
+        this.selects = selectFields;
+        return this;
+    }
+
+    public CharSequence getSelects() {
+        if (needDistinct && selects == null) {
+            throw new IllegalArgumentException("Use distinct, Must set selects!");
+        }
+        if (selects == null) {
+            return "E.*";
+        }
+
+        StringBuilder fields = new StringBuilder();
+        for (int i = 0; i < selects.length; i++) {
+            if (i != 0) fields.append(',');
+            fields.append(selects[i]);
+        }
+        return fields;
     }
 }
