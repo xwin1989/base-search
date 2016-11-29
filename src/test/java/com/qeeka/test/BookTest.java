@@ -417,9 +417,33 @@ public class BookTest extends SpringTestWithDB {
     public void testNativeQuery2() {
         QueryResponse<Book> response = bookService.query(new QueryRequest(1, 2));
         Assert.assertEquals(response.getRecords().size(), 1);
-
-
     }
+
+    @Test
+    @DatabaseSetup("/BookData.xml")
+    public void testNativeQueryAll() {
+        QueryResponse<Book> q2 = bookService.queryAll2();
+        QueryResponse<Book> q3 = bookService.queryAll3();
+        Assert.assertEquals(q2.getRecords().size(), q3.getRecords().size());
+    }
+
+
+    @Test
+    @DatabaseSetup("/BookData.xml")
+    public void testUnique2() {
+        Book b1 = bookService.queryUnique1(new QueryRequest(new QueryGroup("id", 0)));
+        Book b2 = bookService.queryUnique2(new QueryGroup("id", 3));
+        Assert.assertEquals(b1.getStatus(), b2.getStatus());
+    }
+
+    @Test
+    @DatabaseSetup("/BookData.xml")
+    public void testSingle() {
+        Book b1 = bookService.querySingle1(new QueryRequest(new QueryGroup("id", 0)));
+        Book b2 = bookService.querySingle2(new QueryGroup("id", 3));
+        Assert.assertEquals(b1.getStatus(), b2.getStatus());
+    }
+
 
     @Test
     public void testLog() {

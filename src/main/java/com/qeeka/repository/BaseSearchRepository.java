@@ -98,8 +98,8 @@ public abstract class BaseSearchRepository<T> {
      * @param queryGroup
      * @return
      */
-    public QueryResponse<T> searchUnique(QueryGroup queryGroup) {
-        return search(new QueryRequest(queryGroup).uniqueResult());
+    public T searchUnique(QueryGroup queryGroup) {
+        return search(new QueryRequest(queryGroup).uniqueResult()).getEntity();
     }
 
     /**
@@ -108,8 +108,8 @@ public abstract class BaseSearchRepository<T> {
      * @param queryRequest
      * @return
      */
-    public QueryResponse<T> searchUnique(QueryRequest queryRequest) {
-        return search(queryRequest.uniqueResult());
+    public T searchUnique(QueryRequest queryRequest) {
+        return search(queryRequest.uniqueResult()).getEntity();
     }
 
     /**
@@ -118,8 +118,8 @@ public abstract class BaseSearchRepository<T> {
      * @param queryGroup
      * @return
      */
-    public QueryResponse<T> searchSingle(QueryGroup queryGroup) {
-        return search(new QueryRequest(queryGroup).singleResult());
+    public T searchSingle(QueryGroup queryGroup) {
+        return search(new QueryRequest(queryGroup).singleResult()).getEntity();
     }
 
     /**
@@ -128,8 +128,8 @@ public abstract class BaseSearchRepository<T> {
      * @param queryRequest
      * @return
      */
-    public QueryResponse<T> searchSingle(QueryRequest queryRequest) {
-        return search(queryRequest.singleResult());
+    public T searchSingle(QueryRequest queryRequest) {
+        return search(queryRequest.singleResult()).getEntity();
     }
 
     /**
@@ -610,7 +610,6 @@ public abstract class BaseSearchRepository<T> {
     }
 
     protected <X> X getSingleResult(List<X> results) {
-        if (results.isEmpty()) return null;
         if (results.size() != 1) {
             throw new NonUniqueResultException("result returned not one element, returnedSize=" + results.size());
         }

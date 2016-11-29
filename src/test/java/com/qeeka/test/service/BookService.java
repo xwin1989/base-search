@@ -38,12 +38,37 @@ public class BookService {
         return repository.findUnique(hql);
     }
 
+    public Book queryUnique1(QueryRequest queryRequest) {
+        return repository.queryUnique(queryRequest);
+    }
+
+    public Book queryUnique2(QueryGroup queryGroup) {
+        return repository.queryUnique(queryGroup, Book.class);
+    }
+
+
+    public Book querySingle1(QueryRequest queryRequest) {
+        return repository.querySingle(queryRequest);
+    }
+
+    public Book querySingle2(QueryGroup queryGroup) {
+        return repository.querySingle(queryGroup);
+    }
+
     public QueryResponse<Book> search(QueryGroup queryGroup) {
         return repository.search(queryGroup);
     }
 
     public QueryResponse<Book> query(QueryRequest queryRequest) {
         return repository.query(queryRequest);
+    }
+
+    public QueryResponse<Book> queryAll2() {
+        return repository.query(Book.class);
+    }
+
+    public QueryResponse<Book> queryAll3() {
+        return repository.query();
     }
 
     public List<Book> queryAll() {

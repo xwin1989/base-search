@@ -40,10 +40,64 @@ public abstract class BaseJdbcRepository<T> extends BaseSearchRepository<T> {
         this.tableName = tName;
     }
 
+    /**
+     * query all, return T
+     *
+     * @return
+     */
+    public QueryResponse<T> query() {
+        return query(new QueryRequest(new QueryGroup()), entityClass);
+    }
+
+    /**
+     * query all, return X
+     *
+     * @return
+     */
+    public <X> QueryResponse<X> query(Class<X> clazz) {
+        return query(new QueryRequest(new QueryGroup()), clazz);
+    }
+
+    /**
+     * query by query group, return X
+     *
+     * @param queryGroup
+     * @param clazz
+     * @param <X>
+     * @return
+     */
+    public <X> QueryResponse<X> query(QueryGroup queryGroup, Class<X> clazz) {
+        return query(new QueryRequest(queryGroup), clazz);
+    }
+
+    /**
+     * query by group, return T
+     *
+     * @param queryGroup
+     * @return
+     */
+    public QueryResponse<T> query(QueryGroup queryGroup) {
+        return query(new QueryRequest(queryGroup), entityClass);
+    }
+
+    /**
+     * query by query request, return T
+     *
+     * @param queryRequest
+     * @return
+     */
     public QueryResponse<T> query(QueryRequest queryRequest) {
         return query(queryRequest, entityClass);
     }
 
+    /**
+     * query by query request
+     *
+     * @param queryRequest
+     * @param clazz
+     * @param <X>
+     * @return
+     */
     public <X> QueryResponse<X> query(QueryRequest queryRequest, Class<X> clazz) {
         //parse query group to simple query domain
         QueryGroup queryGroup = queryRequest.getQueryGroup();
@@ -63,7 +117,7 @@ public abstract class BaseJdbcRepository<T> extends BaseSearchRepository<T> {
         if (QueryResultType.LIST.equals(queryRequest.getQueryResultType())) {
             return listQuery(queryRequest, model, conditionSql, clazz);
         } else {
-            return singleQuery(model, conditionSql, queryRequest.getQueryResultType(), clazz);
+            return singleQuery(queryRequest, model, conditionSql, queryRequest.getQueryResultType(), clazz);
         }
     }
 
@@ -137,13 +191,19 @@ public abstract class BaseJdbcRepository<T> extends BaseSearchRepository<T> {
         }
     }
 
-
-    private <X> QueryResponse<X> singleQuery(QueryModel model, StringBuilder hql, QueryResultType queryResultType, Class<X> clazz) {
+    private <X> QueryResponse<X> singleQuery(QueryRequest queryRequest, QueryModel model, StringBuilder conditionSql, QueryResultType queryResultType, Class<X> clazz) {
         QueryResponse<X> queryResponse = new QueryResponse<>();
+        StringBuilder sql = new StringBuilder("SELECT ");
+        if (queryRequest.isNeedDistinct()) {
+            sql.append("DISTINCT ").append(queryRequest.getSelects());
+        } else {
+            sql.append(queryRequest.getSelects());
+        }
+        sql.append(conditionSql);
         if (QueryResultType.SINGLE.equals(queryResultType))
-            queryResponse.setEntity(querySingle(hql, model.getParameters(), clazz));
+            queryResponse.setEntity(querySingle(sql, model.getParameters(), clazz));
         else if (QueryResultType.UNIQUE.equals(queryResultType))
-            queryResponse.setEntity(queryUnique(hql, model.getParameters(), clazz));
+            queryResponse.setEntity(queryUnique(sql, model.getParameters(), clazz));
         return queryResponse;
     }
 
@@ -192,6 +252,51 @@ public abstract class BaseJdbcRepository<T> extends BaseSearchRepository<T> {
         } finally {
             logger.debug("native query, query={}, params={}, resultSize={}, elapsedTime={}", sql, params, returnSize, watch.elapsedTime());
         }
+    }
+
+    /**
+     * query unique with group, return X
+     *
+     * @param queryGroup
+     * @param clazz
+     * @param <X>
+     * @return
+     */
+    public <X> X queryUnique(QueryGroup queryGroup, Class<X> clazz) {
+        return query(new QueryRequest(queryGroup).uniqueResult(), clazz).getEntity();
+    }
+
+    /**
+     * query unique with group, return T
+     *
+     * @param queryGroup
+     * @return
+     */
+
+    public T queryUnique(QueryGroup queryGroup) {
+        return query(new QueryRequest(queryGroup).uniqueResult(), entityClass).getEntity();
+    }
+
+    /**
+     * query unique with query request
+     *
+     * @param queryRequest
+     * @return
+     */
+    public T queryUnique(QueryRequest queryRequest) {
+        return query(queryRequest.uniqueResult(), entityClass).getEntity();
+    }
+
+    /**
+     * query unique with request & clazz
+     *
+     * @param queryRequest
+     * @param clazz
+     * @param <X>
+     * @return
+     */
+    public <X> X queryUnique(QueryRequest queryRequest, Class<X> clazz) {
+        return query(queryRequest.uniqueResult(), clazz).getEntity();
     }
 
     /**
@@ -296,6 +401,50 @@ public abstract class BaseJdbcRepository<T> extends BaseSearchRepository<T> {
         } finally {
             logger.debug("native unique query, query={}, params={}, elapsedTime={}", sql, params, watch.elapsedTime());
         }
+    }
+
+    /**
+     * find single with request
+     *
+     * @param queryRequest
+     * @return
+     */
+    public T querySingle(QueryRequest queryRequest) {
+        return query(queryRequest.singleResult(), entityClass).getEntity();
+    }
+
+    /**
+     * find single with request & clazz
+     *
+     * @param queryRequest
+     * @param clazz
+     * @param <X>
+     * @return
+     */
+    public <X> X querySingle(QueryRequest queryRequest, Class<X> clazz) {
+        return query(queryRequest.singleResult(), clazz).getEntity();
+    }
+
+    /**
+     * find single with group
+     *
+     * @param queryGroup
+     * @return
+     */
+    public T querySingle(QueryGroup queryGroup) {
+        return query(new QueryRequest(queryGroup).singleResult(), entityClass).getEntity();
+    }
+
+    /**
+     * find single with group & clazz
+     *
+     * @param queryGroup
+     * @param clazz
+     * @param <X>
+     * @return
+     */
+    public <X> X querySingle(QueryGroup queryGroup, Class<X> clazz) {
+        return query(new QueryRequest(queryGroup).singleResult(), clazz).getEntity();
     }
 
     /**
