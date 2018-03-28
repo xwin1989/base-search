@@ -1,6 +1,7 @@
 package com.qeeka.test.service;
 
 import com.qeeka.domain.QueryGroup;
+import com.qeeka.domain.UpdateGroup;
 import com.qeeka.http.QueryRequest;
 import com.qeeka.http.QueryResponse;
 import com.qeeka.test.domain.Person;
@@ -24,6 +25,9 @@ public class PersonService {
     @Autowired
     private PersonRepository repository;
 
+    public Person get(Integer id) {
+        return repository.get(id);
+    }
 
     public void remove(int personId) {
         Person person = entityManager.find(Person.class, personId);
@@ -44,5 +48,9 @@ public class PersonService {
 
     public Long count(QueryGroup queryGroup) {
         return repository.count(queryGroup);
+    }
+
+    public Integer update(UpdateGroup group) {
+        return repository.update(group);
     }
 }

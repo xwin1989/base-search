@@ -322,6 +322,16 @@ public class BookTest extends SpringTestWithDB {
         Assert.assertEquals(countAll.intValue(), 3);
     }
 
+    @Test
+    @DatabaseSetup("/BookData.xml")
+    public void testFind() {
+        List<Book> bookList = bookService.find("from Book E");
+        Assert.assertEquals(bookList.size(), 3);
+
+        List list = bookService.findByGroup("select new map(type as t,count(id) as c) from Book E Group by type");
+        Assert.assertEquals(list.size(), 3);
+    }
+
 //    @Test
 //    @Transactional
 //    public void testBatchSave() {

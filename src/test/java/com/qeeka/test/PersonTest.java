@@ -2,9 +2,11 @@ package com.qeeka.test;
 
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.qeeka.domain.QueryGroup;
+import com.qeeka.domain.UpdateGroup;
 import com.qeeka.http.QueryRequest;
 import com.qeeka.http.QueryResponse;
 import com.qeeka.operate.QueryOperate;
+import com.qeeka.operate.UpdateOperate;
 import com.qeeka.test.domain.Person;
 import com.qeeka.test.service.PersonService;
 import com.qeeka.util.QueryJSONBinder;
@@ -49,6 +51,20 @@ public class PersonTest extends SpringTestWithDB {
         Long count2 = personService.count(request.getQueryGroup());
         Assert.assertTrue(count == 1);
         Assert.assertEquals(count2, count);
+    }
+
+
+    @Test
+    @DatabaseSetup("/PersonData.xml")
+    @Transactional
+    public void testUpdate() {
+        // update Person set status = 1, password = 'hello', type = type+1 where id = 0 and status = 1
+        Integer update = personService.update(
+                new UpdateGroup("status", 2).set("password", "hello").set("type", "type+1", UpdateOperate.COLUMN_EQUALS)
+                        .where(new QueryGroup("id", 0).and("status", 1)));
+        Assert.assertEquals(update.intValue(), 1);
+        Long status = personService.count(new QueryGroup("status", 2));
+        Assert.assertEquals(status, Long.valueOf(2));
     }
 
 }

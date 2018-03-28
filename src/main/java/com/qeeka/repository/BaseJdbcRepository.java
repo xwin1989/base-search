@@ -5,11 +5,13 @@ import com.qeeka.domain.QueryGroup;
 import com.qeeka.domain.QueryModel;
 import com.qeeka.domain.QueryNode;
 import com.qeeka.domain.QueryParser;
+import com.qeeka.domain.UpdateGroup;
 import com.qeeka.http.QueryRequest;
 import com.qeeka.http.QueryResponse;
 import com.qeeka.jdbc.BeanRowMapper;
 import com.qeeka.operate.QueryResultType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
@@ -18,6 +20,7 @@ import org.springframework.util.StringUtils;
 import javax.persistence.Table;
 import javax.sql.DataSource;
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -236,7 +239,7 @@ public abstract class BaseJdbcRepository<T> extends BaseSearchRepository<T> {
 
 
     /**
-     * find list by native query with sql & params & offset & size & entity class
+     * query list by native query with sql & params & offset & size & entity class
      *
      * @param sql
      * @param params
@@ -253,6 +256,40 @@ public abstract class BaseJdbcRepository<T> extends BaseSearchRepository<T> {
             logger.debug("native query, query={}, params={}, resultSize={}, elapsedTime={}", sql, params, returnSize, watch.elapsedTime());
         }
     }
+
+    /**
+     * query list mapping by rowMapper
+     *
+     * @param sql
+     * @param rowMapper
+     * @param <X>
+     * @return
+     */
+    public <X> List<X> query(CharSequence sql, RowMapper<X> rowMapper) {
+        return query(sql, null, rowMapper);
+    }
+
+    /**
+     * query list with params & rowMapper
+     *
+     * @param sql
+     * @param params
+     * @param rowMapper
+     * @param <X>
+     * @return
+     */
+    public <X> List<X> query(CharSequence sql, Map<String, ?> params, RowMapper<X> rowMapper) {
+        StopWatch watch = new StopWatch();
+        int returnSize = 0;
+        try {
+            List<X> resultList = jdbcTemplate.query(sql.toString(), params, rowMapper);
+            returnSize = resultList.size();
+            return resultList;
+        } finally {
+            logger.debug("native query, query={}, params={}, resultSize={}, elapsedTime={}", sql, params, returnSize, watch.elapsedTime());
+        }
+    }
+
 
     /**
      * query unique with group, return X
@@ -586,6 +623,17 @@ public abstract class BaseJdbcRepository<T> extends BaseSearchRepository<T> {
         } finally {
             logger.debug("native update, query={}, updateSize={}, elapsedTime={}", sql, size, watch.elapsedTime());
         }
+    }
+
+    public int updateNative(UpdateGroup group) {
+        Map<String, Object> params = new HashMap<>();
+        StringBuilder sql = convertUpdateGroup(group, params);
+        if (group.getQueryGroup() != null) {
+            QueryModel queryModel = queryParser.parse(group.getQueryGroup());
+            sql.append(" WHERE ").append(queryModel.getStatement());
+            params.putAll(queryModel.getParameters());
+        }
+        return updateNative(sql, params);
     }
 
     public int[] batchUpdateNative(CharSequence sql, List<?> objects) {
