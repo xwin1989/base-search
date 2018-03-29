@@ -298,6 +298,11 @@ public class BookTest extends SpringTestWithDB {
         QueryGroup group = new QueryGroup().leftJoinFetch("E.bookInfoList", "BI").and("BI.name", "book2", QueryOperate.CONTAIN);
         QueryResponse<Book> queryResponse = bookService.search(group);
         Assert.assertEquals(queryResponse.getRecords().size(), 1);
+        List<Object> recordsKey = queryResponse.getRecordsKey();
+        Assert.assertEquals(recordsKey.size(), 1);
+        Map<Object, List<Book>> multiRecordMap = queryResponse.getMultiRecordMap();
+        Assert.assertEquals(multiRecordMap.size(), 1);
+
     }
 
     @Test
