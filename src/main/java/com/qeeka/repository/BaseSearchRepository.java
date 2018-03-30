@@ -7,10 +7,13 @@ import com.qeeka.domain.QueryModel;
 import com.qeeka.domain.QueryNode;
 import com.qeeka.domain.QueryOperateNode;
 import com.qeeka.domain.QueryParser;
+import com.qeeka.domain.UpdateGroup;
+import com.qeeka.domain.UpdateNode;
 import com.qeeka.http.QueryRequest;
 import com.qeeka.http.QueryResponse;
 import com.qeeka.operate.QueryLinkOperate;
 import com.qeeka.operate.QueryResultType;
+import com.qeeka.operate.UpdateOperate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
@@ -422,6 +425,36 @@ public abstract class BaseSearchRepository<T> {
         }
     }
 
+    public int update(UpdateGroup group) {
+        Map<String, Object> params = new HashMap<>();
+        StringBuilder hql = convertUpdateGroup(group, params);
+        if (group.getQueryGroup() != null) {
+            QueryModel queryModel = queryParser.parse(group.getQueryGroup());
+            hql.append(" WHERE ").append(queryModel.getStatement());
+            params.putAll(queryModel.getParameters());
+        }
+        return update(hql, params);
+    }
+
+    protected StringBuilder convertUpdateGroup(UpdateGroup group, Map<String, Object> params) {
+        List<UpdateNode> updateNodeList = group.getUpdateNodeList();
+        StringBuilder hql = new StringBuilder("UPDATE ");
+        hql.append(entityName).append(" SET ");
+        for (UpdateNode updateNode : updateNodeList) {
+            hql.append(updateNode.getColumnName()).append('=');
+            if (updateNode.getUpdateOperate().equals(UpdateOperate.EQUALS)) {
+                hql.append(':').append(updateNode.getColumnName());
+                params.put(updateNode.getColumnName(), updateNode.getValue());
+            } else {
+                hql.append(updateNode.getValue());
+            }
+            hql.append(',');
+        }
+        hql.setLength(hql.length() - 1);
+        return hql;
+    }
+
+
     /**
      * remove entity
      *
@@ -803,7 +836,7 @@ public abstract class BaseSearchRepository<T> {
 
     }
 
-    @PersistenceContext
+    @PersistenceContext(unitName = "entityManagerFactory")
     public void setEntityManager(EntityManager entityManager) {
         this.entityManager = entityManager;
     }

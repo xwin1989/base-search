@@ -119,6 +119,14 @@ public class CompanyTest extends SpringTestWithDB {
 
         queryForMap = companyService.queryForMap("select * from company where id = :id", Collections.<String, Object>singletonMap("id", 1));
         Assert.assertEquals(queryForMap.size(), 5);
+
+        List<Company> companies = companyService.queryWithRowMap("select * from company where id=:id", Collections.<String, Object>singletonMap("id", 1));
+        Assert.assertEquals(companies.size(), 1);
+        Assert.assertEquals(companies.get(0).getName(), "company2");
+
+        companies = companyService.queryWithRowMap("select * from company");
+        Assert.assertEquals(companies.size(), 3);
+
     }
 
     @Autowired

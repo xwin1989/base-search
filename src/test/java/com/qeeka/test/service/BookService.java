@@ -1,6 +1,7 @@
 package com.qeeka.test.service;
 
 import com.qeeka.domain.QueryGroup;
+import com.qeeka.domain.UpdateGroup;
 import com.qeeka.http.QueryRequest;
 import com.qeeka.http.QueryResponse;
 import com.qeeka.test.domain.Book;
@@ -12,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -76,6 +76,16 @@ public class BookService {
         return repository.query(sql);
     }
 
+    public List<Book> find(String hql) {
+        return repository.find(hql);
+    }
+
+
+    public List findByGroup(String hql) {
+        return repository.find(hql);
+    }
+
+
     public List<Book> findAll() {
         return repository.find("from Book");
     }
@@ -128,10 +138,7 @@ public class BookService {
 
     @Transactional
     public int updateBookStatus(Integer bookId, Integer status) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("id", bookId);
-        params.put("status", status);
-        return repository.updateNative("update book set status = :status where id = :id", params);
+        return repository.updateNative(new UpdateGroup("status", status).where(new QueryGroup("id", bookId)));
     }
 
     @Transactional

@@ -298,6 +298,11 @@ public class BookTest extends SpringTestWithDB {
         QueryGroup group = new QueryGroup().leftJoinFetch("E.bookInfoList", "BI").and("BI.name", "book2", QueryOperate.CONTAIN);
         QueryResponse<Book> queryResponse = bookService.search(group);
         Assert.assertEquals(queryResponse.getRecords().size(), 1);
+        List<Object> recordsKey = queryResponse.getRecordsKey();
+        Assert.assertEquals(recordsKey.size(), 1);
+        Map<Object, List<Book>> multiRecordMap = queryResponse.getMultiRecordMap();
+        Assert.assertEquals(multiRecordMap.size(), 1);
+
     }
 
     @Test
@@ -320,6 +325,16 @@ public class BookTest extends SpringTestWithDB {
 
         Long countAll = bookService.countAll();
         Assert.assertEquals(countAll.intValue(), 3);
+    }
+
+    @Test
+    @DatabaseSetup("/BookData.xml")
+    public void testFind() {
+        List<Book> bookList = bookService.find("from Book E");
+        Assert.assertEquals(bookList.size(), 3);
+
+        List list = bookService.findByGroup("select new map(type as t,count(id) as c) from Book E Group by type");
+        Assert.assertEquals(list.size(), 3);
     }
 
 //    @Test
