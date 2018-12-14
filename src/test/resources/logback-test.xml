@@ -9,7 +9,6 @@
         </layout>
     </appender>
 
-    <logger name="org.hibernate" level="INFO"/>
     <logger name="org.dbunit" level="INFO"/>
 
     <!-- 日志输出级别 -->

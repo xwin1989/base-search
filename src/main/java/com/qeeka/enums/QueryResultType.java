@@ -1,4 +1,4 @@
-package com.qeeka.operate;
+package com.qeeka.enums;
 
 /**
  * Created by Neal on 8/2 0002.

@@ -1,4 +1,6 @@
-package com.qeeka.operate;
+package com.qeeka.domain;
+
+import com.qeeka.enums.Direction;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -1,10 +1,10 @@
 package com.qeeka.domain;
 
-import com.qeeka.operate.QueryLinkOperate;
+import com.qeeka.enums.QueryLinkOperate;
 
 public class QueryOperateNode implements QueryHandle {
 
-    private QueryLinkOperate queryLinkOperate = QueryLinkOperate.AND;
+    private QueryLinkOperate queryLinkOperate;
 
     public QueryOperateNode(QueryLinkOperate queryLinkOperate) {
         this.queryLinkOperate = queryLinkOperate;

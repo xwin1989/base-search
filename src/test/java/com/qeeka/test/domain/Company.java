@@ -1,31 +1,27 @@
 package com.qeeka.test.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import com.qeeka.annotation.Column;
+import com.qeeka.annotation.Entity;
+import com.qeeka.annotation.Id;
 
 /**
  * Created by Neal on 16/4/8.
  */
-@Entity
-@Table(name = "company")
+@Entity(table = "company")
 public class Company {
     @Id
-    @GeneratedValue
     public Integer id;
 
-    @Column(name = "name")
+    @Column("name")
     public String name;
 
-    @Column(name = "password")
+    @Column("password")
     public String password;
 
-    @Column(name = "type")
+    @Column("type")
     public Integer type;
 
-    @Column(name = "status")
+    @Column("status")
     public Integer status;
 
     public Integer getId() {

@@ -1,23 +1,21 @@
 package com.qeeka.test.domain;
 
-
 import com.qeeka.annotation.Column;
 import com.qeeka.annotation.Entity;
 import com.qeeka.annotation.Id;
 
+import java.util.Date;
+
 /**
- * Created by neal.xu on 2015/10/14
+ * Created by neal.xu on 2018/12/13.
  */
-@Entity(table = "book_author")
-public class BookAuthor {
+@Entity(table = "role")
+public class RoleEntity {
     @Id
     private Integer id;
-
-    @Column("name")
     private String name;
-
-    @Column("book_id")
-    private Integer bookId;
+    @Column("create_time")
+    private Date createTime;
 
     public Integer getId() {
         return id;
@@ -35,11 +33,11 @@ public class BookAuthor {
         this.name = name;
     }
 
-    public Integer getBookId() {
-        return bookId;
+    public Date getCreateTime() {
+        return createTime;
     }
 
-    public void setBookId(Integer bookId) {
-        this.bookId = bookId;
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 }

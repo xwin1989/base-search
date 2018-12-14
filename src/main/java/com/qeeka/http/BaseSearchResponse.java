@@ -1,10 +1,13 @@
 package com.qeeka.http;
 
+import com.qeeka.domain.QueryResponse;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.net.HttpURLConnection;
 import java.util.List;
 
 /**
@@ -24,8 +27,8 @@ public class BaseSearchResponse<T> {
     protected Integer pageIndex;
     @XmlElement(name = "page_size")
     protected Integer pageSize;
-    @XmlElement(name = "status")
-    protected String status = "success";
+    @XmlElement(name = "status_code")
+    protected Integer statusCode = HttpURLConnection.HTTP_OK;
     @XmlElement(name = "message")
     protected String message;
 
@@ -69,12 +72,12 @@ public class BaseSearchResponse<T> {
         this.pageSize = pageSize;
     }
 
-    public String getStatus() {
-        return status;
+    public Integer getStatusCode() {
+        return statusCode;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setStatusCode(Integer statusCode) {
+        this.statusCode = statusCode;
     }
 
     public String getMessage() {

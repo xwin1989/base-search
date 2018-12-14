@@ -1,7 +1,13 @@
-package com.qeeka.domain;
+package com.qeeka.util;
 
-import com.qeeka.operate.Direction;
-import com.qeeka.operate.Sort;
+import com.qeeka.domain.QueryCombineNode;
+import com.qeeka.domain.QueryGroup;
+import com.qeeka.domain.QueryHandle;
+import com.qeeka.domain.QueryModel;
+import com.qeeka.domain.QueryNode;
+import com.qeeka.domain.QueryOperateNode;
+import com.qeeka.domain.Sort;
+import com.qeeka.enums.Direction;
 
 import java.util.List;
 import java.util.Map;
@@ -10,8 +16,7 @@ import java.util.Stack;
 /**
  * Created by neal.xu on 7/31 0031.
  */
-public class QueryParser {
-
+public class QueryParserHandle {
     public QueryModel parse(QueryGroup queryGroup) {
         QueryModel queryModel = new QueryModel();
         if (queryGroup == null) {
@@ -29,51 +34,33 @@ public class QueryParser {
 
         //Handle alone node
         if (queryHandleList.size() == 1) {
-            queryModel.setStatement(generateParameterHql(queryHandleList.get(0), queryModel.getParameters()).toString());
+            queryModel.setConditionStatement(generateParameterHql(queryHandleList.get(0), queryModel.getParameters()).toString());
             return queryModel;
         }
 
-        Stack<CharSequence> hqlParts = new Stack<>();
+        //Handle multi node
         Stack<QueryHandle> handleStack = new Stack<>();
-
-
         for (int index = 0; index < queryHandleList.size(); index++) {
             QueryHandle currentNode = queryHandleList.get(index);
             if (currentNode instanceof QueryOperateNode) {
                 QueryOperateNode operateNode = (QueryOperateNode) currentNode;
 
-                QueryHandle node1 = handleStack.isEmpty() ? null : handleStack.pop();
-                QueryHandle node2 = handleStack.isEmpty() ? null : handleStack.pop();
+                QueryHandle node1 = handleStack.pop();
+                QueryHandle node2 = handleStack.pop();
 
                 //when express like a b +
-                if (node1 instanceof QueryNode && node2 instanceof QueryNode) {
-                    hqlParts.push(new StringBuilder().append('(')
-                            .append(generateParameterHql(node2, queryModel.getParameters())).append(operateNode.getQueryLinkOperate().getValue())
-                            .append(generateParameterHql(node1, queryModel.getParameters()))
-                            .append(')'));
-                } else {
-                    CharSequence popNode = hqlParts.pop();
-
-                    if (node1 == null) {
-                        CharSequence popNode2 = hqlParts.pop();
-                        hqlParts.push(
-                                new StringBuilder("(").append(popNode2)
-                                        .append(operateNode.getQueryLinkOperate().getValue())
-                                        .append(popNode).append(")")
-                        );
-                    } else {
-                        hqlParts.push(
-                                new StringBuilder("(").append(popNode)
-                                        .append(operateNode.getQueryLinkOperate().getValue())
-                                        .append(generateParameterHql(node1, queryModel.getParameters())).append(")"));
-                    }
-                }
+                StringBuilder combineSql = new StringBuilder(32).append('(')
+                        .append(generateParameterHql(node2, queryModel.getParameters()))
+                        .append(operateNode.getQueryLinkOperate().getValue())
+                        .append(generateParameterHql(node1, queryModel.getParameters()))
+                        .append(')');
+                handleStack.push(new QueryCombineNode(combineSql.toString()));
             } else {
                 handleStack.add(currentNode);
             }
         }
-
-        queryModel.setStatement(hqlParts.pop().toString());
+        QueryCombineNode handle = (QueryCombineNode) handleStack.pop();
+        queryModel.setConditionStatement(handle.getValue());
         return queryModel;
     }
 
@@ -149,29 +136,9 @@ public class QueryParser {
             }
             return queryPart;
         }
-        return "";
-    }
-
-    public static QueryGroup deepQueryGroupCopy(QueryGroup queryGroup) {
-        //Copy Node
-        if (queryGroup != null) {
-            QueryGroup group = new QueryGroup();
-            if (queryGroup.getQueryHandleList() != null) {
-                for (QueryHandle handle : queryGroup.getQueryHandleList()) {
-                    if (handle instanceof QueryOperateNode) {
-                        QueryOperateNode operateNode = new QueryOperateNode(((QueryOperateNode) handle).getQueryLinkOperate());
-                        group.getQueryHandleList().add(operateNode);
-                    } else if (handle instanceof QueryNode) {
-                        QueryNode currentNode = (QueryNode) handle;
-                        QueryNode queryNode = new QueryNode(currentNode.getColumnName(), currentNode.getValue(), currentNode.getQueryOperate());
-                        group.getQueryHandleList().add(queryNode);
-                    }
-                }
-            }
-            group.setSort(queryGroup.getSort());
-            return group;
-        } else {
-            return null;
+        if (handle instanceof QueryCombineNode) {
+            return ((QueryCombineNode) handle).getValue();
         }
+        return "";
     }
 }

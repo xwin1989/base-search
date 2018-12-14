@@ -1,22 +1,21 @@
 package com.qeeka.test.domain;
 
-import javax.persistence.*;
+
+import com.qeeka.annotation.Column;
+import com.qeeka.annotation.Entity;
+import com.qeeka.annotation.Id;
 
 /**
  * Created by neal.xu on 2015/10/14
  */
-@Entity
-@Table(name = "book_info")
+@Entity(table = "book_info")
 public class BookInfo {
     @Id
-    @GeneratedValue
     private Integer id;
 
-    @Column(name = "name")
+    @Column( "name")
     private String name;
 
-    @ManyToOne
-    @JoinColumn(name = "book_id")
     private Book book;
 
     public Integer getId() {

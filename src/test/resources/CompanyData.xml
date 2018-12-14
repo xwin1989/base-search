@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<dataset>
-    <company id="0" name="company1" status="1" type="2"/>
-    <company id="1" name="company2" status="2" type="1"/>
-    <company id="2" name="company3" status="3" type="2"/>
-
-</dataset>

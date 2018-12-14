@@ -1,45 +1,37 @@
 package com.qeeka.test.domain;
 
+import com.qeeka.annotation.Column;
+import com.qeeka.annotation.Entity;
+import com.qeeka.annotation.Id;
+import com.qeeka.annotation.Transient;
 import com.qeeka.domain.MapHandle;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import java.util.List;
+import com.qeeka.enums.GenerationType;
 
 /**
  * Created by Neal on 8/9 0009.
  */
-@Entity
-@Table(name = "book")
+@Entity(table = "book")
 public class Book implements MapHandle {
-    @Id
-    @GeneratedValue
+    @Id(strategy = GenerationType.AUTO)
     private Integer id;
 
-    @Column(name = "name")
+    @Column("name")
     private String name;
 
-    @Column(name = "type")
+    @Column("type")
     private Integer type;
 
-    @Column(name = "status")
+    @Column("status")
     private Integer status;
 
-    @Column(name = "user_id")
-    private Integer userId;
-
-    @OneToMany(mappedBy = "book")
-    private List<BookInfo> bookInfoList;
-
-    @Column(name = "author_id")
+    @Column("author_id")
     private Integer authorId;
 
+    @Transient
+    private Integer total;
+
+    @Transient
     private String authorName;
-    private String bookDescription;
 
     public Integer getId() {
         return id;
@@ -65,28 +57,12 @@ public class Book implements MapHandle {
         this.type = type;
     }
 
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-
     public Integer getStatus() {
         return status;
     }
 
     public void setStatus(Integer status) {
         this.status = status;
-    }
-
-    public List<BookInfo> getBookInfoList() {
-        return bookInfoList;
-    }
-
-    public void setBookInfoList(List<BookInfo> bookInfoList) {
-        this.bookInfoList = bookInfoList;
     }
 
     public Integer getAuthorId() {
@@ -97,24 +73,24 @@ public class Book implements MapHandle {
         this.authorId = authorId;
     }
 
+    public Integer getTotal() {
+        return total;
+    }
+
+    public void setTotal(Integer total) {
+        this.total = total;
+    }
+
+    @Override
+    public Object getPrimaryKey() {
+        return this.id;
+    }
+
     public String getAuthorName() {
         return authorName;
     }
 
     public void setAuthorName(String authorName) {
         this.authorName = authorName;
-    }
-
-    public String getBookDescription() {
-        return bookDescription;
-    }
-
-    public void setBookDescription(String bookDescription) {
-        this.bookDescription = bookDescription;
-    }
-
-    @Override
-    public Object getPrimaryKey() {
-        return this.id;
     }
 }

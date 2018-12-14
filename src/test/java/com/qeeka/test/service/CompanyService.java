@@ -21,12 +21,12 @@ public class CompanyService {
 
     @Transactional
     public int updateNative(String sql) {
-        return repository.updateNative(sql);
+        return repository.update(sql);
     }
 
     @Transactional
     public int updateNative(String sql, Map<String, Object> params) {
-        return repository.updateNative(sql, params);
+        return repository.update(sql, params);
     }
 
     public List<Company> query(String sql) {
@@ -53,14 +53,6 @@ public class CompanyService {
         return repository.queryUnique(sql, params, clazz);
     }
 
-
-    public List<Object> queryList(String sql) {
-        return repository.queryForList(sql);
-    }
-
-    public List<Object> queryList(String sql, Map<String, Object> params) {
-        return repository.queryForList(sql, params);
-    }
 
     public <T> List<T> queryList(String sql, Class<T> clazz) {
         return repository.queryForList(sql, clazz);

@@ -1,17 +1,13 @@
 package com.qeeka.test.service;
 
 import com.qeeka.domain.QueryGroup;
+import com.qeeka.domain.QueryResponse;
 import com.qeeka.domain.UpdateGroup;
-import com.qeeka.http.QueryRequest;
-import com.qeeka.http.QueryResponse;
 import com.qeeka.test.domain.Person;
 import com.qeeka.test.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 /**
  * Created by Neal on 2015/7/27.
@@ -19,8 +15,6 @@ import javax.persistence.PersistenceContext;
 @Service
 @Transactional
 public class PersonService {
-    @PersistenceContext
-    private EntityManager entityManager;
 
     @Autowired
     private PersonRepository repository;
@@ -29,21 +23,17 @@ public class PersonService {
         return repository.get(id);
     }
 
-    public void remove(int personId) {
-        Person person = entityManager.find(Person.class, personId);
-        this.entityManager.remove(person);
+    public int delete(int personId) {
+        Person person = repository.get(personId, Person.class);
+        return repository.delete(person);
     }
 
-    public QueryResponse<Person> query(QueryRequest request) {
-        return repository.query(request);
+    public int deleteById(Integer id) {
+        return repository.deleteById(id);
     }
 
-    public QueryResponse<Person> search(QueryRequest request) {
-        return repository.search(request);
-    }
-
-    public Long count(QueryRequest request) {
-        return repository.count(request);
+    public QueryResponse<Person> search(QueryGroup group) {
+        return repository.query(group);
     }
 
     public Long count(QueryGroup queryGroup) {
@@ -52,5 +42,9 @@ public class PersonService {
 
     public Integer update(UpdateGroup group) {
         return repository.update(group);
+    }
+
+    public int update(String sql) {
+        return repository.update(sql);
     }
 }

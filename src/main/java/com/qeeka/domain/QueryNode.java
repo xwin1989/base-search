@@ -1,6 +1,6 @@
 package com.qeeka.domain;
 
-import com.qeeka.operate.QueryOperate;
+import com.qeeka.enums.QueryOperate;
 
 /**
  * Created by neal.xu on 7/31 0031.
@@ -8,12 +8,7 @@ import com.qeeka.operate.QueryOperate;
 public class QueryNode implements QueryHandle {
     private String columnName;
     private Object value;
-    private QueryOperate queryOperate = QueryOperate.EQUALS;
-
-    public QueryNode(String columnName, Object value) {
-        this.columnName = columnName;
-        this.value = value;
-    }
+    private QueryOperate queryOperate;
 
     public QueryNode(String columnName, Object value, QueryOperate queryOperate) {
         this.value = value;

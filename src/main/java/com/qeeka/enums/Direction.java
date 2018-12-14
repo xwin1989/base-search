@@ -1,4 +1,4 @@
-package com.qeeka.operate;
+package com.qeeka.enums;
 
 public enum Direction {
     ASC("ASC"), DESC("DESC"), ASC_NULL("ASC"), DESC_NULL("DESC"), ASC_FIELD("FIELD"), DESC_FIELD("FIELD");
