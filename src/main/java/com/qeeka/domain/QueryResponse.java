@@ -1,6 +1,6 @@
-package com.qeeka.http;
+package com.qeeka.domain;
 
-import com.qeeka.domain.MapHandle;
+import com.qeeka.http.BaseSearchResponse;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,19 +11,10 @@ import java.util.Map;
  * Created by Neal on 8/9 0009.
  */
 public class QueryResponse<T> {
-    private T entity;
     private List<T> records;
     private Long totalRecords;
     private Integer pageIndex;
     private Integer pageSize;
-
-    public T getEntity() {
-        return entity;
-    }
-
-    public void setEntity(T entity) {
-        this.entity = entity;
-    }
 
     public List<T> getRecords() {
         return records;
@@ -59,7 +50,6 @@ public class QueryResponse<T> {
 
     public <X extends BaseSearchResponse<T>> X assignmentToResponse(X response) {
         if (response != null) {
-            response.setEntity(this.entity);
             response.setRecordList(this.records);
             response.setTotalRecords(this.totalRecords);
             response.setPageIndex(this.pageIndex);

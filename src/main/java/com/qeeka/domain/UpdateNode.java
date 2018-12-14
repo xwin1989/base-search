@@ -1,6 +1,6 @@
 package com.qeeka.domain;
 
-import com.qeeka.operate.UpdateOperate;
+import com.qeeka.enums.UpdateOperate;
 
 /**
  * Created by neal.xu on 2017/08/11.
@@ -8,15 +8,8 @@ import com.qeeka.operate.UpdateOperate;
 public class UpdateNode {
     private String columnName;
     private Object value;
-    private UpdateOperate updateOperate = UpdateOperate.EQUALS;
+    private UpdateOperate updateOperate;
 
-    public UpdateNode() {
-    }
-
-    public UpdateNode(String columnName, Object value) {
-        this.columnName = columnName;
-        this.value = value;
-    }
 
     public UpdateNode(String columnName, Object value, UpdateOperate updateOperate) {
         this.columnName = columnName;

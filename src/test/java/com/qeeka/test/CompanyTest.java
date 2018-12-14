@@ -1,6 +1,5 @@
 package com.qeeka.test;
 
-import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.qeeka.test.domain.Company;
 import com.qeeka.test.domain.CompanyInfo;
 import com.qeeka.test.service.CompanyService;
@@ -25,6 +24,11 @@ public class CompanyTest extends SpringTestWithDB {
     @Before
     @Transactional
     public void init() {
+        companyService.updateNative("create table company(id int,name varchar(50),status int,type int)");
+        companyService.updateNative("insert into company values(0,'company1',1,2)");
+        companyService.updateNative("insert into company values(1,'company2',2,1)");
+        companyService.updateNative("insert into company values(2,'company3',3,2)");
+
         companyService.updateNative("create table company_info(id int,title varchar(50),status int,first_name varchar(10),lastName varchar(10))");
         companyService.updateNative("insert into company_info values(1,'info1',1,'neal','xu')");
         companyService.updateNative("insert into company_info values(2,'info2',2,'neal','xu')");
@@ -34,12 +38,11 @@ public class CompanyTest extends SpringTestWithDB {
     @After
     @Transactional
     public void after() {
+        companyService.updateNative("drop table company");
         companyService.updateNative("drop table company_info");
     }
 
-
     @Test
-    @DatabaseSetup("/CompanyData.xml")
     @Transactional
     public void testSimple() {
         List<CompanyInfo> companyInfoList = companyService.query("select * from company_info order by id asc", CompanyInfo.class);
@@ -70,8 +73,6 @@ public class CompanyTest extends SpringTestWithDB {
     }
 
     @Test
-    @Transactional
-    @DatabaseSetup("/CompanyData.xml")
     public void testQuery() {
         CompanyInfo company = companyService.queryUnique("select id,first_name as firstColumn ,lastName from company_info where id = :id", Collections.<String, Object>singletonMap("id", 1), CompanyInfo.class);
         Assert.assertEquals(company.getFirstColumn(), "neal");
@@ -81,18 +82,12 @@ public class CompanyTest extends SpringTestWithDB {
     }
 
     @Test
-    @Transactional
-    @DatabaseSetup("/CompanyData.xml")
     public void testList() {
-        List<Object> objects = companyService.queryList("select id from company");
+        List<Integer> objects = companyService.queryList("select id from company", Integer.class);
         Assert.assertEquals(objects.size(), 3);
 
         List<Integer> idList = companyService.queryList("select id from company where id >= :id", Collections.<String, Object>singletonMap("id", 1), Integer.class);
         Assert.assertEquals(idList.size(), 2);
-
-
-        List list = companyService.queryList("select id from company where id >= :id", Collections.<String, Object>singletonMap("id", 1));
-        Assert.assertEquals(list.size(), 2);
 
         List<String> list2 = companyService.queryList("select id from company where id = 2", String.class);
         Assert.assertEquals(list2.get(0), "2");
@@ -101,7 +96,6 @@ public class CompanyTest extends SpringTestWithDB {
 
     @Test
     @Transactional
-    @DatabaseSetup("/CompanyData.xml")
     public void testObject() {
         String name = companyService.queryForObject("select name from company where id = 1", String.class);
         Assert.assertEquals(name, "company2");
@@ -112,13 +106,12 @@ public class CompanyTest extends SpringTestWithDB {
 
     @Test
     @Transactional
-    @DatabaseSetup("/CompanyData.xml")
     public void testMap() {
         Map<String, Object> queryForMap = companyService.queryForMap("select * from company where id = 1");
-        Assert.assertEquals(queryForMap.size(), 5);
+        Assert.assertEquals(queryForMap.size(), 4);
 
         queryForMap = companyService.queryForMap("select * from company where id = :id", Collections.<String, Object>singletonMap("id", 1));
-        Assert.assertEquals(queryForMap.size(), 5);
+        Assert.assertEquals(queryForMap.size(), 4);
 
         List<Company> companies = companyService.queryWithRowMap("select * from company where id=:id", Collections.<String, Object>singletonMap("id", 1));
         Assert.assertEquals(companies.size(), 1);

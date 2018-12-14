@@ -1,9 +1,8 @@
 package com.qeeka.test.service;
 
 import com.qeeka.domain.QueryGroup;
+import com.qeeka.domain.QueryResponse;
 import com.qeeka.domain.UpdateGroup;
-import com.qeeka.http.QueryRequest;
-import com.qeeka.http.QueryResponse;
 import com.qeeka.test.domain.Book;
 import com.qeeka.test.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,20 +25,24 @@ public class BookService {
     @Autowired
     private BookRepository repository;
 
-    public QueryResponse<Book> search(QueryRequest request) {
-        return repository.search(request);
+    public QueryResponse<Book> search(QueryGroup request) {
+        return repository.query(request);
+    }
+
+    public Book searchUnique(QueryGroup group) {
+        return repository.queryUnique(group);
     }
 
     public Book findUnique(String hql, Map<String, Object> params) {
-        return repository.findUnique(hql, params);
+        return repository.queryUnique(hql, params);
     }
 
-    public Book findUnique(String hql) {
-        return repository.findUnique(hql);
+    public Book findUnique(QueryGroup group) {
+        return repository.queryUnique(group);
     }
 
-    public Book queryUnique1(QueryRequest queryRequest) {
-        return repository.queryUnique(queryRequest);
+    public Book queryUnique(QueryGroup hql) {
+        return repository.queryUnique(hql);
     }
 
     public Book queryUnique2(QueryGroup queryGroup) {
@@ -47,7 +50,7 @@ public class BookService {
     }
 
 
-    public Book querySingle1(QueryRequest queryRequest) {
+    public Book querySingle1(QueryGroup queryRequest) {
         return repository.querySingle(queryRequest);
     }
 
@@ -55,12 +58,8 @@ public class BookService {
         return repository.querySingle(queryGroup);
     }
 
-    public QueryResponse<Book> search(QueryGroup queryGroup) {
-        return repository.search(queryGroup);
-    }
-
-    public QueryResponse<Book> query(QueryRequest queryRequest) {
-        return repository.query(queryRequest);
+    public QueryResponse<Book> query(QueryGroup queryGroup) {
+        return repository.query(queryGroup);
     }
 
     public QueryResponse<Book> queryAll2() {
@@ -77,21 +76,16 @@ public class BookService {
     }
 
     public List<Book> find(String hql) {
-        return repository.find(hql);
+        return repository.query(hql);
     }
 
 
-    public List findByGroup(String hql) {
-        return repository.find(hql);
-    }
-
-
-    public List<Book> findAll() {
-        return repository.find("from Book");
+    public <X> List<X> findBySql(String sql, Class<X> clazz) {
+        return repository.query(sql, clazz);
     }
 
     public List<Book> findAll2() {
-        return repository.search().getRecords();
+        return repository.query().getRecords();
     }
 
     public Integer count() {
@@ -109,8 +103,8 @@ public class BookService {
     }
 
     public Long countByUnique() {
-        String hql = "select count(B) from Book B";
-        return repository.findUnique(hql);
+        String hql = "select count(1) from Book";
+        return repository.queryForObject(hql, Long.class);
     }
 
     public Integer getTypeById(Integer id) {
@@ -124,31 +118,27 @@ public class BookService {
         return null;
     }
 
-    public void testLog() {
-        repository.testLog();
-    }
-
-    public List<Object[]> findGroup() {
-        return repository.find("select status,COUNT(ID) from Book group by status");
+    public List<Book> findGroup() {
+        return repository.query("select status,COUNT(id) as total from Book group by status");
     }
 
     public Map<String, Object> queryGroup() {
-        return repository.queryForMap("select status,count(id) as c1 from book group by status");
+        return repository.queryForMap("select status,count(id) as total from book group by status");
     }
 
     @Transactional
     public int updateBookStatus(Integer bookId, Integer status) {
-        return repository.updateNative(new UpdateGroup("status", status).where(new QueryGroup("id", bookId)));
+        return repository.update(new UpdateGroup("status", status).where(new QueryGroup("id", bookId)));
     }
 
     @Transactional
     public int updateAllBookStatus(Integer status) {
-        return repository.update("update Book set status = :status,userId=1", Collections.<String, Object>singletonMap("status", status));
+        return repository.update("update book set status = :status", Collections.<String, Object>singletonMap("status", status));
     }
 
     @Transactional
     public int updateNativeAllBookStatus(Integer status) {
-        return repository.updateNative("update book set status = :status,user_id=2", Collections.<String, Object>singletonMap("status", status));
+        return repository.update("update book set status = :status", Collections.<String, Object>singletonMap("status", status));
     }
 
     @Transactional
@@ -159,6 +149,11 @@ public class BookService {
     @Transactional
     public void update(Book book) {
         repository.update(book);
+    }
+
+    @Transactional
+    public void update(String sql) {
+        repository.update(sql);
     }
 
     public Book getBook(Integer id) {
@@ -173,27 +168,28 @@ public class BookService {
     @Transactional
     public List<Book> batchSave() {
         List<Book> books = new ArrayList<>();
-        for (int i = 1; i < 501; i++) {
+        for (int i = 1; i < 5; i++) {
             Book book = new Book();
             book.setName("book" + i);
+            book.setId(i);
             books.add(book);
         }
         return repository.batchSave(books);
     }
 
     @Transactional
-    public List<Book> batchUpdate(List<Book> books) {
+    public int[] batchUpdate(List<Book> books) {
         return repository.batchUpdate(books);
     }
 
     @Transactional
     public int[] batchNativeUpdate(String sql, List<Book> books) {
-        return repository.batchUpdateNative(sql, books);
+        return repository.batchUpdate(sql, books);
     }
 
     @Transactional
     public int[] batchNativeUpdate(String sql, Map<String, ?>[] batchValues) {
-        return repository.batchUpdateNative(sql, batchValues);
+        return repository.batchUpdate(sql, batchValues);
     }
 
 }

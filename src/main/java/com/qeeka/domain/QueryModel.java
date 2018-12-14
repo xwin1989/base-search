@@ -7,20 +7,17 @@ import java.util.Map;
  * Created by neal.xu on 8/1 0001.
  */
 public class QueryModel {
-    private String statement;
+    private String conditionStatement;
     private String orderStatement;
+    private String selectStatement;
     private Map<String, Object> parameters = new HashMap<>();
 
-    public void setParameters(Map<String, Object> parameters) {
-        this.parameters = parameters;
+    public String getConditionStatement() {
+        return conditionStatement;
     }
 
-    public String getStatement() {
-        return statement;
-    }
-
-    public void setStatement(String statement) {
-        this.statement = statement;
+    public void setConditionStatement(String conditionStatement) {
+        this.conditionStatement = conditionStatement;
     }
 
     public String getOrderStatement() {
@@ -31,8 +28,19 @@ public class QueryModel {
         this.orderStatement = orderStatement;
     }
 
+    public String getSelectStatement() {
+        return selectStatement;
+    }
+
+    public void setSelectStatement(String selectStatement) {
+        this.selectStatement = selectStatement;
+    }
+
     public Map<String, Object> getParameters() {
         return parameters;
     }
 
+    public void setParameters(Map<String, Object> parameters) {
+        this.parameters = parameters;
+    }
 }

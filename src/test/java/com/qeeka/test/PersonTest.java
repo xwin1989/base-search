@@ -1,16 +1,15 @@
 package com.qeeka.test;
 
-import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.qeeka.domain.QueryGroup;
+import com.qeeka.domain.QueryResponse;
 import com.qeeka.domain.UpdateGroup;
-import com.qeeka.http.QueryRequest;
-import com.qeeka.http.QueryResponse;
-import com.qeeka.operate.QueryOperate;
-import com.qeeka.operate.UpdateOperate;
+import com.qeeka.enums.QueryOperate;
+import com.qeeka.enums.UpdateOperate;
 import com.qeeka.test.domain.Person;
 import com.qeeka.test.service.PersonService;
-import com.qeeka.util.QueryJSONBinder;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,39 +22,47 @@ import java.util.List;
  */
 public class PersonTest extends SpringTestWithDB {
 
-
     @Autowired
     private PersonService personService;
 
+    @Before
+    @Transactional
+    public void init() {
+        personService.update("create table person(id int,name varchar(50),password varchar(50),status int,type int)");
+        personService.update("insert into person values(0,'neal1','p1',1,1)");
+        personService.update("insert into person values(1,'neal2','p2',2,2)");
+    }
+
+    @After
+    @Transactional
+    public void after() {
+        personService.update("drop table person");
+    }
+
+
     @Test
-    @DatabaseSetup("/PersonData.xml")
     @Transactional
     public void testRemove() {
-        personService.remove(1);
+        int n1 = personService.delete(1);
+        int n2 = personService.deleteById(2);
+        Assert.assertEquals(n1, 1);
+        Assert.assertEquals(n2, 0);
     }
 
     @Test
-    @DatabaseSetup("/PersonData.xml")
     public void testSearch() {
         List<Integer> ids = Arrays.asList(2, 3, 4, 5);
-        QueryGroup group = new QueryGroup("name", "%n%", QueryOperate.LIKE)
+        QueryGroup group = new QueryGroup("name", "n", QueryOperate.CONTAIN)
                 .and("type", 1).and("status", "type", QueryOperate.COLUMN_EQUALS)
                 .and("password", "p1").and("id", ids, QueryOperate.NOT_IN).or("id", 0, QueryOperate.IN);
-        String json = QueryJSONBinder.binder(QueryGroup.class).toJSON(group);
-
-        QueryRequest request = QueryJSONBinder.binder(QueryRequest.class).fromJSON(json);
-        request.setQueryGroup(group);
-        QueryResponse<Person> response = personService.search(request);
+        QueryResponse<Person> response = personService.search(group);
         Assert.assertTrue(response.getRecords().get(0).getId() == 0);
-        Long count = personService.count(request);
-        Long count2 = personService.count(request.getQueryGroup());
+        Long count = personService.count(group);
         Assert.assertTrue(count == 1);
-        Assert.assertEquals(count2, count);
     }
 
 
     @Test
-    @DatabaseSetup("/PersonData.xml")
     @Transactional
     public void testUpdate() {
         // update Person set status = 1, password = 'hello', type = type+1 where id = 0 and status = 1

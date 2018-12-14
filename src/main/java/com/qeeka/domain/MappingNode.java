@@ -1,6 +1,6 @@
 package com.qeeka.domain;
 
-import com.qeeka.operate.QueryLinkOperate;
+import com.qeeka.enums.QueryLinkOperate;
 
 import java.util.ArrayList;
 import java.util.List;

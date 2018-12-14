@@ -1,14 +1,11 @@
 package com.qeeka.test;
 
-import com.qeeka.domain.QueryParser;
+import com.qeeka.util.QueryParserHandle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.Database;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
@@ -29,31 +26,14 @@ public class AppTestConfig {
         return dataSource;
     }
 
-
-    @Bean
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-        vendorAdapter.setDatabase(Database.HSQL);
-        vendorAdapter.setGenerateDdl(true);
-        vendorAdapter.setShowSql(true);
-
-        LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
-        factory.setJpaVendorAdapter(vendorAdapter);
-        factory.setPackagesToScan("com.qeeka.test.domain");
-        factory.setDataSource(dataSource());
-
-        return factory;
-    }
-
     @Bean
     public PlatformTransactionManager transactionManager() {
-        JpaTransactionManager txManager = new JpaTransactionManager();
-        txManager.setEntityManagerFactory(entityManagerFactory().getObject());
-        return txManager;
+        DataSourceTransactionManager manager = new DataSourceTransactionManager(dataSource());
+        return manager;
     }
 
     @Bean
-    public QueryParser queryParser() {
-        return new QueryParser();
+    public QueryParserHandle queryParser() {
+        return new QueryParserHandle();
     }
 }

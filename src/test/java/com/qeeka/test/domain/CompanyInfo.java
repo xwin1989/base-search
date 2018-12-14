@@ -1,17 +1,13 @@
 package com.qeeka.test.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Transient;
-
+/**
+ * simple vo
+ */
 public class CompanyInfo {
     private Integer id;
     private String title;
     private Integer status;
-
-    @Column(name = "first_name")
     public String firstName;
-
-    @Transient
     public String lastName;
 
     public String firstColumn;
