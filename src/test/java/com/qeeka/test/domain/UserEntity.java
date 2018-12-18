@@ -3,7 +3,6 @@ package com.qeeka.test.domain;
 import com.qeeka.annotation.Column;
 import com.qeeka.annotation.Entity;
 import com.qeeka.annotation.Id;
-import com.qeeka.annotation.Transient;
 import com.qeeka.enums.GenerationType;
 
 import java.util.Date;
@@ -13,15 +12,18 @@ import java.util.Date;
  */
 @Entity(table = "user")
 public class UserEntity {
+
+    public static final Integer COMMON_NO = 0;
+
     @Id(strategy = GenerationType.AUTO)
     @Column("user_id")
     private Integer userId;
+    @Column
     private String name;
     @Column("role_id")
     private Integer roleId;
     @Column("create_time")
     private Date createTime;
-    @Transient
     private Integer age;
 
     public Integer getUserId() {

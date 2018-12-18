@@ -3,7 +3,6 @@ package com.qeeka.test.domain;
 import com.qeeka.annotation.Column;
 import com.qeeka.annotation.Entity;
 import com.qeeka.annotation.Id;
-import com.qeeka.annotation.Transient;
 import com.qeeka.domain.MapHandle;
 import com.qeeka.enums.GenerationType;
 
@@ -27,10 +26,9 @@ public class Book implements MapHandle {
     @Column("author_id")
     private Integer authorId;
 
-    @Transient
+    //skip column
     private Integer total;
 
-    @Transient
     private String authorName;
 
     public Integer getId() {
