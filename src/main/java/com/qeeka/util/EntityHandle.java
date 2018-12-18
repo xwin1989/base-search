@@ -3,7 +3,6 @@ package com.qeeka.util;
 import com.qeeka.annotation.Column;
 import com.qeeka.annotation.Entity;
 import com.qeeka.annotation.Id;
-import com.qeeka.annotation.Transient;
 import com.qeeka.domain.EntityInfo;
 import org.springframework.util.StringUtils;
 
@@ -54,19 +53,23 @@ public class EntityHandle {
             Map<String, Field> allDeclareFields = ReflectionUtil.getAllDeclareFields(clazz);
             for (Map.Entry<String, Field> entry : allDeclareFields.entrySet()) {
                 Field field = entry.getValue();
-                //skip transient
-                if (field.isAnnotationPresent(Transient.class)) continue;
+
+                Column column = field.getAnnotation(Column.class);
+                Id idColumn = field.getAnnotation(Id.class);
+                //skip column
+                if (column == null && idColumn == null) continue;
+
                 //get column name
                 String columnName = field.getName();
-                if (field.isAnnotationPresent(Column.class)) {
-                    columnName = field.getAnnotation(Column.class).value();
+                if (column != null && StringUtils.hasText(column.value())) {
+                    columnName = column.value();
                 }
-                if (field.isAnnotationPresent(Id.class)) {
+                if (idColumn != null) {
                     if (idNames != null) {
                         throw new IllegalArgumentException("Current only support single @Id annotation");
                     }
                     idNames = columnName;
-                    entityInfo.setStrategy(field.getAnnotation(Id.class).strategy());
+                    entityInfo.setStrategy(idColumn.strategy());
                 }
                 entityInfo.getColumnMap().put(field.getName(), columnName);
             }

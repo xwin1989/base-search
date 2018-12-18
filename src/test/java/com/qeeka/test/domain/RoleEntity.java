@@ -13,6 +13,7 @@ import java.util.Date;
 public class RoleEntity {
     @Id
     private Integer id;
+    @Column
     private String name;
     @Column("create_time")
     private Date createTime;
