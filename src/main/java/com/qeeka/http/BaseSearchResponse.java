@@ -1,35 +1,28 @@
 package com.qeeka.http;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.qeeka.domain.QueryResponse;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.net.HttpURLConnection;
 import java.util.List;
 
 /**
  * Created by Neal on 10/12 0012.
  */
-@XmlRootElement(name = "base_search_response")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class BaseSearchResponse<T> {
-    @XmlElement(name = "record")
+    @JsonProperty("record")
     protected T entity;
-    @XmlElementWrapper(name = "records")
-    @XmlElement
+    @JsonProperty("records")
     protected List<T> recordList;
-    @XmlElement(name = "total_records")
+    @JsonProperty("total_records")
     protected Long totalRecords;
-    @XmlElement(name = "page_index")
+    @JsonProperty("page_index")
     protected Integer pageIndex;
-    @XmlElement(name = "page_size")
+    @JsonProperty("page_size")
     protected Integer pageSize;
-    @XmlElement(name = "status_code")
+    @JsonProperty("status_code")
     protected Integer statusCode = HttpURLConnection.HTTP_OK;
-    @XmlElement(name = "message")
+    @JsonProperty("message")
     protected String message;
 
     public T getEntity() {
