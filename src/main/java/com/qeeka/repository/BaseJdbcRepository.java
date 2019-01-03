@@ -12,7 +12,6 @@ import com.qeeka.domain.UpdateGroup;
 import com.qeeka.domain.UpdateNode;
 import com.qeeka.enums.GenerationType;
 import com.qeeka.enums.QueryResultType;
-import com.qeeka.enums.UpdateOperate;
 import com.qeeka.util.EntityHandle;
 import com.qeeka.util.QueryParserHandle;
 import com.qeeka.util.ReflectionUtil;
@@ -667,12 +666,14 @@ public abstract class BaseJdbcRepository<T> {
         sql.append("UPDATE ").append(entityInfo.getTableName()).append(" SET ");
         for (UpdateNode updateNode : updateNodeList) {
             //append params
-            sql.append(updateNode.getColumnName()).append(" = ");
-            if (UpdateOperate.COLUMN_EQUALS.equals(updateNode.getUpdateOperate())) {
-                sql.append(updateNode.getValue());
-            } else {
-                params.put(updateNode.getColumnName(), updateNode.getValue());
-                sql.append(':').append(updateNode.getColumnName());
+            sql.append(updateNode.getColumnName());
+            if (updateNode.getValue() != null) {
+                if (updateNode.getValue() instanceof Map) {
+                    params.putAll((Map) updateNode.getValue());
+                } else {
+                    params.put(updateNode.getColumnName(), updateNode.getValue());
+                    sql.append(" = :").append(updateNode.getColumnName());
+                }
             }
             sql.append(',');
         }
