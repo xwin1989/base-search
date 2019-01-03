@@ -128,7 +128,7 @@ public class BookService {
 
     @Transactional
     public int updateBookStatus(Integer bookId, Integer status) {
-        return repository.update(new UpdateGroup("status", status).where(new QueryGroup("id", bookId)));
+        return repository.update(new UpdateGroup("status", status).where("id", bookId));
     }
 
     @Transactional

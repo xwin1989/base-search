@@ -4,7 +4,6 @@ import com.qeeka.domain.QueryGroup;
 import com.qeeka.domain.QueryResponse;
 import com.qeeka.domain.UpdateGroup;
 import com.qeeka.enums.QueryOperate;
-import com.qeeka.enums.UpdateOperate;
 import com.qeeka.test.domain.Person;
 import com.qeeka.test.service.PersonService;
 import org.junit.After;
@@ -15,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -65,13 +65,56 @@ public class PersonTest extends SpringTestWithDB {
     @Test
     @Transactional
     public void testUpdate() {
-        // update Person set status = 1, password = 'hello', type = type+1 where id = 0 and status = 1
+        // update Person set status = 1, password = 'hello', type = type+1, name= 'helloName' where id = 0 and status = 1
         Integer update = personService.update(
-                new UpdateGroup("status", 2).set("password", "hello").set("type", "type+1", UpdateOperate.COLUMN_EQUALS)
+                new UpdateGroup("status", 2).set("password", "hello")
+                        .set("type=type+:t", Collections.singletonMap("t", 1)).set("name='helloName'")
                         .where(new QueryGroup("id", 0).and("status", 1)));
         Assert.assertEquals(update.intValue(), 1);
         Long status = personService.count(new QueryGroup("status", 2));
         Assert.assertEquals(status, Long.valueOf(2));
     }
+
+
+    @Test
+    @Transactional
+    public void testUpdate2() {
+        // update Person set password = 'hello' where id = 0
+        Integer update = personService.update(new UpdateGroup("password", "hello").where("id", 0));
+        Assert.assertEquals(update.intValue(), 1);
+        Long status = personService.count(new QueryGroup("id", 0).and("password", "hello"));
+        Assert.assertEquals(status, Long.valueOf(1));
+    }
+
+    @Test
+    @Transactional
+    public void testUpdateAll() {
+        // update Person set type = type + 1
+        Integer update = personService.update(new UpdateGroup("type = type+1"));
+        Assert.assertEquals(update.intValue(), 2);
+        Long status = personService.count(new QueryGroup("type", 1));
+        Assert.assertEquals(status, Long.valueOf(0));
+    }
+
+    @Test
+    @Transactional
+    public void testUpdateNull() {
+        // update Person set password = 'hello' where id is not null
+        Integer update = personService.update(new UpdateGroup("type = type+1").where("id", QueryOperate.IS_NOT_NULL));
+        Assert.assertEquals(update.intValue(), 2);
+        Long status = personService.count(new QueryGroup("type", 1));
+        Assert.assertEquals(status, Long.valueOf(0));
+    }
+
+    @Test
+    @Transactional
+    public void testUpdateNotEquals() {
+        // update Person set type=type+1 where id <> 0
+        Integer update = personService.update(new UpdateGroup("type = type+1").where("id", 0, QueryOperate.NO_EQUALS));
+        Assert.assertEquals(update.intValue(), 1);
+        Long status = personService.count(new QueryGroup("type", 1));
+        Assert.assertEquals(status, Long.valueOf(1));
+    }
+
 
 }
