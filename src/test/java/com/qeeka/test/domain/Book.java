@@ -23,7 +23,7 @@ public class Book implements MapHandle {
     @Column("status")
     private Integer status;
 
-    @Column("author_id")
+    @Column
     private Integer authorId;
 
     //skip column

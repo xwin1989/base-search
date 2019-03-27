@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class EntityHandle {
     private static final Map<Class<?>, EntityInfo> INFO_CACHE = new ConcurrentHashMap<>();
+    public static final char UNDERLINE = '_';
 
     public static EntityInfo getEntityInfo(Class clazz) {
         EntityInfo info = INFO_CACHE.get(clazz);
@@ -59,8 +60,8 @@ public class EntityHandle {
                 //skip column
                 if (column == null && idColumn == null) continue;
 
-                //get column name
-                String columnName = field.getName();
+                //get column name, camel to underLine
+                String columnName = camelToUnderline(field.getName());
                 if (column != null && StringUtils.hasText(column.value())) {
                     columnName = column.value();
                 }
@@ -115,5 +116,22 @@ public class EntityHandle {
         return columnNames;
     }
 
+    private static String camelToUnderline(String param) {
+        if (param == null || "".equals(param.trim())) {
+            return "";
+        }
+        int len = param.length();
+        StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++) {
+            char c = param.charAt(i);
+            if (Character.isUpperCase(c)) {
+                sb.append(UNDERLINE);
+                sb.append(Character.toLowerCase(c));
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
 
 }
