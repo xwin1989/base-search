@@ -1,7 +1,5 @@
 package com.qeeka.domain;
 
-import com.qeeka.http.BaseSearchResponse;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,17 +44,6 @@ public class QueryResponse<T> {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
-    }
-
-    public <X extends BaseSearchResponse<T>> X assignmentToResponse(X response) {
-        if (response != null) {
-            response.setRecordList(this.records);
-            response.setTotalRecords(this.totalRecords);
-            response.setPageIndex(this.pageIndex);
-            response.setPageSize(this.pageSize);
-            return response;
-        }
-        return null;
     }
 
     public Map<Object, T> getRecordsMap() {
