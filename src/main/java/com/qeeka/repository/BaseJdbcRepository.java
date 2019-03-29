@@ -28,6 +28,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.transaction.IllegalTransactionStateException;
+import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
@@ -161,7 +162,8 @@ public abstract class BaseJdbcRepository<T> {
             if (key == null) return entity;
             Field idField = ReflectionUtil.findUniqueFieldWithAnnotation(entity.getClass(), Id.class);
             try {
-                idField.set(entity, key.intValue());
+                Class type = idField.getType();
+                idField.set(entity, NumberUtils.convertNumberToTargetClass(key, type));
             } catch (IllegalAccessException e) {
                 logger.error(e.getMessage(), e);
             }

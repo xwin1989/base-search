@@ -85,7 +85,7 @@ public class CompanyService {
             @Override
             public Company mapRow(ResultSet rs, int rowNum) throws SQLException {
                 Company company = new Company();
-                company.setId(rs.getInt("id"));
+                company.setId(rs.getLong("id"));
                 company.setName(rs.getString("name"));
                 return company;
             }
@@ -97,11 +97,15 @@ public class CompanyService {
             @Override
             public Company mapRow(ResultSet rs, int rowNum) throws SQLException {
                 Company company = new Company();
-                company.setId(rs.getInt("id"));
+                company.setId(rs.getLong("id"));
                 company.setName(rs.getString("name"));
                 return company;
             }
         });
+    }
+
+    public Company save(Company company) {
+        return repository.save(company);
     }
 
     @Autowired
