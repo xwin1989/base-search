@@ -10,13 +10,10 @@ import com.qeeka.annotation.Id;
 @Entity(table = "company")
 public class Company {
     @Id
-    public Integer id;
+    public Long id;
 
     @Column("name")
     public String name;
-
-    @Column("password")
-    public String password;
 
     @Column("type")
     public Integer type;
@@ -24,11 +21,11 @@ public class Company {
     @Column("status")
     public Integer status;
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -38,14 +35,6 @@ public class Company {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public Integer getType() {

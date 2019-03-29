@@ -24,10 +24,10 @@ public class CompanyTest extends SpringTestWithDB {
     @Before
     @Transactional
     public void init() {
-        companyService.updateNative("create table company(id int,name varchar(50),status int,type int)");
-        companyService.updateNative("insert into company values(0,'company1',1,2)");
-        companyService.updateNative("insert into company values(1,'company2',2,1)");
-        companyService.updateNative("insert into company values(2,'company3',3,2)");
+        companyService.updateNative("create table company(id BIGINT IDENTITY,name varchar(50),status int,type int)");
+        companyService.updateNative("insert into company(name,status,type) values('company1',1,2)");
+        companyService.updateNative("insert into company(name,status,type) values('company2',2,1)");
+        companyService.updateNative("insert into company(name,status,type) values('company3',3,2)");
 
         companyService.updateNative("create table company_info(id int,title varchar(50),status int,first_name varchar(10),lastName varchar(10))");
         companyService.updateNative("insert into company_info values(1,'info1',1,'neal','xu')");
@@ -120,6 +120,18 @@ public class CompanyTest extends SpringTestWithDB {
         companies = companyService.queryWithRowMap("select * from company");
         Assert.assertEquals(companies.size(), 3);
 
+    }
+
+
+    @Test
+    @Transactional
+    public void testSave() {
+        Company company = new Company();
+        company.setName("test1");
+        company.setStatus(1);
+        company.setType(1);
+        Company c1 = companyService.save(company);
+        System.out.println(c1.getId());
     }
 
     @Autowired
