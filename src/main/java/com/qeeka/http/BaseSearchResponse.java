@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.qeeka.domain.QueryResponse;
 
 import java.net.HttpURLConnection;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * Created by Neal on 10/12 0012.
@@ -13,7 +13,7 @@ public class BaseSearchResponse<T> {
     @JsonProperty("record")
     protected T entity;
     @JsonProperty("records")
-    protected List<T> recordList;
+    protected Collection<T> recordList;
     @JsonProperty("total_records")
     protected Long totalRecords;
     @JsonProperty("page_index")
@@ -33,11 +33,11 @@ public class BaseSearchResponse<T> {
         this.entity = entity;
     }
 
-    public List<T> getRecordList() {
+    public Collection<T> getRecordList() {
         return recordList;
     }
 
-    public void setRecordList(List<T> recordList) {
+    public void setRecordList(Collection<T> recordList) {
         this.recordList = recordList;
     }
 
