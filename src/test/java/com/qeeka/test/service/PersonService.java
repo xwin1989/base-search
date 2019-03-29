@@ -28,6 +28,11 @@ public class PersonService {
         return repository.delete(person);
     }
 
+    public int delete2(int persionId) {
+        return repository.delete(new QueryGroup("id", persionId));
+    }
+
+
     public int deleteById(Integer id) {
         return repository.deleteById(id);
     }

@@ -45,8 +45,10 @@ public class PersonTest extends SpringTestWithDB {
     public void testRemove() {
         int n1 = personService.delete(1);
         int n2 = personService.deleteById(2);
+        int n3 = personService.delete2(0);
         Assert.assertEquals(n1, 1);
         Assert.assertEquals(n2, 0);
+        Assert.assertEquals(n3, 1);
     }
 
     @Test
