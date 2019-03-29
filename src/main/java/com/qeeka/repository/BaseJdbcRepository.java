@@ -113,19 +113,19 @@ public abstract class BaseJdbcRepository<T> {
     public <X> X save(X entity) {
         //reflection
         EntityInfo entityInfo = EntityHandle.getEntityInfo(entity.getClass());
-        Map<String, Field> allDeclareFields = ReflectionUtil.getAllDeclareFields(entity.getClass());
         Map<String, String> columnMap = entityInfo.getColumnMap();
+        Map<String, Field> allDeclareFields = ReflectionUtil.getAllDeclareFields(entity.getClass());
 
         //begin build sql
-        StringBuilder sql = new StringBuilder(64);
+        StringBuilder sql = new StringBuilder(128);
         LinkedHashMap<String, Object> params = new LinkedHashMap<>();
         sql.append("INSERT INTO ").append(entityInfo.getTableName()).append('(');
 
         boolean needHolder = false;
         for (Map.Entry<String, Field> entry : allDeclareFields.entrySet()) {
-            String fieldName = entry.getKey();
+            String columnName = columnMap.get(entry.getKey());
             Field field = entry.getValue();
-            if (entityInfo.getIdColumn().equals(fieldName)) {
+            if (entityInfo.getIdColumn().equals(columnName)) {
                 if (GenerationType.IDENTITY.equals(entityInfo.getStrategy())) {
                     needHolder = true;
                     continue;
@@ -138,7 +138,6 @@ public abstract class BaseJdbcRepository<T> {
                     logger.error(e.getMessage(), e);
                 }
             }
-            String columnName = columnMap.get(fieldName);
             if (columnName == null) continue;
             try {
                 params.put(columnName, field.get(entity));
@@ -600,7 +599,7 @@ public abstract class BaseJdbcRepository<T> {
         Map<String, String> columnMap = entityInfo.getColumnMap();
 
         //begin build sql
-        StringBuilder sql = new StringBuilder(64);
+        StringBuilder sql = new StringBuilder(128);
         Map<String, Object> params = new HashMap<>();
         sql.append("UPDATE ").append(entityInfo.getTableName()).append(" SET ");
 
