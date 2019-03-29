@@ -611,7 +611,9 @@ public abstract class BaseJdbcRepository<T> {
             Field field = entry.getValue();
             try {
                 params.put(columnName, field.get(entity));
-                sql.append(columnName).append(" = :").append(columnName).append(',');
+                //skip id column
+                if (!columnName.equals(entityInfo.getIdColumn()))
+                    sql.append(columnName).append(" = :").append(columnName).append(',');
             } catch (IllegalAccessException e) {
                 logger.error(e.getMessage(), e);
             }
