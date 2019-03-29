@@ -4,8 +4,7 @@ import com.qeeka.domain.QueryGroup;
 import com.qeeka.domain.QueryResponse;
 import com.qeeka.enums.Direction;
 import com.qeeka.enums.QueryOperate;
-import com.qeeka.http.BaseSearchRequest;
-import com.qeeka.http.BaseSearchResponse;
+import com.qeeka.http.BaseRequest;
 import com.qeeka.test.domain.Book;
 import com.qeeka.test.domain.SimpleMapping;
 import com.qeeka.test.service.BookService;
@@ -155,10 +154,8 @@ public class BookTest extends SpringTestWithDB {
 
     @Test
     public void testAllBook() {
-        QueryResponse<Book> response = bookService.search(new QueryGroup().needCount().setPageSize(2));
-        BaseSearchResponse<Book> bookBaseSearchResponse = new BaseSearchResponse<>();
-        BaseSearchResponse<Book> searchResponse = response.assignmentToResponse(bookBaseSearchResponse);
-        Assert.assertTrue(response.getRecords().size() == 2);
+        QueryResponse<Book> searchResponse = bookService.search(new QueryGroup().needCount().setPageSize(2));
+        Assert.assertTrue(searchResponse.getRecords().size() == 2);
         Assert.assertTrue(searchResponse.getTotalRecords() == 3);
         Assert.assertTrue(searchResponse.getPageIndex() == 0);
         Assert.assertTrue(searchResponse.getPageSize() == 2);
@@ -166,11 +163,9 @@ public class BookTest extends SpringTestWithDB {
 
     @Test
     public void testSearchRequest() {
-        BaseSearchRequest baseSearchRequest = new BaseSearchRequest(0, 2);
-        QueryResponse<Book> response = bookService.search(new QueryGroup().needCount().setSearchRequest(baseSearchRequest));
-        BaseSearchResponse<Book> bookBaseSearchResponse = new BaseSearchResponse<>();
-        BaseSearchResponse<Book> searchResponse = response.assignmentToResponse(bookBaseSearchResponse);
-        Assert.assertTrue(response.getRecords().size() == 2);
+        BaseRequest baseRequest = new BaseRequest(0, 2);
+        QueryResponse<Book> searchResponse = bookService.search(new QueryGroup().needCount().setSearchRequest(baseRequest));
+        Assert.assertTrue(searchResponse.getRecords().size() == 2);
         Assert.assertTrue(searchResponse.getTotalRecords() == 3);
         Assert.assertTrue(searchResponse.getPageIndex() == 0);
         Assert.assertTrue(searchResponse.getPageSize() == 2);
@@ -203,7 +198,7 @@ public class BookTest extends SpringTestWithDB {
 
     @Test
     public void testBookMap() {
-        BaseSearchRequest request = new BaseSearchRequest(0, 5);
+        BaseRequest request = new BaseRequest(0, 5);
         QueryResponse<Book> response = bookService.search(new QueryGroup().needCount().setSearchRequest(request));
         Map<Object, Book> recordMap = response.getRecordsMap();
         Assert.assertTrue(recordMap.size() == 3);
@@ -218,7 +213,7 @@ public class BookTest extends SpringTestWithDB {
 
     @Test
     public void testBookMapWithParam() {
-        BaseSearchRequest request = new BaseSearchRequest(0, 5);
+        BaseRequest request = new BaseRequest(0, 5);
         List<Integer> ids = Arrays.asList(1, 3);
         QueryGroup group = new QueryGroup("id", ids, QueryOperate.IN);
         QueryResponse<Book> queryResponse = bookService.search(group.needCount().setSearchRequest(request));

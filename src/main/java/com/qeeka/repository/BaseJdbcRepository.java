@@ -109,6 +109,17 @@ public abstract class BaseJdbcRepository<T> {
         }
         return 0;
     }
+
+    public int delete(QueryGroup queryGroup) {
+        EntityInfo entityInfo = EntityHandle.getEntityInfo(entityClass);
+        StringBuilder sql = new StringBuilder(128);
+
+        sql.append("DELETE FROM ").append(entityInfo.getTableName());
+        QueryModel queryModel = queryParserHandle.parse(queryGroup);
+        sql.append(" WHERE ").append(queryModel.getConditionStatement());
+        return update(sql, queryModel.getParameters());
+    }
+
 //--------------------------- save operator -------------------------
 
     public <X> X save(X entity) {
@@ -611,7 +622,9 @@ public abstract class BaseJdbcRepository<T> {
             Field field = entry.getValue();
             try {
                 params.put(columnName, field.get(entity));
-                sql.append(columnName).append(" = :").append(columnName).append(',');
+                //skip id column
+                if (!columnName.equals(entityInfo.getIdColumn()))
+                    sql.append(columnName).append(" = :").append(columnName).append(',');
             } catch (IllegalAccessException e) {
                 logger.error(e.getMessage(), e);
             }
