@@ -76,6 +76,10 @@ public abstract class BaseJdbcRepository<T> {
         return queryUnique(new QueryGroup(entityInfo.getIdColumn(), id), clazz);
     }
 
+    public T get(String columnName, Object value) {
+        return queryUnique(new QueryGroup(columnName, value));
+    }
+
 //--------------------------- delete operator -------------------------
 
 
