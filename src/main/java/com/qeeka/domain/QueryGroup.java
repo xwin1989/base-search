@@ -74,8 +74,8 @@ public class QueryGroup {
      * set index & size from search request
      */
     public QueryGroup setSearchRequest(BaseRequest searchRequest) {
-        this.setPageIndex(searchRequest.getPageIndex());
-        this.setPageSize(searchRequest.getPageSize());
+        this.pageIndex = searchRequest.getPageIndex();
+        this.pageSize = searchRequest.getPageSize();
         return this;
     }
 
@@ -330,11 +330,6 @@ public class QueryGroup {
         return pageIndex;
     }
 
-    public QueryGroup setPageIndex(Integer pageIndex) {
-        this.pageIndex = pageIndex;
-        return this;
-    }
-
     public QueryGroup setPageable(Integer pageIndex, Integer pageSize) {
         this.pageIndex = pageIndex;
         this.pageSize = pageSize;
@@ -345,7 +340,12 @@ public class QueryGroup {
         return pageSize;
     }
 
-    public QueryGroup setPageSize(Integer pageSize) {
+    public QueryGroup index(Integer pageIndex) {
+        this.pageIndex = pageIndex;
+        return this;
+    }
+
+    public QueryGroup size(Integer pageSize) {
         this.pageSize = pageSize;
         return this;
     }
@@ -401,4 +401,14 @@ public class QueryGroup {
         sb.setLength(sb.length() - 1);
         return sb;
     }
+
+    //--------------------------- search operator -------------------------
+    public <X extends BaseRequest> QueryGroup search(Class<X> searchObject) {
+        //todo
+        // 1.parse obj field
+        // 2.query auto mapping field->column
+        // 3.query(new queryGroup)
+        return null;
+    }
+
 }

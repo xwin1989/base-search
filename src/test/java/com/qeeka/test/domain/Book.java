@@ -3,14 +3,13 @@ package com.qeeka.test.domain;
 import com.qeeka.annotation.Column;
 import com.qeeka.annotation.Entity;
 import com.qeeka.annotation.Id;
-import com.qeeka.domain.MapHandle;
 import com.qeeka.enums.GenerationType;
 
 /**
  * Created by Neal on 8/9 0009.
  */
 @Entity(table = "book")
-public class Book implements MapHandle {
+public class Book {
     @Id(strategy = GenerationType.AUTO)
     private Integer id;
 
@@ -77,11 +76,6 @@ public class Book implements MapHandle {
 
     public void setTotal(Integer total) {
         this.total = total;
-    }
-
-    @Override
-    public Object getPrimaryKey() {
-        return this.id;
     }
 
     public String getAuthorName() {
