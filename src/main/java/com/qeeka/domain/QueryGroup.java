@@ -57,6 +57,10 @@ public class QueryGroup {
      */
     private boolean needDistinct = false;
     /**
+     * strict
+     */
+    private boolean strict = true;
+    /**
      * select column
      */
     private CharSequence[] selects;
@@ -74,8 +78,8 @@ public class QueryGroup {
      * set index & size from search request
      */
     public QueryGroup setSearchRequest(BaseRequest searchRequest) {
-        this.setPageIndex(searchRequest.getPageIndex());
-        this.setPageSize(searchRequest.getPageSize());
+        this.pageIndex = searchRequest.getPageIndex();
+        this.pageSize = searchRequest.getPageSize();
         return this;
     }
 
@@ -97,6 +101,14 @@ public class QueryGroup {
      * add node with parameters and query operate
      */
     public QueryGroup(String columnName, Object value, QueryOperate queryOperate) {
+        addNode(columnName, value, queryOperate, QueryLinkOperate.AND);
+    }
+
+    /**
+     * add node with parameters, query operate, strict mode
+     */
+    public QueryGroup(String columnName, Object value, QueryOperate queryOperate, boolean strict) {
+        this.strict = strict;
         addNode(columnName, value, queryOperate, QueryLinkOperate.AND);
     }
 
@@ -181,6 +193,7 @@ public class QueryGroup {
      */
     private QueryGroup addNode(String columnName, Object value, QueryOperate queryOperate, QueryLinkOperate queryLinkOperate) {
         if (value == null && !(QueryOperate.IS_NULL.equals(queryOperate) || QueryOperate.IS_NOT_NULL.equals(queryOperate) || QueryOperate.SUB_QUERY.equals(queryOperate))) {
+            if (this.strict) throw new IllegalArgumentException("column #" + columnName + " value can't null");
             return this;
         }
         queryHandleList.add(new QueryNode(columnName, value, queryOperate));
@@ -330,11 +343,6 @@ public class QueryGroup {
         return pageIndex;
     }
 
-    public QueryGroup setPageIndex(Integer pageIndex) {
-        this.pageIndex = pageIndex;
-        return this;
-    }
-
     public QueryGroup setPageable(Integer pageIndex, Integer pageSize) {
         this.pageIndex = pageIndex;
         this.pageSize = pageSize;
@@ -345,7 +353,12 @@ public class QueryGroup {
         return pageSize;
     }
 
-    public QueryGroup setPageSize(Integer pageSize) {
+    public QueryGroup index(Integer pageIndex) {
+        this.pageIndex = pageIndex;
+        return this;
+    }
+
+    public QueryGroup size(Integer pageSize) {
         this.pageSize = pageSize;
         return this;
     }
@@ -401,4 +414,21 @@ public class QueryGroup {
         sb.setLength(sb.length() - 1);
         return sb;
     }
+
+    public static QueryGroup looseGroup() {
+        return looseGroup(null, null, null);
+    }
+
+    public static QueryGroup looseGroup(String columnName, Object value) {
+        return looseGroup(columnName, value, QueryOperate.EQUALS);
+    }
+
+    public static QueryGroup looseGroup(String columnName, QueryOperate queryOperate) {
+        return looseGroup(columnName, null, queryOperate);
+    }
+
+    public static QueryGroup looseGroup(String columnName, Object value, QueryOperate queryOperate) {
+        return new QueryGroup(columnName, value, queryOperate, false);
+    }
+
 }

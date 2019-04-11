@@ -76,6 +76,10 @@ public abstract class BaseJdbcRepository<T> {
         return queryUnique(new QueryGroup(entityInfo.getIdColumn(), id), clazz);
     }
 
+    public T get(String columnName, Object value) {
+        return queryUnique(new QueryGroup(columnName, value));
+    }
+
 //--------------------------- delete operator -------------------------
 
 
@@ -262,8 +266,7 @@ public abstract class BaseJdbcRepository<T> {
         }
         //limit record size
         if (!QueryResultType.LIST.equals(queryGroup.getQueryResultType())) {
-            queryGroup.setPageIndex(0);
-            queryGroup.setPageSize(1);
+            queryGroup.index(0).size(1);
         }
         return doQuery(queryGroup, model, sql, entityInfo, clazz);
     }

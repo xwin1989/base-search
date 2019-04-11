@@ -154,7 +154,7 @@ public class BookTest extends SpringTestWithDB {
 
     @Test
     public void testAllBook() {
-        QueryResponse<Book> searchResponse = bookService.search(new QueryGroup().needCount().setPageSize(2));
+        QueryResponse<Book> searchResponse = bookService.search(new QueryGroup().needCount().size(2));
         Assert.assertTrue(searchResponse.getRecords().size() == 2);
         Assert.assertTrue(searchResponse.getTotalRecords() == 3);
         Assert.assertTrue(searchResponse.getPageIndex() == 0);
@@ -200,9 +200,8 @@ public class BookTest extends SpringTestWithDB {
     public void testBookMap() {
         BaseRequest request = new BaseRequest(0, 5);
         QueryResponse<Book> response = bookService.search(new QueryGroup().needCount().setSearchRequest(request));
-        Map<Object, Book> recordMap = response.getRecordsMap();
-        Assert.assertTrue(recordMap.size() == 3);
-        Assert.assertTrue(recordMap.containsKey(0) && recordMap.containsKey(1) && recordMap.containsKey(3));
+        List<Book> records = response.getRecords();
+        Assert.assertTrue(records.size() == 3);
     }
 
     @Test
@@ -217,9 +216,8 @@ public class BookTest extends SpringTestWithDB {
         List<Integer> ids = Arrays.asList(1, 3);
         QueryGroup group = new QueryGroup("id", ids, QueryOperate.IN);
         QueryResponse<Book> queryResponse = bookService.search(group.needCount().setSearchRequest(request));
-        Map<Object, Book> recordMap = queryResponse.getRecordsMap();
-        Assert.assertTrue(recordMap.size() == 2);
-        Assert.assertTrue(recordMap.containsKey(1) && recordMap.containsKey(3) && !recordMap.containsKey(0));
+        List<Book> records = queryResponse.getRecords();
+        Assert.assertTrue(records.size() == 2);
     }
 
     @Test
@@ -244,11 +242,8 @@ public class BookTest extends SpringTestWithDB {
         QueryGroup group = new QueryGroup().leftJoin("book_info", "BI").on("BI.book_id", "E.id")
                 .and("BI.name", "book2", QueryOperate.CONTAIN);
         QueryResponse<Book> queryResponse = bookService.search(group);
-        Assert.assertEquals(queryResponse.getRecords().size(), 1);
-        List<Object> recordsKey = queryResponse.getRecordsKey();
-        Assert.assertEquals(recordsKey.size(), 1);
-        Map<Object, List<Book>> multiRecordMap = queryResponse.getMultiRecordMap();
-        Assert.assertEquals(multiRecordMap.size(), 1);
+        List<Book> records = queryResponse.getRecords();
+        Assert.assertEquals(records.size(), 1);
     }
 
     //hsqldb can't support cross join
@@ -269,11 +264,8 @@ public class BookTest extends SpringTestWithDB {
         QueryGroup group = new QueryGroup().leftOutJoin("book_info", "BI").on("BI.book_id", "E.id")
                 .and("BI.name", "book2", QueryOperate.CONTAIN);
         QueryResponse<Book> queryResponse = bookService.search(group);
-        Assert.assertEquals(queryResponse.getRecords().size(), 1);
-        List<Object> recordsKey = queryResponse.getRecordsKey();
-        Assert.assertEquals(recordsKey.size(), 1);
-        Map<Object, List<Book>> multiRecordMap = queryResponse.getMultiRecordMap();
-        Assert.assertEquals(multiRecordMap.size(), 1);
+        List<Book> records = queryResponse.getRecords();
+        Assert.assertEquals(records.size(), 1);
     }
 
 
@@ -345,7 +337,7 @@ public class BookTest extends SpringTestWithDB {
                 .join("book_info", "BI").on("BI.book_id", "E.id").on("BI.name", "hello", QueryOperate.NO_EQUALS)
                 .leftJoin("book_author", "BA").on("BA.id", "E.author_id")
                 .and("BI.name", "1", QueryOperate.CONTAIN);
-        QueryResponse<Book> response = bookService.query(group.needCount().setPageSize(3)
+        QueryResponse<Book> response = bookService.query(group.needCount().size(3)
                 .selects("E.*", "BA.name as authorName", "BI.name AS bookDescription")
         );
         Assert.assertEquals(response.getRecords().size(), 1);
