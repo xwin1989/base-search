@@ -2,16 +2,31 @@ package com.qeeka.test.parse;
 
 import com.qeeka.domain.QueryGroup;
 import com.qeeka.domain.QueryModel;
-import com.qeeka.util.QueryParserHandle;
 import com.qeeka.enums.Direction;
 import com.qeeka.enums.QueryOperate;
+import com.qeeka.util.QueryParserHandle;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static com.qeeka.enums.QueryOperate.*;
+import static com.qeeka.enums.QueryOperate.COLUMN_EQUALS;
+import static com.qeeka.enums.QueryOperate.COLUMN_NO_EQUALS;
+import static com.qeeka.enums.QueryOperate.CONTAIN;
+import static com.qeeka.enums.QueryOperate.EQUALS;
+import static com.qeeka.enums.QueryOperate.GREAT_THAN;
+import static com.qeeka.enums.QueryOperate.GREAT_THAN_EQUALS;
+import static com.qeeka.enums.QueryOperate.IN;
+import static com.qeeka.enums.QueryOperate.IS_NOT_NULL;
+import static com.qeeka.enums.QueryOperate.IS_NULL;
+import static com.qeeka.enums.QueryOperate.LESS_THAN;
+import static com.qeeka.enums.QueryOperate.LESS_THAN_EQUALS;
+import static com.qeeka.enums.QueryOperate.LIKE;
+import static com.qeeka.enums.QueryOperate.NOT_CONTAIN;
+import static com.qeeka.enums.QueryOperate.NOT_IN;
+import static com.qeeka.enums.QueryOperate.NOT_LIKE;
+import static com.qeeka.enums.QueryOperate.NO_EQUALS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -125,13 +140,13 @@ public class OperatorTest {
 
     @Test
     public void testNullValue() {
-        QueryGroup group = new QueryGroup("a", 1, GREAT_THAN).and("b", 2, GREAT_THAN_EQUALS).and("c", null, EQUALS).and("d", null, LIKE);
+        QueryGroup group = QueryGroup.looseGroup("a", 1, GREAT_THAN).and("b", 2, GREAT_THAN_EQUALS).and("c", null, EQUALS).and("d", null, LIKE);
         assertEquals(parser.parse(group).getConditionStatement(), "(a > :a0 AND b >= :b1)");
     }
 
     @Test
     public void testNullValue2() {
-        QueryGroup group = new QueryGroup("a", null, GREAT_THAN).and("b", null, GREAT_THAN_EQUALS).and("c", null, EQUALS).and("d", null, LIKE);
+        QueryGroup group = QueryGroup.looseGroup("a", null, GREAT_THAN).and("b", null, GREAT_THAN_EQUALS).and("c", null, EQUALS).and("d", null, LIKE);
         assertEquals(parser.parse(group).getConditionStatement(), null);
     }
 
@@ -151,7 +166,7 @@ public class OperatorTest {
     public void testGroupGroup() {
         Integer status = null;
         String title = null;
-        QueryGroup queryGroup = new QueryGroup()
+        QueryGroup queryGroup = QueryGroup.looseGroup()
                 .join("IconChannelVersionMappingEntity", "IE")
                 .and("E.status", status)
                 .and(new QueryGroup("E.platform", 3).or("E.platform", "all"))
@@ -167,12 +182,12 @@ public class OperatorTest {
     public void testGroupGroup2() {
         Integer status = null;
         String title = null;
-        QueryGroup queryGroup = new QueryGroup()
+        QueryGroup queryGroup = QueryGroup.looseGroup()
                 .join("IconChannelVersionMappingEntity", "IE")
                 .and("E.status", status)
-                .and(new QueryGroup("E.platform", status).or("E.platform", status))
-                .and(new QueryGroup("IE.channelCode", status).or("IE.channelCode", status))
-                .and(new QueryGroup("IE.appVersion", status).or("IE.appVersion", status));
+                .and(QueryGroup.looseGroup("E.platform", status).or("E.platform", status))
+                .and(QueryGroup.looseGroup("IE.channelCode", status).or("IE.channelCode", status))
+                .and(QueryGroup.looseGroup("IE.appVersion", status).or("IE.appVersion", status));
         queryGroup.and("E.title", title, QueryOperate.LIKE);
         queryGroup.sort(Direction.ASC, "E.sequenceNumber");
         Assert.assertNull(parser.parse(queryGroup).getConditionStatement());

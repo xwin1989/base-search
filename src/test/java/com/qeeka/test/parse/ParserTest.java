@@ -2,8 +2,8 @@ package com.qeeka.test.parse;
 
 import com.qeeka.domain.QueryGroup;
 import com.qeeka.domain.QueryModel;
-import com.qeeka.util.QueryParserHandle;
 import com.qeeka.enums.QueryOperate;
+import com.qeeka.util.QueryParserHandle;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -151,11 +151,26 @@ public class ParserTest {
 
     @Test
     public void testOrQuery() {
-        QueryGroup group = new QueryGroup();
-        group.or("status", "1");
-        group.and("a", null, QueryOperate.EQUALS);
-        group.or("b", "b");
+        QueryGroup group = QueryGroup.looseGroup("status", "1")
+                .and("a", 1, QueryOperate.EQUALS)
+                .or("b", "b");
+        QueryModel queryModel = parser.parse(group);
+        Assert.assertEquals(queryModel.getConditionStatement(), "((status = :status0 AND a = :a1) OR b = :b2)");
+    }
+
+    @Test
+    public void testLooseQuery() {
+        QueryGroup group = QueryGroup.looseGroup("status", "1")
+                .and("a", null, QueryOperate.EQUALS)
+                .or("b", "b");
         QueryModel queryModel = parser.parse(group);
         Assert.assertEquals(queryModel.getConditionStatement(), "(status = :status0 OR b = :b1)");
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testStrictGroup() {
+        new QueryGroup("a", null, QueryOperate.EQUALS);
+    }
+
+
 }

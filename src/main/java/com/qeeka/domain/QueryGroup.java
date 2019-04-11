@@ -57,6 +57,10 @@ public class QueryGroup {
      */
     private boolean needDistinct = false;
     /**
+     * strict
+     */
+    private boolean strict = true;
+    /**
      * select column
      */
     private CharSequence[] selects;
@@ -97,6 +101,14 @@ public class QueryGroup {
      * add node with parameters and query operate
      */
     public QueryGroup(String columnName, Object value, QueryOperate queryOperate) {
+        addNode(columnName, value, queryOperate, QueryLinkOperate.AND);
+    }
+
+    /**
+     * add node with parameters, query operate, strict mode
+     */
+    public QueryGroup(String columnName, Object value, QueryOperate queryOperate, boolean strict) {
+        this.strict = strict;
         addNode(columnName, value, queryOperate, QueryLinkOperate.AND);
     }
 
@@ -181,6 +193,7 @@ public class QueryGroup {
      */
     private QueryGroup addNode(String columnName, Object value, QueryOperate queryOperate, QueryLinkOperate queryLinkOperate) {
         if (value == null && !(QueryOperate.IS_NULL.equals(queryOperate) || QueryOperate.IS_NOT_NULL.equals(queryOperate) || QueryOperate.SUB_QUERY.equals(queryOperate))) {
+            if (this.strict) throw new IllegalArgumentException("column #" + columnName + " value can't null");
             return this;
         }
         queryHandleList.add(new QueryNode(columnName, value, queryOperate));
@@ -402,13 +415,20 @@ public class QueryGroup {
         return sb;
     }
 
-    //--------------------------- search operator -------------------------
-    public <X extends BaseRequest> QueryGroup search(Class<X> searchObject) {
-        //todo
-        // 1.parse obj field
-        // 2.query auto mapping field->column
-        // 3.query(new queryGroup)
-        return null;
+    public static QueryGroup looseGroup() {
+        return looseGroup(null, null, null);
+    }
+
+    public static QueryGroup looseGroup(String columnName, Object value) {
+        return looseGroup(columnName, value, QueryOperate.EQUALS);
+    }
+
+    public static QueryGroup looseGroup(String columnName, QueryOperate queryOperate) {
+        return looseGroup(columnName, null, queryOperate);
+    }
+
+    public static QueryGroup looseGroup(String columnName, Object value, QueryOperate queryOperate) {
+        return new QueryGroup(columnName, value, queryOperate, false);
     }
 
 }
