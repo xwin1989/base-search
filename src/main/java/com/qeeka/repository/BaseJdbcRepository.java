@@ -574,7 +574,7 @@ public abstract class BaseJdbcRepository<T> {
             size = jdbcTemplate.update(sql.toString(), params);
             return size;
         } finally {
-            logger.debug("update, sql={}, updateSize={}, elapsedTime={}", sql, size, watch.elapsedTime());
+            logger.debug("update, sql={}, params={}, updateSize={}, elapsedTime={}", sql, params, size, watch.elapsedTime());
         }
     }
 
@@ -585,7 +585,7 @@ public abstract class BaseJdbcRepository<T> {
             size = jdbcTemplate.update(sql.toString(), new MapSqlParameterSource(params), holder);
             return size;
         } finally {
-            logger.debug("update, sql={}, updateSize={}, elapsedTime={}", sql, size, watch.elapsedTime());
+            logger.debug("update, sql={}, params={}, updateSize={}, elapsedTime={}", sql, params, size, watch.elapsedTime());
         }
     }
 
@@ -604,7 +604,7 @@ public abstract class BaseJdbcRepository<T> {
         try {
             return jdbcTemplate.batchUpdate(sql.toString(), batchValues);
         } finally {
-            logger.debug("batch update, sql={}, updateSize={}, elapsedTime={}", sql, batchValues.length, watch.elapsedTime());
+            logger.debug("batch update, sql={}, params={}, updateSize={}, elapsedTime={}", sql, batchValues, batchValues.length, watch.elapsedTime());
         }
     }
 
