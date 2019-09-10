@@ -49,8 +49,6 @@ public abstract class BaseJdbcRepository<T> {
 
     private NamedParameterJdbcTemplate jdbcTemplate;
     private final Class<T> entityClass;
-    private final QueryParserHandle queryParserHandle = new QueryParserHandle();
-
 
     //get default class
     public BaseJdbcRepository() {
@@ -119,7 +117,7 @@ public abstract class BaseJdbcRepository<T> {
         StringBuilder sql = new StringBuilder(128);
 
         sql.append("DELETE FROM ").append(entityInfo.getTableName());
-        QueryModel queryModel = queryParserHandle.parse(queryGroup);
+        QueryModel queryModel = QueryParserHandle.parse(queryGroup);
         sql.append(" WHERE ").append(queryModel.getConditionStatement());
         return update(sql, queryModel.getParameters());
     }
@@ -243,7 +241,7 @@ public abstract class BaseJdbcRepository<T> {
         //parse query group to simple query domain
         EntityInfo entityInfo = EntityHandle.getEntityInfo(clazz);
 
-        QueryModel model = queryParserHandle.parse(queryGroup);
+        QueryModel model = QueryParserHandle.parse(queryGroup);
         StringBuilder sql = new StringBuilder(128);
 
         // append table
@@ -550,7 +548,7 @@ public abstract class BaseJdbcRepository<T> {
         Map<String, Object> params = new HashMap<>();
         StringBuilder sql = convertUpdateGroup(group, params, clazz);
         if (group.getQueryGroup() != null) {
-            QueryModel queryModel = queryParserHandle.parse(group.getQueryGroup());
+            QueryModel queryModel = QueryParserHandle.parse(group.getQueryGroup());
             sql.append(" WHERE ").append(queryModel.getConditionStatement());
             params.putAll(queryModel.getParameters());
         }

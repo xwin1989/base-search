@@ -1,6 +1,5 @@
 package com.qeeka.test;
 
-import com.qeeka.util.QueryParserHandle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -30,10 +29,5 @@ public class AppTestConfig {
     public PlatformTransactionManager transactionManager() {
         DataSourceTransactionManager manager = new DataSourceTransactionManager(dataSource());
         return manager;
-    }
-
-    @Bean
-    public QueryParserHandle queryParser() {
-        return new QueryParserHandle();
     }
 }

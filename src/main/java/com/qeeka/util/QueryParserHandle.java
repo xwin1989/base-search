@@ -17,7 +17,7 @@ import java.util.Stack;
  * Created by neal.xu on 7/31 0031.
  */
 public class QueryParserHandle {
-    public QueryModel parse(QueryGroup queryGroup) {
+    public static QueryModel parse(QueryGroup queryGroup) {
         QueryModel queryModel = new QueryModel();
         if (queryGroup == null) {
             return queryModel;
@@ -64,7 +64,7 @@ public class QueryParserHandle {
         return queryModel;
     }
 
-    private String generateOrderStatement(Sort sort) {
+    private static String generateOrderStatement(Sort sort) {
         if (sort == null) {
             return null;
         }
