@@ -3,7 +3,7 @@ package com.qeeka.http;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Created by Neal on 10/12 0012.
+ * Created by Neal on 2018/10/12.
  */
 public class BaseRequest {
     @JsonProperty("page_index")

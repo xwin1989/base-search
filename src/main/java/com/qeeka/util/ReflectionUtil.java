@@ -1,14 +1,19 @@
 package com.qeeka.util;
 
+import com.qeeka.SFunction;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.annotation.Annotation;
+import java.lang.invoke.SerializedLambda;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,15 +21,17 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by neal.xu on 2018/12/12.
  */
 public class ReflectionUtil extends ReflectionUtils {
-    private static final Map<Class<?>, LinkedHashMap<String, Field>> FIELD_CACHE = new ConcurrentHashMap<>();
+    //class field cache
+    private static final Map<Class<?>, Map<String, Field>> FIELD_CACHE = new ConcurrentHashMap<>();
+    //SerializedLambda cache
+    private static final Map<Class<?>, WeakReference<SerializedLambda>> FUNC_CACHE = new ConcurrentHashMap<>();
 
     public static Map<String, Field> getAllDeclareFields(Class clazz) {
         //skip object class
         if (Object.class.equals(clazz)) {
             return null;
         }
-
-        LinkedHashMap<String, Field> fieldMap = FIELD_CACHE.get(clazz);
+        Map<String, Field> fieldMap = FIELD_CACHE.get(clazz);
         if (fieldMap != null) {
             return fieldMap;
         }
@@ -69,4 +76,28 @@ public class ReflectionUtil extends ReflectionUtils {
         }
         return fields;
     }
+
+    //get function from cache or serialized
+    public static <T> SerializedLambda resolve(SFunction<T, ?> fun) {
+        Class<?> clazz = fun.getClass();
+        //todo handle function cache & get
+        return Optional.ofNullable(FUNC_CACHE.get(clazz))
+                .map(WeakReference::get)
+                .orElseGet(() -> {
+                    SerializedLambda lambda = serialized(fun);
+                    FUNC_CACHE.put(clazz, new WeakReference<>(lambda));
+                    return lambda;
+                });
+    }
+
+    private static <T> SerializedLambda serialized(SFunction<T, ?> fun) {
+        try {
+            Method replaceMethod = fun.getClass().getDeclaredMethod("writeReplace");
+            replaceMethod.setAccessible(true);
+            return (SerializedLambda) replaceMethod.invoke(fun);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

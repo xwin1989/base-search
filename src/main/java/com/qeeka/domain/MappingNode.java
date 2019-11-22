@@ -10,14 +10,14 @@ import java.util.List;
  */
 public class MappingNode {
     private QueryLinkOperate linkOperate;
-    private String entityName;
-    private String entityAlias;
+    private String name;
+    private String alias;
     private List<QueryNode> linkMapping = new ArrayList<>();
 
-    public MappingNode(String entityName, String entityAlias, QueryLinkOperate linkOperate) {
+    public MappingNode(String name, String alias, QueryLinkOperate linkOperate) {
         this.linkOperate = linkOperate;
-        this.entityName = entityName;
-        this.entityAlias = entityAlias;
+        this.name = name;
+        this.alias = alias;
     }
 
     public QueryLinkOperate getLinkOperate() {
@@ -28,20 +28,20 @@ public class MappingNode {
         this.linkOperate = linkOperate;
     }
 
-    public String getEntityName() {
-        return entityName;
+    public String getName() {
+        return name;
     }
 
-    public void setEntityName(String entityName) {
-        this.entityName = entityName;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getEntityAlias() {
-        return entityAlias;
+    public String getAlias() {
+        return alias;
     }
 
-    public void setEntityAlias(String entityAlias) {
-        this.entityAlias = entityAlias;
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
     public List<QueryNode> getLinkMapping() {

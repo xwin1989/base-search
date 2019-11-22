@@ -21,7 +21,7 @@
 
     <groupId>com.qeeka</groupId>
     <artifactId>base-search</artifactId>
-    <version>2.0.3</version>
+    <version>2.1.0</version>
     <packaging>jar</packaging>
     <description>base-search framework</description>
 
@@ -31,7 +31,7 @@
         <jackson.version.annotations>2.9.0</jackson.version.annotations>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.build.targetJDK>1.7</project.build.targetJDK>
+        <project.build.targetJDK>1.8</project.build.targetJDK>
 
         <plugin.checkstyle.version>2.9.1</plugin.checkstyle.version>
         <plugin.pmd.version>3.0.1</plugin.pmd.version>

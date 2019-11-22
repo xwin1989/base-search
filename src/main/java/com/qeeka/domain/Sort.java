@@ -1,6 +1,7 @@
 package com.qeeka.domain;
 
 import com.qeeka.enums.Direction;
+import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,7 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Created by Neal on 8/9 0009.
+ * Created by Neal on 2019/08/09.
  */
 public class Sort implements Iterable<Sort.Order> {
     public static final Direction DEFAULT_DIRECTION = Direction.ASC;
@@ -42,6 +43,39 @@ public class Sort implements Iterable<Sort.Order> {
             this.orders.add(new Order(direction, property));
         }
     }
+
+    // Creates a new {@link Sort} for the given properties.
+    public static Sort by(String... properties) {
+        Assert.notEmpty(properties, "Properties must not be null!");
+        return new Sort(properties);
+    }
+
+    public static Sort by(Direction direction, String... properties) {
+        Assert.notNull(direction, "Direction must not be null!");
+        Assert.notEmpty(properties, "Properties must not be null!");
+
+        return new Sort(direction, properties);
+    }
+
+    public static Sort by(List<Order> orders) {
+        Assert.notEmpty(orders, "Orders must not be null!");
+        return new Sort(orders);
+    }
+
+    public static Sort by(Order... orders) {
+        Assert.notNull(orders, "Orders must not be null!");
+        return new Sort(Arrays.asList(orders));
+    }
+
+    /**
+     * combine other sort.
+     */
+    public Sort and(Sort sort) {
+        Assert.notNull(sort, "Sort must not be null!");
+        this.orders.addAll(sort.orders);
+        return this;
+    }
+
 
     @Override
     public Iterator<Order> iterator() {

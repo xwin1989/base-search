@@ -1,5 +1,6 @@
 package com.qeeka.util;
 
+import com.qeeka.SFunction;
 import com.qeeka.annotation.Column;
 import com.qeeka.annotation.Entity;
 import com.qeeka.annotation.Id;
@@ -7,8 +8,11 @@ import com.qeeka.domain.EntityInfo;
 import org.springframework.util.StringUtils;
 
 import java.lang.annotation.Annotation;
+import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -133,5 +137,40 @@ public class EntityHandle {
         }
         return sb.toString();
     }
+
+    public static <T> String functionToColumn(SFunction<T, ?> fun) {
+        SerializedLambda resolve = ReflectionUtil.resolve(fun);
+        Class<?> clazz = null;
+        String className = resolve.getImplClass();
+        try {
+            className = className.replaceAll("/", ".");
+            clazz = Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException("Error to find class " + className);
+        }
+        return EntityHandle.methodToColumn(clazz, resolve.getImplMethodName());
+    }
+
+    public static String methodToColumn(Class clazz, String method) {
+        String name;
+        if (method.startsWith("is")) {
+            name = method.substring(2);
+        } else {
+            if (!method.startsWith("get") && !method.startsWith("set")) {
+                throw new IllegalArgumentException("Error parsing property method name '" + method + "'.  Didn't start with 'is', 'get' or 'set'.");
+            }
+            name = method.substring(3);
+        }
+
+        if (name.length() == 1 || name.length() > 1 && !Character.isUpperCase(name.charAt(1))) {
+            name = name.substring(0, 1).toLowerCase(Locale.ENGLISH) + name.substring(1);
+        }
+
+        EntityInfo entityInfo = getEntityInfo(clazz);
+        String column = entityInfo.getColumnMap().get(name);
+        Objects.nonNull(column);
+        return column;
+    }
+
 
 }

@@ -1,7 +1,7 @@
 package com.qeeka.enums;
 
 /**
- * Created by neal.xu on 7/29 0029.
+ * Created by neal.xu on 2018/07/29.
  */
 public enum QueryOperate {
     EQUALS(" = "), NO_EQUALS(" <> "),
@@ -10,7 +10,8 @@ public enum QueryOperate {
     LIKE(" LIKE "), NOT_LIKE(" NOT LIKE "), CONTAIN(" LIKE "), NOT_CONTAIN(" NOT LIKE "),
     LESS_THAN(" < "), LESS_THAN_EQUALS(" <= "),
     GREAT_THAN(" > "), GREAT_THAN_EQUALS(" >= "),
-    IN(" IN "), NOT_IN(" NOT IN "), SUB_QUERY(" ");
+    IN(" IN "), NOT_IN(" NOT IN "), SUB_QUERY(" "),
+    EXISTS(" EXISTS"), NO_EXISTS(" NOT EXISTS ");
 
     private String value;
 

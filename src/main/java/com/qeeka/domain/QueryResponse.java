@@ -3,7 +3,7 @@ package com.qeeka.domain;
 import java.util.List;
 
 /**
- * Created by Neal on 8/9 0009.
+ * Created by Neal on 2019/08/09.
  */
 public class QueryResponse<T> {
     private List<T> records;

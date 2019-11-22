@@ -3,7 +3,7 @@ package com.qeeka.domain;
 import com.qeeka.enums.QueryOperate;
 
 /**
- * Created by neal.xu on 7/31 0031.
+ * Created by neal.xu on 2018/7/31.
  */
 public class QueryNode implements QueryHandle {
     private String columnName;

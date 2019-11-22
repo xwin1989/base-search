@@ -1,7 +1,7 @@
 package com.qeeka.enums;
 
 /**
- * Created by neal.xu on 7/29 0029.
+ * Created by neal.xu on 2018/7/29.
  */
 public enum QueryLinkOperate {
     AND(" AND "), OR(" OR "),

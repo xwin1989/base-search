@@ -252,7 +252,7 @@ public abstract class BaseJdbcRepository<T> {
             sql.append(" AS E");
         }
         for (MappingNode node : queryGroup.getEntityMapping()) {
-            sql.append(node.getLinkOperate().getValue()).append(node.getEntityName()).append(" AS ").append(node.getEntityAlias());
+            sql.append(node.getLinkOperate().getValue()).append(node.getName()).append(" AS ").append(node.getAlias());
             for (int i = 0; i < node.getLinkMapping().size(); i++) {
                 sql.append(i == 0 ? " ON " : " AND ");
                 sql.append(QueryParserHandle.generateParameterHql(node.getLinkMapping().get(i), model.getParameters()));

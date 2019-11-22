@@ -13,7 +13,9 @@ import java.util.List;
 /**
  * Created by neal.xu on 2018/12/11.
  * Search condition inlet
+ * this is Deprecated class, please use {@link com.qeeka.query.Query}
  */
+@Deprecated
 public class QueryGroup {
 
     /**

@@ -8,23 +8,38 @@ import com.qeeka.domain.QueryNode;
 import com.qeeka.domain.QueryOperateNode;
 import com.qeeka.domain.Sort;
 import com.qeeka.enums.Direction;
+import com.qeeka.query.Query;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
 /**
- * Created by neal.xu on 7/31 0031.
+ * Created by neal.xu on 2019/07/31.
  */
 public class QueryParserHandle {
-    public static QueryModel parse(QueryGroup queryGroup) {
-        QueryModel queryModel = new QueryModel();
-        if (queryGroup == null) {
-            return queryModel;
+
+    public static QueryModel parse(Query query) {
+        if (query == null) {
+            return new QueryModel();
         }
-        List<QueryHandle> queryHandleList = queryGroup.getQueryHandleList();
+        if (query.getCriteria() == null) {
+            return parse(null, query.getSort());
+        }
+        return parse(query.getCriteria().getCriteriaChain(), query.getSort());
+    }
+
+    public static QueryModel parse(QueryGroup queryGroup) {
+        if (queryGroup == null) {
+            return new QueryModel();
+        }
+        return parse(queryGroup.getQueryHandleList(), queryGroup.getSort());
+    }
+
+    public static QueryModel parse(List<QueryHandle> queryHandleList, Sort sort) {
+        QueryModel queryModel = new QueryModel();
         //Set order statement
-        String orderStatement = generateOrderStatement(queryGroup.getSort());
+        String orderStatement = generateOrderStatement(sort);
         queryModel.setOrderStatement(orderStatement);
 
 

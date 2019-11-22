@@ -10,7 +10,7 @@ import java.net.HttpURLConnection;
 import java.util.Collection;
 
 /**
- * Created by Neal on 10/12 0012.
+ * Created by Neal on 2018/10/12.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BaseResponse<T> {
@@ -111,6 +111,11 @@ public class BaseResponse<T> {
 
     public void setRecords(Collection<T> records) {
         this.records = records;
+    }
+
+    public BaseResponse<T> total(Long total) {
+        this.totalRecords = total;
+        return this;
     }
 
     public Long getTotalRecords() {
