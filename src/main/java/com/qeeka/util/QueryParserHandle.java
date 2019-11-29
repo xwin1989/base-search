@@ -8,6 +8,7 @@ import com.qeeka.domain.QueryNode;
 import com.qeeka.domain.QueryOperateNode;
 import com.qeeka.domain.Sort;
 import com.qeeka.enums.Direction;
+import com.qeeka.query.Criteria;
 import com.qeeka.query.Query;
 
 import java.util.List;
@@ -27,6 +28,13 @@ public class QueryParserHandle {
             return parse(null, query.getSort());
         }
         return parse(query.getCriteria().getCriteriaChain(), query.getSort());
+    }
+
+    public static QueryModel parse(Criteria criteria) {
+        if (criteria == null) {
+            return new QueryModel();
+        }
+        return parse(criteria.getCriteriaChain(), null);
     }
 
     public static QueryModel parse(QueryGroup queryGroup) {

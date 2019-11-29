@@ -131,5 +131,31 @@ public class Query {
         return sort;
     }
 
+    public List<Join> getJoinChain() {
+        return joinChain;
+    }
 
+    public CharSequence[] getSelects() {
+        return selects;
+    }
+
+    public boolean isNeedCount() {
+        return needCount;
+    }
+
+    public boolean isNeedDistinct() {
+        return needDistinct;
+    }
+
+    public Group getGroupBy() {
+        return groupBy;
+    }
+
+    public Integer getIndex() {
+        return index;
+    }
+
+    public Integer getSize() {
+        return size;
+    }
 }

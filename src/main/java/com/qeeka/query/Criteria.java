@@ -1,15 +1,11 @@
 package com.qeeka.query;
 
-import com.qeeka.SFunction;
 import com.qeeka.domain.QueryHandle;
 import com.qeeka.domain.QueryNode;
 import com.qeeka.domain.QueryOperateNode;
 import com.qeeka.enums.QueryLinkOperate;
 import com.qeeka.enums.QueryOperate;
-import com.qeeka.util.EntityHandle;
-import com.qeeka.util.ReflectionUtil;
 
-import java.lang.invoke.SerializedLambda;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;

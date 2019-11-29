@@ -7,7 +7,7 @@ import java.util.List;
  */
 public class QueryResponse<T> {
     private List<T> records;
-    private Long totalRecords;
+    private Long total;
     private Integer pageIndex;
     private Integer pageSize;
 
@@ -19,12 +19,12 @@ public class QueryResponse<T> {
         this.records = records;
     }
 
-    public Long getTotalRecords() {
-        return totalRecords;
+    public Long getTotal() {
+        return total;
     }
 
-    public void setTotalRecords(Long totalRecords) {
-        this.totalRecords = totalRecords;
+    public void setTotal(Long total) {
+        this.total = total;
     }
 
     public Integer getPageIndex() {

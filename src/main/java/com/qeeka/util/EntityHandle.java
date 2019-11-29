@@ -10,10 +10,12 @@ import org.springframework.util.StringUtils;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Created by neal.xu on 2018/12/12.
@@ -80,6 +82,7 @@ public class EntityHandle {
             }
             entityInfo.setIdColumn(idNames);
             entityInfo.setClazz(clazz);
+            entityInfo.setDefaultColumnStr(convertColumnMapping(entityInfo, false));
             INFO_CACHE.put(clazz, entityInfo);
             return entityInfo;
         }
@@ -99,6 +102,12 @@ public class EntityHandle {
         columns.setLength(columns.length() - 1);
         return columns;
     }
+
+    public static CharSequence convertColumnMapping(CharSequence[] fields) {
+        if (fields == null || fields.length == 0) return null;
+        return Arrays.stream(fields).collect(Collectors.joining(","));
+    }
+
 
     public static CharSequence convertColumnMapping(EntityInfo entityInfo, boolean appendMaster) {
         StringBuilder columnNames = new StringBuilder(64);

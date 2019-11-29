@@ -12,6 +12,10 @@ import com.qeeka.domain.UpdateGroup;
 import com.qeeka.domain.UpdateNode;
 import com.qeeka.enums.GenerationType;
 import com.qeeka.enums.QueryResultType;
+import com.qeeka.query.Criteria;
+import com.qeeka.query.Group;
+import com.qeeka.query.Join;
+import com.qeeka.query.Query;
 import com.qeeka.util.EntityHandle;
 import com.qeeka.util.QueryParserHandle;
 import com.qeeka.util.ReflectionUtil;
@@ -28,6 +32,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.transaction.IllegalTransactionStateException;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
 
@@ -208,7 +213,7 @@ public abstract class BaseJdbcRepository<T> {
     }
 
     public <X> Long count(QueryGroup group, Class<X> clazz) {
-        return query(group.onlyCount(), clazz).getTotalRecords();
+        return query(group.onlyCount(), clazz).getTotal();
     }
 
 //--------------------------- QueryResponse operator -------------------------
@@ -217,117 +222,120 @@ public abstract class BaseJdbcRepository<T> {
      * query all, return T
      */
     public QueryResponse<T> query() {
-        return query(new QueryGroup(), entityClass);
+        return query(Query.query(), entityClass);
     }
 
     /**
      * query all, return X
      */
     public <X> QueryResponse<X> query(Class<X> clazz) {
-        return query(new QueryGroup(), clazz);
+        return query(Query.query(), clazz);
     }
 
     /**
      * query by group, return T class
      */
-    public QueryResponse<T> query(QueryGroup queryGroup) {
-        return query(queryGroup, entityClass);
+    public QueryResponse<T> query(Query query) {
+        return query(query, entityClass);
     }
 
     /**
      * query by query request, Specifies return class
      */
-    public <X> QueryResponse<X> query(QueryGroup queryGroup, Class<X> clazz) {
+    public <X> QueryResponse<X> query(Query query, Class<X> clazz) {
         //parse query group to simple query domain
         EntityInfo entityInfo = EntityHandle.getEntityInfo(clazz);
 
-        QueryModel model = QueryParserHandle.parse(queryGroup);
+        QueryModel model = QueryParserHandle.parse(query);
         StringBuilder sql = new StringBuilder(128);
 
         // append table
         sql.append(" FROM ").append(entityInfo.getTableName());
 
         //append join table
-        if (!queryGroup.getEntityMapping().isEmpty()) {
+        if (query.getJoinChain() != null && !query.getJoinChain().isEmpty()) {
             sql.append(" AS E");
-        }
-        for (MappingNode node : queryGroup.getEntityMapping()) {
-            sql.append(node.getLinkOperate().getValue()).append(node.getName()).append(" AS ").append(node.getAlias());
-            for (int i = 0; i < node.getLinkMapping().size(); i++) {
-                sql.append(i == 0 ? " ON " : " AND ");
-                sql.append(QueryParserHandle.generateParameterHql(node.getLinkMapping().get(i), model.getParameters()));
+            for (Join joinNode : query.getJoinChain()) {
+                sql.append(joinNode.getLinkOperate().getValue()).append(joinNode.getName()).append(" AS ").append(joinNode.getAlias());
+                if (joinNode.hasCriteria()) {
+                    QueryModel queryModel = QueryParserHandle.parse(query.getCriteria());
+                    sql.append(" ON ").append(queryModel.getConditionStatement());
+                }
             }
         }
-
         if (StringUtils.hasText(model.getConditionStatement())) {
             sql.append(" WHERE ").append(model.getConditionStatement());
         }
-        //limit record size
-        if (!QueryResultType.LIST.equals(queryGroup.getQueryResultType())) {
-            queryGroup.index(0).size(1);
-        }
-        return doQuery(queryGroup, model, sql, entityInfo, clazz);
+        return doQuery(query, model, sql, entityInfo, clazz);
     }
 
-    private <X> QueryResponse<X> doQuery(QueryGroup queryGroup, QueryModel model, StringBuilder conditionSql, EntityInfo entityInfo, Class<X> clazz) {
+    private <X> QueryResponse<X> doQuery(Query query, QueryModel model, StringBuilder conditionSql, EntityInfo entityInfo, Class<X> clazz) {
         // handle column name convert
-        CharSequence select;
-        if (queryGroup.getEntityMapping().isEmpty()) {
-            select = EntityHandle.convertColumnMapping(queryGroup.getSelects(), entityInfo);
-            if (select == null) select = EntityHandle.convertColumnMapping(entityInfo, false);
-        } else {
-            select = queryGroup.getSelectsChar();
-        }
-
-        QueryResponse<X> queryResponse = new QueryResponse<>();
-        if (queryGroup.isNeedRecord()) {
-            StringBuilder sql = new StringBuilder("SELECT ");
-            // append distinct
-            if (queryGroup.isNeedDistinct()) {
-                sql.append("DISTINCT ");
-            }
-            if (select == null) {
-                sql.append(EntityHandle.convertColumnMapping(entityInfo, true));
+        CharSequence select = EntityHandle.convertColumnMapping(query.getSelects());
+        if (select == null) {
+            if (CollectionUtils.isEmpty(query.getJoinChain())) {
+                select = entityInfo.getDefaultColumnStr();
             } else {
-                sql.append(select);
+                select = EntityHandle.convertColumnMapping(entityInfo, true);
             }
-            sql.append(conditionSql);
-            if (StringUtils.hasText(model.getOrderStatement())) {
-                sql.append(" ORDER BY ").append(model.getOrderStatement());
-            }
-            //Pageable
-            if (queryGroup.getPageIndex() != 0 || queryGroup.getPageSize() != 0) {
-                sql.append(" limit ");
-                if (queryGroup.getPageIndex() != 0) {
-                    sql.append(queryGroup.getPageIndex() * queryGroup.getPageSize()).append(',');
-                }
-                sql.append(queryGroup.getPageSize());
-            }
-            List<X> list = query(sql, model.getParameters(), clazz);
-            //Set query record
-            queryResponse.setRecords(list);
-            queryResponse.setPageIndex(queryGroup.getPageIndex());
-            queryResponse.setPageSize(queryGroup.getPageSize());
         }
-        //Query count
-        if (queryGroup.isNeedCount()) {
+        QueryResponse<X> queryResponse = new QueryResponse<>();
+        //query list
+        StringBuilder querySQL = new StringBuilder("SELECT ");
+        // append distinct
+        if (query.isNeedDistinct()) {
+            querySQL.append("DISTINCT ");
+        }
+        querySQL.append(select).append(conditionSql);
+        if (StringUtils.hasText(model.getOrderStatement())) {
+            querySQL.append(" ORDER BY ").append(model.getOrderStatement());
+        }
+        //Pageable
+        appendPageable(query, querySQL);
+        //Group by
+        appendGroupBy(query, querySQL);
+        //Query
+        List<X> list = query(querySQL, model.getParameters(), clazz);
+        //Set query record
+        queryResponse.setRecords(list);
+        queryResponse.setPageIndex(query.getIndex());
+        queryResponse.setPageSize(query.getSize());
+
+        //count & skip group by
+        if (query.isNeedCount() && query.getGroupBy() == null) {
             StringBuilder countSql = new StringBuilder("SELECT ");
-            if (queryGroup.isNeedDistinct()) {
-                countSql.append("COUNT(DISTINCT ");
-                if (select == null) {
-                    countSql.append(EntityHandle.convertColumn(entityInfo, true));
-                } else {
-                    countSql.append(select);
-                }
-                countSql.append(')');
+            if (query.isNeedDistinct()) {
+                countSql.append("COUNT(DISTINCT ").append(select).append(')');
             } else {
                 countSql.append("COUNT(1)");
             }
             countSql.append(conditionSql);
             BigInteger total = queryForObject(countSql, model.getParameters(), BigInteger.class);
-            queryResponse.setTotalRecords(total.longValue());
+            queryResponse.setTotal(total.longValue());
         }
         return queryResponse;
+    }
+
+    private void appendPageable(Query query, StringBuilder querySQL) {
+        if (query.getSize() != null) {
+            querySQL.append(" LIMIT ");
+            if (query.getIndex() != null) {
+                querySQL.append(query.getIndex() * query.getSize()).append(",");
+            }
+            querySQL.append(query.getSize());
+        }
+    }
+
+    private void appendGroupBy(Query query, StringBuilder querySQL) {
+        Group group = query.getGroupBy();
+        if (group != null) {
+            querySQL.append(" GROUP BY ");
+            querySQL.append(EntityHandle.convertColumnMapping(group.getSelects()));
+            if (group.getHavingCriteria() != null) {
+                QueryModel queryModel = QueryParserHandle.parse(group.getHavingCriteria());
+                querySQL.append(" HAVING ").append(queryModel.getConditionStatement());
+            }
+        }
     }
 
     //--------------------------- query sql operator -------------------------
@@ -374,17 +382,16 @@ public abstract class BaseJdbcRepository<T> {
     /**
      * query unique with group, return T
      */
-    public T queryUnique(QueryGroup queryGroup) {
-        return queryUnique(queryGroup, entityClass);
+    public T queryUnique(Query query) {
+        return queryUnique(query, entityClass);
     }
 
     /**
      * query unique with group, return X
      */
-    public <X> X queryUnique(QueryGroup queryGroup, Class<X> clazz) {
-        queryGroup.setQueryResultType(QueryResultType.UNIQUE);
-        queryGroup.onlyRecord();
-        return getUniqueResult(query(queryGroup, clazz).getRecords());
+    public <X> X queryUnique(Query query, Class<X> clazz) {
+        query.size(1);
+        return getUniqueResult(query(query, clazz).getRecords());
     }
 
     /**
@@ -431,17 +438,16 @@ public abstract class BaseJdbcRepository<T> {
     /**
      * query unique with group, return T
      */
-    public T querySingle(QueryGroup queryGroup) {
-        return querySingle(queryGroup, entityClass);
+    public T querySingle(Query query) {
+        return querySingle(query, entityClass);
     }
 
     /**
      * query unique with group, return X
      */
-    public <X> X querySingle(QueryGroup queryGroup, Class<X> clazz) {
-        queryGroup.setQueryResultType(QueryResultType.SINGLE);
-        queryGroup.onlyRecord();
-        return getSingleResult(query(queryGroup, clazz).getRecords());
+    public <X> X querySingle(Query query, Class<X> clazz) {
+        query.size(1);
+        return getSingleResult(query(query, clazz).getRecords());
     }
 
     public T querySingle(CharSequence sql) {

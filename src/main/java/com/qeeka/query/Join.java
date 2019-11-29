@@ -45,4 +45,24 @@ public class Join {
         this.criteria = criteria;
         return this;
     }
+
+    public Criteria getCriteria() {
+        return criteria;
+    }
+
+    public boolean hasCriteria() {
+        return this.criteria != null && this.criteria.getCriteriaChain() != null && !this.criteria.getCriteriaChain().isEmpty();
+    }
+
+    public QueryLinkOperate getLinkOperate() {
+        return linkOperate;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
 }
