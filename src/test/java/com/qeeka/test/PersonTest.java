@@ -54,7 +54,7 @@ public class PersonTest extends SpringTestWithDB {
     @Test
     public void testSearch() {
         List<Integer> ids = Arrays.asList(2, 3, 4, 5);
-        QueryGroup group = new QueryGroup("name", "n", QueryOperate.CONTAIN)
+        QueryGroup group = new QueryGroup("name", "n", QueryOperate.LIKE)
                 .and("type", 1).and("status", "type", QueryOperate.COLUMN_EQUALS)
                 .and("password", "p1").and("id", ids, QueryOperate.NOT_IN).or("id", 0, QueryOperate.IN);
         QueryResponse<Person> response = personService.search(group);

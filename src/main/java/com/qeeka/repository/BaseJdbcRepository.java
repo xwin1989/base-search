@@ -3,7 +3,6 @@ package com.qeeka.repository;
 import com.qeeka.annotation.Entity;
 import com.qeeka.annotation.Id;
 import com.qeeka.domain.EntityInfo;
-import com.qeeka.domain.MappingNode;
 import com.qeeka.domain.QueryGroup;
 import com.qeeka.domain.QueryModel;
 import com.qeeka.domain.QueryResponse;
@@ -11,11 +10,10 @@ import com.qeeka.domain.StopWatch;
 import com.qeeka.domain.UpdateGroup;
 import com.qeeka.domain.UpdateNode;
 import com.qeeka.enums.GenerationType;
-import com.qeeka.enums.QueryResultType;
 import com.qeeka.query.Criteria;
-import com.qeeka.query.Group;
 import com.qeeka.query.Join;
 import com.qeeka.query.Query;
+import com.qeeka.util.CriteriaParserHandle;
 import com.qeeka.util.EntityHandle;
 import com.qeeka.util.QueryParserHandle;
 import com.qeeka.util.ReflectionUtil;
@@ -71,16 +69,16 @@ public abstract class BaseJdbcRepository<T> {
 
     public T get(Object id) {
         EntityInfo entityInfo = EntityHandle.getEntityInfo(entityClass);
-        return queryUnique(new QueryGroup(entityInfo.getIdColumn(), id));
+        return queryUnique(Query.query(Criteria.where(entityInfo.getIdColumn()).eq(id)));
     }
 
     public <X> X get(Object id, Class<X> clazz) {
         EntityInfo entityInfo = EntityHandle.getEntityInfo(clazz);
-        return queryUnique(new QueryGroup(entityInfo.getIdColumn(), id), clazz);
+        return queryUnique(Query.query(Criteria.where(entityInfo.getIdColumn()).eq(id)), clazz);
     }
 
     public T get(String columnName, Object value) {
-        return queryUnique(new QueryGroup(columnName, value));
+        return queryUnique(Query.query(Criteria.where(columnName).eq(value)));
     }
 
 //--------------------------- delete operator -------------------------
@@ -117,12 +115,12 @@ public abstract class BaseJdbcRepository<T> {
         return 0;
     }
 
-    public int delete(QueryGroup queryGroup) {
+    public int delete(Criteria criteria) {
         EntityInfo entityInfo = EntityHandle.getEntityInfo(entityClass);
         StringBuilder sql = new StringBuilder(128);
 
         sql.append("DELETE FROM ").append(entityInfo.getTableName());
-        QueryModel queryModel = QueryParserHandle.parse(queryGroup);
+        QueryModel queryModel = CriteriaParserHandle.parse(criteria);
         sql.append(" WHERE ").append(queryModel.getConditionStatement());
         return update(sql, queryModel.getParameters());
     }
@@ -213,7 +211,8 @@ public abstract class BaseJdbcRepository<T> {
     }
 
     public <X> Long count(QueryGroup group, Class<X> clazz) {
-        return query(group.onlyCount(), clazz).getTotal();
+//        return query(group.onlyCount(), clazz).getTotal();
+        return 0L;
     }
 
 //--------------------------- QueryResponse operator -------------------------
@@ -243,100 +242,33 @@ public abstract class BaseJdbcRepository<T> {
      * query by query request, Specifies return class
      */
     public <X> QueryResponse<X> query(Query query, Class<X> clazz) {
-        //parse query group to simple query domain
-        EntityInfo entityInfo = EntityHandle.getEntityInfo(clazz);
-
-        QueryModel model = QueryParserHandle.parse(query);
-        StringBuilder sql = new StringBuilder(128);
-
-        // append table
-        sql.append(" FROM ").append(entityInfo.getTableName());
-
-        //append join table
-        if (query.getJoinChain() != null && !query.getJoinChain().isEmpty()) {
-            sql.append(" AS E");
-            for (Join joinNode : query.getJoinChain()) {
-                sql.append(joinNode.getLinkOperate().getValue()).append(joinNode.getName()).append(" AS ").append(joinNode.getAlias());
-                if (joinNode.hasCriteria()) {
-                    QueryModel queryModel = QueryParserHandle.parse(query.getCriteria());
-                    sql.append(" ON ").append(queryModel.getConditionStatement());
-                }
-            }
-        }
-        if (StringUtils.hasText(model.getConditionStatement())) {
-            sql.append(" WHERE ").append(model.getConditionStatement());
-        }
-        return doQuery(query, model, sql, entityInfo, clazz);
-    }
-
-    private <X> QueryResponse<X> doQuery(Query query, QueryModel model, StringBuilder conditionSql, EntityInfo entityInfo, Class<X> clazz) {
-        // handle column name convert
-        CharSequence select = EntityHandle.convertColumnMapping(query.getSelects());
-        if (select == null) {
-            if (CollectionUtils.isEmpty(query.getJoinChain())) {
-                select = entityInfo.getDefaultColumnStr();
-            } else {
-                select = EntityHandle.convertColumnMapping(entityInfo, true);
-            }
-        }
         QueryResponse<X> queryResponse = new QueryResponse<>();
-        //query list
-        StringBuilder querySQL = new StringBuilder("SELECT ");
-        // append distinct
-        if (query.isNeedDistinct()) {
-            querySQL.append("DISTINCT ");
-        }
-        querySQL.append(select).append(conditionSql);
-        if (StringUtils.hasText(model.getOrderStatement())) {
-            querySQL.append(" ORDER BY ").append(model.getOrderStatement());
-        }
-        //Pageable
-        appendPageable(query, querySQL);
-        //Group by
-        appendGroupBy(query, querySQL);
-        //Query
-        List<X> list = query(querySQL, model.getParameters(), clazz);
-        //Set query record
-        queryResponse.setRecords(list);
-        queryResponse.setPageIndex(query.getIndex());
-        queryResponse.setPageSize(query.getSize());
+        QueryModel queryModel = QueryParserHandle.parse(query, clazz);
+        if (queryModel.getSelectStatement() != null) {
+            StringBuilder sql = new StringBuilder(128);
+            sql.append("SELECT ").append(queryModel.getSelectStatement());
+            sql.append(" FROM ").append(queryModel.getTableStatement());
+            if (queryModel.getConditionStatement() != null)
+                sql.append(" WHERE ").append(queryModel.getConditionStatement());
+            if (queryModel.getOrderStatement() != null)
+                sql.append(" ORDER BY ").append(queryModel.getOrderStatement());
+            if (queryModel.getGroupStatement() != null)
+                sql.append(" GROUP BY ").append(queryModel.getGroupStatement());
+            if (queryModel.getPageableStatement() != null)
+                sql.append(queryModel.getPageableStatement());
 
-        //count & skip group by
-        if (query.isNeedCount() && query.getGroupBy() == null) {
-            StringBuilder countSql = new StringBuilder("SELECT ");
-            if (query.isNeedDistinct()) {
-                countSql.append("COUNT(DISTINCT ").append(select).append(')');
-            } else {
-                countSql.append("COUNT(1)");
-            }
-            countSql.append(conditionSql);
-            BigInteger total = queryForObject(countSql, model.getParameters(), BigInteger.class);
-            queryResponse.setTotal(total.longValue());
+            queryResponse.setRecords(query(sql, queryModel.getParameters(), clazz));
+        }
+        if (queryModel.getCountStatement() != null) {
+            StringBuilder sql = new StringBuilder(128);
+            sql.append("SELECT ").append(queryModel.getCountStatement());
+            sql.append(" FROM ").append(queryModel.getTableStatement());
+
+            queryResponse.setTotal(queryForObject(sql, queryModel.getParameters(), BigInteger.class).longValue());
         }
         return queryResponse;
     }
 
-    private void appendPageable(Query query, StringBuilder querySQL) {
-        if (query.getSize() != null) {
-            querySQL.append(" LIMIT ");
-            if (query.getIndex() != null) {
-                querySQL.append(query.getIndex() * query.getSize()).append(",");
-            }
-            querySQL.append(query.getSize());
-        }
-    }
-
-    private void appendGroupBy(Query query, StringBuilder querySQL) {
-        Group group = query.getGroupBy();
-        if (group != null) {
-            querySQL.append(" GROUP BY ");
-            querySQL.append(EntityHandle.convertColumnMapping(group.getSelects()));
-            if (group.getHavingCriteria() != null) {
-                QueryModel queryModel = QueryParserHandle.parse(group.getHavingCriteria());
-                querySQL.append(" HAVING ").append(queryModel.getConditionStatement());
-            }
-        }
-    }
 
     //--------------------------- query sql operator -------------------------
     public List<T> query(CharSequence sql) {
@@ -554,7 +486,7 @@ public abstract class BaseJdbcRepository<T> {
         Map<String, Object> params = new HashMap<>();
         StringBuilder sql = convertUpdateGroup(group, params, clazz);
         if (group.getQueryGroup() != null) {
-            QueryModel queryModel = QueryParserHandle.parse(group.getQueryGroup());
+            QueryModel queryModel = null;//CriteriaParserHandle.parse(group.getQueryGroup());
             sql.append(" WHERE ").append(queryModel.getConditionStatement());
             params.putAll(queryModel.getParameters());
         }

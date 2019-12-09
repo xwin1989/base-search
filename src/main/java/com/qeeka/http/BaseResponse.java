@@ -73,15 +73,6 @@ public class BaseResponse<T> {
         return this;
     }
 
-    public BaseResponse<T> fromResponse(QueryResponse response) {
-        if (response != null) {
-            this.totalRecords = response.getTotalRecords();
-            this.pageIndex = response.getPageIndex();
-            this.pageSize = response.getPageSize();
-        }
-        return this;
-    }
-
     public BaseResponse<T> setResponse(Integer index, Integer size, Long total) {
         this.pageIndex = index;
         this.pageSize = size;

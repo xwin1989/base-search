@@ -5,10 +5,10 @@ package com.qeeka.domain;
  */
 public class StopWatch {
     private long start;
-    private final long createTime;
+    private final long beginTime;
 
     public StopWatch() {
-        start = createTime = System.currentTimeMillis();
+        start = beginTime = System.currentTimeMillis();
     }
 
     public void reset() {
@@ -27,6 +27,6 @@ public class StopWatch {
     }
 
     public long totalTime() {
-        return System.currentTimeMillis() - createTime;
+        return System.currentTimeMillis() - beginTime;
     }
 }

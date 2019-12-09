@@ -58,7 +58,7 @@ public class CriteriaTest {
         Query query = Query.query(criteria).selects("a.id,b.id,c.id")
                 .join(join1).join(join2).join(join3)
                 .join(join4).join(join5).join(join6)
-                .group(group).index(1).size(10).with(1, 10).with(sort).count().distinct();
+                .group(group).offset(1).size(10).with(1, 10).with(sort).count().distinct();
 
     }
 
@@ -99,33 +99,6 @@ public class CriteriaTest {
 
 
     @Test
-    public void test4() {
-        Stream<String> stream = Stream.of("I", "love", "you", "too");
-        List<String> list = stream.collect(ArrayList::new, ArrayList::add, ArrayList::addAll);// 方式１
-        Set<String> list2 = stream.collect(Collectors.toSet());// 方式2
-        String joined = stream.collect(Collectors.joining(",", "{", "}"));
-        System.out.println(list);
-        System.out.println(joined);
-    }
-
-
-    @Test
-    public void test5() {
-
-        Stream<Character> stream = Stream.of('a', 'b', 'c', 'b', 'e', 'f', 'f', 'f');
-
-
-        System.out.println(stream.map(e -> e.toString().toUpperCase()).collect(Collectors.toList()));
-
-        Map<Character, Long> collect = stream.collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-        Optional<Map.Entry<Character, Long>> first = collect.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).findFirst();
-        if (first.isPresent()) {
-            System.out.println(first.get().getKey() + " " + first.get().getValue());
-        }
-
-    }
-
-    @Test
     public void test6() {
         Properties properties = System.getProperties();
         // not easy to sort this
@@ -145,11 +118,4 @@ public class CriteriaTest {
         Map<String, String> collect1 = entries.stream().collect(Collectors.toMap(k -> String.valueOf(k), v -> String.valueOf(v)));
 
     }
-
-
-    @Test
-    public void test7() {
-
-    }
-
 }

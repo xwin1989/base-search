@@ -7,11 +7,10 @@ public enum QueryOperate {
     EQUALS(" = "), NO_EQUALS(" <> "),
     IS_NULL(""), IS_NOT_NULL(""),
     COLUMN_EQUALS(" = "), COLUMN_NO_EQUALS(" <> "),
-    LIKE(" LIKE "), NOT_LIKE(" NOT LIKE "), CONTAIN(" LIKE "), NOT_CONTAIN(" NOT LIKE "),
+    LIKE(" LIKE "), NOT_LIKE(" NOT LIKE "),
     LESS_THAN(" < "), LESS_THAN_EQUALS(" <= "),
     GREAT_THAN(" > "), GREAT_THAN_EQUALS(" >= "),
-    IN(" IN "), NOT_IN(" NOT IN "), SUB_QUERY(" "),
-    EXISTS(" EXISTS"), NO_EXISTS(" NOT EXISTS ");
+    IN(" IN "), NOT_IN(" NOT IN "), SUB_QUERY(" ");
 
     private String value;
 

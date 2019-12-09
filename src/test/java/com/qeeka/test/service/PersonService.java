@@ -38,8 +38,8 @@ public class PersonService {
     }
 
     public QueryResponse<Person> search(QueryGroup group) {
-        return repository.query(group);
-    }
+//        return repository.query(group);
+        return null;}
 
     public Long count(QueryGroup queryGroup) {
         return repository.count(queryGroup);

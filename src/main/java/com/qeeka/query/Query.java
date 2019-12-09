@@ -3,8 +3,10 @@ package com.qeeka.query;
 import com.qeeka.domain.Sort;
 import com.qeeka.http.BaseRequest;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by neal.xu on 2019/10/30.
@@ -32,9 +34,9 @@ public class Query {
      */
     private Sort sort;
     /**
-     * page index and set default
+     * page offset and size
      */
-    private Integer index;
+    private Integer offset;
 
     /**
      * page size and set default
@@ -45,6 +47,11 @@ public class Query {
      * need total record
      */
     private boolean needCount = false;
+
+    /**
+     * need record
+     */
+    private boolean needRecord = true;
 
     /**
      * record need distinct
@@ -84,7 +91,7 @@ public class Query {
     }
 
     public Query with(Integer pageIndex, Integer pageSize) {
-        this.index = pageIndex;
+        this.offset = pageIndex * pageSize;
         this.size = pageSize;
         return this;
     }
@@ -106,8 +113,9 @@ public class Query {
         return this;
     }
 
-    public Query index(Integer index) {
-        this.index = index;
+    public Query offset(Integer offset) {
+        this.offset = offset;
+        this.size = 0;
         return this;
     }
 
@@ -135,8 +143,9 @@ public class Query {
         return joinChain;
     }
 
-    public CharSequence[] getSelects() {
-        return selects;
+    public String getSelects() {
+        if (this.selects == null || this.selects.length == 0) return null;
+        return Arrays.stream(this.selects).collect(Collectors.joining(","));
     }
 
     public boolean isNeedCount() {
@@ -147,12 +156,26 @@ public class Query {
         return needDistinct;
     }
 
+    public Query onlyCount() {
+        this.needRecord = false;
+        this.needCount = true;
+        return this;
+    }
+
+    public boolean isNeedRecord() {
+        return needRecord;
+    }
+
+    public void setNeedRecord(boolean needRecord) {
+        this.needRecord = needRecord;
+    }
+
     public Group getGroupBy() {
         return groupBy;
     }
 
-    public Integer getIndex() {
-        return index;
+    public Integer getOffset() {
+        return offset;
     }
 
     public Integer getSize() {

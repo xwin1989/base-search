@@ -8,8 +8,6 @@ import java.util.List;
 public class QueryResponse<T> {
     private List<T> records;
     private Long total;
-    private Integer pageIndex;
-    private Integer pageSize;
 
     public List<T> getRecords() {
         return records;
@@ -25,21 +23,5 @@ public class QueryResponse<T> {
 
     public void setTotal(Long total) {
         this.total = total;
-    }
-
-    public Integer getPageIndex() {
-        return pageIndex;
-    }
-
-    public void setPageIndex(Integer pageIndex) {
-        this.pageIndex = pageIndex;
-    }
-
-    public Integer getPageSize() {
-        return pageSize;
-    }
-
-    public void setPageSize(Integer pageSize) {
-        this.pageSize = pageSize;
     }
 }

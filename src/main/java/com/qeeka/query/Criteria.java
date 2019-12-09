@@ -155,29 +155,6 @@ public class Criteria {
         return addNode(o, QueryOperate.NOT_IN);
     }
 
-    /**
-     * exists operator
-     */
-    public Criteria exists(String sql) {
-        return sqlSub(sql, null, QueryOperate.EXISTS);
-    }
-
-    public Criteria exists(String sql, Map<String, Object> params) {
-        return sqlSub(sql, params, QueryOperate.EXISTS);
-    }
-
-    /**
-     * not exists operator
-     */
-    public Criteria noExists(String sql) {
-        return sqlSub(sql, null, QueryOperate.NO_EXISTS);
-    }
-
-    public Criteria noExists(String sql, Map<String, Object> params) {
-        return sqlSub(sql, params, QueryOperate.NO_EXISTS);
-    }
-
-
     //--------------------------------- link operator ---------------------------------
 
     public Criteria and(String key) {
@@ -264,8 +241,4 @@ public class Criteria {
     public List<QueryHandle> getCriteriaChain() {
         return criteriaChain;
     }
-
-    //--------------------------------- lambda ---------------------------------
-
-
 }

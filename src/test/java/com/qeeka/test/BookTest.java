@@ -61,7 +61,7 @@ public class BookTest extends SpringTestWithDB {
     @Test
     public void testSelectAll() {
         QueryResponse<Book> response = bookService.search(new QueryGroup().needCount());
-        Assert.assertTrue(response.getTotalRecords() == 3);
+        Assert.assertTrue(response.getTotal() == 3);
     }
 
     @Test
@@ -74,33 +74,33 @@ public class BookTest extends SpringTestWithDB {
 
     @Test
     public void testBookSearch() {
-        QueryGroup queryGroup = new QueryGroup("name", "book", QueryOperate.CONTAIN).and("status", 0, QueryOperate.GREAT_THAN)
+        QueryGroup queryGroup = new QueryGroup("name", "%book%", QueryOperate.LIKE).and("status", 0, QueryOperate.GREAT_THAN)
                 .sort(Direction.DESC, "type").needCount().setPageable(0, 2);
         QueryResponse<Book> response = bookService.search(queryGroup);
         Assert.assertTrue(response.getRecords().size() == 2);
         Assert.assertTrue(response.getRecords().get(0).getId() == 3);
-        Assert.assertTrue(response.getTotalRecords() == 3);
+        Assert.assertTrue(response.getTotal() == 3);
     }
 
     @Test
     public void testBookSearchExcludeCount() {
-        QueryGroup queryGroup = new QueryGroup("name", "book", QueryOperate.CONTAIN).and("status", 0, QueryOperate.GREAT_THAN)
+        QueryGroup queryGroup = new QueryGroup("name", "%book%", QueryOperate.LIKE).and("status", 0, QueryOperate.GREAT_THAN)
                 .sort(Direction.DESC, "type").setPageable(0, 2);
 
         QueryResponse<Book> response = bookService.search(queryGroup);
         Assert.assertTrue(response.getRecords().size() == 2);
         Assert.assertTrue(response.getRecords().get(0).getId() == 3);
-        Assert.assertTrue(response.getTotalRecords() == null);
+        Assert.assertTrue(response.getTotal() == null);
     }
 
     @Test
     public void testBookSearchExcludeRecord() {
-        QueryGroup queryGroup = new QueryGroup("name", "book", QueryOperate.CONTAIN).and("status", 0, QueryOperate.GREAT_THAN)
+        QueryGroup queryGroup = new QueryGroup("name", "%book%", QueryOperate.LIKE).and("status", 0, QueryOperate.GREAT_THAN)
                 .sort(Direction.DESC, "type").needCount().setPageable(0, 2);
 
         QueryResponse<Book> response = bookService.search(queryGroup);
         Assert.assertEquals(response.getRecords().size(), 2);
-        Assert.assertEquals(response.getTotalRecords(), Long.valueOf(3));
+        Assert.assertEquals(response.getTotal(), Long.valueOf(3));
     }
 
     @Test
@@ -114,11 +114,11 @@ public class BookTest extends SpringTestWithDB {
 
         QueryGroup group = new QueryGroup("name", "book4").onlyCount();
 
-        Assert.assertTrue(bookService.search(group).getTotalRecords() == 1);
+        Assert.assertTrue(bookService.search(group).getTotal() == 1);
 
         bookService.delete(book.getId());
 
-        Assert.assertTrue(bookService.search(group).getTotalRecords() == 0);
+        Assert.assertTrue(bookService.search(group).getTotal() == 0);
 
     }
 
@@ -156,9 +156,7 @@ public class BookTest extends SpringTestWithDB {
     public void testAllBook() {
         QueryResponse<Book> searchResponse = bookService.search(new QueryGroup().needCount().size(2));
         Assert.assertTrue(searchResponse.getRecords().size() == 2);
-        Assert.assertTrue(searchResponse.getTotalRecords() == 3);
-        Assert.assertTrue(searchResponse.getPageIndex() == 0);
-        Assert.assertTrue(searchResponse.getPageSize() == 2);
+        Assert.assertTrue(searchResponse.getTotal() == 3);
     }
 
     @Test
@@ -166,9 +164,7 @@ public class BookTest extends SpringTestWithDB {
         BaseRequest baseRequest = new BaseRequest(0, 2);
         QueryResponse<Book> searchResponse = bookService.search(new QueryGroup().needCount().setSearchRequest(baseRequest));
         Assert.assertTrue(searchResponse.getRecords().size() == 2);
-        Assert.assertTrue(searchResponse.getTotalRecords() == 3);
-        Assert.assertTrue(searchResponse.getPageIndex() == 0);
-        Assert.assertTrue(searchResponse.getPageSize() == 2);
+        Assert.assertTrue(searchResponse.getTotal() == 3);
     }
 
     @Test
@@ -222,10 +218,10 @@ public class BookTest extends SpringTestWithDB {
 
     @Test
     public void testJoin() {
-        QueryGroup group = new QueryGroup("BI.name", "book2", QueryOperate.CONTAIN)
+        QueryGroup group = new QueryGroup("BI.name", "book2", QueryOperate.LIKE)
                 .join("book_info", "BI").on("BI.book_id", "E.id");
         QueryResponse<Book> queryResponse = bookService.search(group.needCount().needDistinct());
-        Assert.assertEquals(queryResponse.getTotalRecords().intValue(), 1);
+        Assert.assertEquals(queryResponse.getTotal().intValue(), 1);
     }
 
     @Test
@@ -240,7 +236,7 @@ public class BookTest extends SpringTestWithDB {
     @Test
     public void testLeftJoinFetch() {
         QueryGroup group = new QueryGroup().leftJoin("book_info", "BI").on("BI.book_id", "E.id")
-                .and("BI.name", "book2", QueryOperate.CONTAIN);
+                .and("BI.name", "book2", QueryOperate.LIKE);
         QueryResponse<Book> queryResponse = bookService.search(group);
         List<Book> records = queryResponse.getRecords();
         Assert.assertEquals(records.size(), 1);
@@ -262,7 +258,7 @@ public class BookTest extends SpringTestWithDB {
     @Test
     public void testLeftOutJoinFetch() {
         QueryGroup group = new QueryGroup().leftOutJoin("book_info", "BI").on("BI.book_id", "E.id")
-                .and("BI.name", "book2", QueryOperate.CONTAIN);
+                .and("BI.name", "book2", QueryOperate.LIKE);
         QueryResponse<Book> queryResponse = bookService.search(group);
         List<Book> records = queryResponse.getRecords();
         Assert.assertEquals(records.size(), 1);
@@ -336,12 +332,12 @@ public class BookTest extends SpringTestWithDB {
         QueryGroup group = new QueryGroup()
                 .join("book_info", "BI").on("BI.book_id", "E.id").on("BI.name", "hello", QueryOperate.NO_EQUALS)
                 .leftJoin("book_author", "BA").on("BA.id", "E.author_id")
-                .and("BI.name", "1", QueryOperate.CONTAIN);
+                .and("BI.name", "1", QueryOperate.LIKE);
         QueryResponse<Book> response = bookService.query(group.needCount().size(3)
                 .selects("E.*", "BA.name as authorName", "BI.name AS bookDescription")
         );
         Assert.assertEquals(response.getRecords().size(), 1);
-        Assert.assertEquals(response.getTotalRecords(), new Long(1));
+        Assert.assertEquals(response.getTotal(), new Long(1));
         Assert.assertEquals(response.getRecords().get(0).getAuthorName(), "neal");
     }
 

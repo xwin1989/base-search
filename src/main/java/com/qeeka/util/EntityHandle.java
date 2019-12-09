@@ -21,6 +21,9 @@ import java.util.stream.Collectors;
  * Created by neal.xu on 2018/12/12.
  */
 public class EntityHandle {
+    private EntityHandle() {
+    }
+
     private static final Map<Class<?>, EntityInfo> INFO_CACHE = new ConcurrentHashMap<>();
     public static final char UNDERLINE = '_';
 
@@ -88,46 +91,22 @@ public class EntityHandle {
         }
     }
 
-    public static CharSequence convertColumnMapping(CharSequence[] fields, EntityInfo entityInfo) {
-        if (fields == null || fields.length == 0) {
-            return null;
-        }
-        StringBuilder columns = new StringBuilder();
-        for (CharSequence field : fields) {
-            String column = entityInfo.getColumnMap().get(field);
-            if (column == null)
-                throw new IllegalArgumentException(String.format("Entity #%s column %s can't mapping!", entityInfo.getClazz().getName(), field));
-            columns.append(column).append(" AS ").append(field).append(',');
-        }
-        columns.setLength(columns.length() - 1);
-        return columns;
-    }
-
     public static CharSequence convertColumnMapping(CharSequence[] fields) {
         if (fields == null || fields.length == 0) return null;
         return Arrays.stream(fields).collect(Collectors.joining(","));
     }
 
 
-    public static CharSequence convertColumnMapping(EntityInfo entityInfo, boolean appendMaster) {
-        StringBuilder columnNames = new StringBuilder(64);
+    public static String convertColumnMapping(EntityInfo entityInfo, boolean appendMaster) {
+        StringBuilder columnNames = new StringBuilder(128);
         for (Map.Entry<String, String> entry : entityInfo.getColumnMap().entrySet()) {
             if (appendMaster) columnNames.append("E.");
             columnNames.append(entry.getValue()).append(" AS ").append(entry.getKey()).append(',');
         }
         columnNames.setLength(columnNames.length() - 1);
-        return columnNames;
+        return columnNames.toString();
     }
 
-    public static CharSequence convertColumn(EntityInfo entityInfo, boolean appendMaster) {
-        StringBuilder columnNames = new StringBuilder(64);
-        for (Map.Entry<String, String> entry : entityInfo.getColumnMap().entrySet()) {
-            if (appendMaster) columnNames.append("E.");
-            columnNames.append(entry.getValue()).append(',');
-        }
-        columnNames.setLength(columnNames.length() - 1);
-        return columnNames;
-    }
 
     private static String camelToUnderline(String param) {
         if (param == null || "".equals(param.trim())) {

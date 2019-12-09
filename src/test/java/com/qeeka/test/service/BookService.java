@@ -26,41 +26,42 @@ public class BookService {
     private BookRepository repository;
 
     public QueryResponse<Book> search(QueryGroup request) {
-        return repository.query(request);
+//        return repository.query(request);
+        return null;
     }
 
     public Book searchUnique(QueryGroup group) {
-        return repository.queryUnique(group);
-    }
+//        return repository.queryUnique(group);
+        return null;}
 
     public Book findUnique(String hql, Map<String, Object> params) {
         return repository.queryUnique(hql, params);
     }
 
     public Book findUnique(QueryGroup group) {
-        return repository.queryUnique(group);
-    }
+//        return repository.queryUnique(group);
+        return null;}
 
     public Book queryUnique(QueryGroup hql) {
-        return repository.queryUnique(hql);
-    }
+//        return repository.queryUnique(hql);
+        return null;}
 
     public Book queryUnique2(QueryGroup queryGroup) {
-        return repository.queryUnique(queryGroup, Book.class);
-    }
+//        return repository.queryUnique(queryGroup, Book.class);
+        return null;}
 
 
     public Book querySingle1(QueryGroup queryRequest) {
-        return repository.querySingle(queryRequest);
-    }
+//        return repository.querySingle(queryRequest);
+        return null;}
 
     public Book querySingle2(QueryGroup queryGroup) {
-        return repository.querySingle(queryGroup);
-    }
+//        return repository.querySingle(queryGroup);
+        return null;}
 
     public QueryResponse<Book> query(QueryGroup queryGroup) {
-        return repository.query(queryGroup);
-    }
+//        return repository.query(queryGroup);
+        return null;}
 
     public QueryResponse<Book> queryAll2() {
         return repository.query(Book.class);

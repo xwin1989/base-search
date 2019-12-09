@@ -15,7 +15,7 @@ public class EntityInfo {
     private String idColumn;
     private GenerationType strategy;
     private String tableName;
-    private CharSequence defaultColumnStr;
+    private String defaultColumnStr;
 
     public Class getClazz() {
         return clazz;
@@ -57,11 +57,11 @@ public class EntityInfo {
         this.columnMap = columnMap;
     }
 
-    public CharSequence getDefaultColumnStr() {
+    public String getDefaultColumnStr() {
         return defaultColumnStr;
     }
 
-    public void setDefaultColumnStr(CharSequence defaultColumnStr) {
+    public void setDefaultColumnStr(String defaultColumnStr) {
         this.defaultColumnStr = defaultColumnStr;
     }
 }

@@ -1,99 +1,85 @@
 package com.qeeka.util;
 
-import com.qeeka.domain.QueryCombineNode;
-import com.qeeka.domain.QueryGroup;
-import com.qeeka.domain.QueryHandle;
+import com.qeeka.domain.EntityInfo;
 import com.qeeka.domain.QueryModel;
-import com.qeeka.domain.QueryNode;
-import com.qeeka.domain.QueryOperateNode;
 import com.qeeka.domain.Sort;
 import com.qeeka.enums.Direction;
-import com.qeeka.query.Criteria;
+import com.qeeka.query.Join;
 import com.qeeka.query.Query;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Created by neal.xu on 2019/07/31.
  */
 public class QueryParserHandle {
-
-    public static QueryModel parse(Query query) {
-        if (query == null) {
-            return new QueryModel();
-        }
-        if (query.getCriteria() == null) {
-            return parse(null, query.getSort());
-        }
-        return parse(query.getCriteria().getCriteriaChain(), query.getSort());
+    private QueryParserHandle() {
     }
 
-    public static QueryModel parse(Criteria criteria) {
-        if (criteria == null) {
-            return new QueryModel();
-        }
-        return parse(criteria.getCriteriaChain(), null);
+    public static QueryModel parse(Query query, Class clazz) {
+
+        EntityInfo entityInfo = EntityHandle.getEntityInfo(clazz);
+        QueryModel model = CriteriaParserHandle.parse(query.getCriteria());
+
+        //append statement
+        model.setTableStatement(parseTable(query, entityInfo));
+        model.setSelectStatement(parseSelect(query, entityInfo));
+        model.setCountStatement(parseCount(query));
+        model.setOrderStatement(parseOrder(query));
+        model.setGroupStatement(parseGroup(query));
+        model.setPageableStatement(parsePageable(query));
+        return model;
     }
 
-    public static QueryModel parse(QueryGroup queryGroup) {
-        if (queryGroup == null) {
-            return new QueryModel();
+    private static String parseSelect(Query query, EntityInfo entityInfo) {
+        if (!query.isNeedRecord()) return null;
+
+        StringBuilder sql = new StringBuilder(128);
+        if (query.isNeedDistinct()) {
+            sql.append("DISTINCT ");
         }
-        return parse(queryGroup.getQueryHandleList(), queryGroup.getSort());
-    }
-
-    public static QueryModel parse(List<QueryHandle> queryHandleList, Sort sort) {
-        QueryModel queryModel = new QueryModel();
-        //Set order statement
-        String orderStatement = generateOrderStatement(sort);
-        queryModel.setOrderStatement(orderStatement);
-
-
-        if (queryHandleList == null || queryHandleList.isEmpty()) {
-            return queryModel;
-        }
-
-        //Handle alone node
-        if (queryHandleList.size() == 1) {
-            queryModel.setConditionStatement(generateParameterHql(queryHandleList.get(0), queryModel.getParameters()).toString());
-            return queryModel;
-        }
-
-        //Handle multi node
-        Stack<QueryHandle> handleStack = new Stack<>();
-        for (int index = 0; index < queryHandleList.size(); index++) {
-            QueryHandle currentNode = queryHandleList.get(index);
-            if (currentNode instanceof QueryOperateNode) {
-                QueryOperateNode operateNode = (QueryOperateNode) currentNode;
-
-                QueryHandle node1 = handleStack.pop();
-                QueryHandle node2 = handleStack.pop();
-
-                //when express like a b +
-                StringBuilder combineSql = new StringBuilder(32).append('(')
-                        .append(generateParameterHql(node2, queryModel.getParameters()))
-                        .append(operateNode.getQueryLinkOperate().getValue())
-                        .append(generateParameterHql(node1, queryModel.getParameters()))
-                        .append(')');
-                handleStack.push(new QueryCombineNode(combineSql.toString()));
+        String select = query.getSelects();
+        if (select == null) {
+            if (CollectionUtils.isEmpty(query.getJoinChain())) {
+                select = entityInfo.getDefaultColumnStr();
             } else {
-                handleStack.add(currentNode);
+                select = EntityHandle.convertColumnMapping(entityInfo, true);
             }
         }
-        QueryCombineNode handle = (QueryCombineNode) handleStack.pop();
-        queryModel.setConditionStatement(handle.getValue());
-        return queryModel;
+        sql.append(select);
+        return sql.toString();
     }
 
-    private static String generateOrderStatement(Sort sort) {
-        if (sort == null) {
-            return null;
+    private static String parseCount(Query query) {
+        if (!query.isNeedCount()) return null;
+        StringBuilder sql = new StringBuilder(32);
+        if (query.isNeedDistinct()) {
+            sql.append("COUNT(DISTINCT ").append(query.getSelects()).append(')');
+        } else {
+            sql.append("COUNT(1)");
         }
+        return sql.toString();
+    }
 
-        StringBuilder orderStatement = new StringBuilder();
-        for (Sort.Order order : sort) {
+    private static String parseTable(Query query, EntityInfo entityInfo) {
+
+        StringBuilder sql = new StringBuilder(64);
+        sql.append(" FROM ").append(entityInfo.getTableName());
+        if (!CollectionUtils.isEmpty(query.getJoinChain())) {
+            sql.append(" AS E");
+            for (Join join : query.getJoinChain()) {
+                sql.append(join.getLinkOperate().getValue()).append(join.getName()).append(" AS ").append(join.getAlias());
+                QueryModel model = CriteriaParserHandle.parse(join.getCriteria());
+                sql.append(" ON ").append(model.getConditionStatement());
+            }
+        }
+        return sql.toString();
+    }
+
+    private static String parseOrder(Query query) {
+        if (query.getSort() == null) return null;
+
+        StringBuilder orderStatement = new StringBuilder(32);
+        for (Sort.Order order : query.getSort()) {
             if (order.getDirection().equals(Direction.ASC_NULL) || order.getDirection().equals(Direction.DESC_NULL)) {
                 orderStatement.append("ISNULL(").append(order.getProperty()).append(") ").append(order.getDirection().getValue()).append(',');
             } else if (order.getDirection().equals(Direction.ASC_FIELD)) {
@@ -110,58 +96,33 @@ public class QueryParserHandle {
         return orderStatement.toString();
     }
 
-    public static CharSequence generateParameterHql(QueryHandle handle, Map<String, Object> parameters) {
-        if (handle instanceof QueryNode) {
-            QueryNode node = (QueryNode) handle;
+    private static String parseGroup(Query query) {
+        if (query.getGroupBy() == null) return null;
 
-            StringBuilder queryPart = new StringBuilder(node.getColumnName()).append(node.getQueryOperate().getValue());
-            StringBuilder parameterName = new StringBuilder(node.getColumnName().replace(".", "_")).append(parameters.size());
-
-            switch (node.getQueryOperate()) {
-                case IS_NULL:
-                    queryPart.append(" IS NULL");
-                    parameterName = null;
-                    break;
-                case IS_NOT_NULL:
-                    queryPart.append(" IS NOT NULL");
-                    parameterName = null;
-                    break;
-                case COLUMN_EQUALS:
-                    queryPart.append(node.getValue());
-                    parameterName = null;
-                    break;
-                case COLUMN_NO_EQUALS:
-                    queryPart.append(node.getValue());
-                    parameterName = null;
-                    break;
-                case IN:
-                case NOT_IN:
-                    queryPart = new StringBuilder(node.getColumnName()).append(node.getQueryOperate().getValue()).append("(:").append(parameterName).append(')');
-                    break;
-                case CONTAIN:
-                case NOT_CONTAIN:
-                    queryPart.append(':').append(parameterName);
-                    node.setValue(String.format("%%%s%%", node.getValue()));
-                    break;
-                case SUB_QUERY:
-                    if (node.getValue() instanceof Map) {
-                        Map<String, Object> parameter = (Map<String, Object>) node.getValue();
-                        parameters.putAll(parameter);
-                    }
-                    parameterName = null;
-                    break;
-                default:
-                    queryPart.append(':').append(parameterName);
-            }
-
-            if (parameterName != null) {
-                parameters.put(parameterName.toString(), node.getValue());
-            }
-            return queryPart;
+        StringBuilder sql = new StringBuilder(32);
+        sql.append(" GROUP BY ");
+        sql.append(EntityHandle.convertColumnMapping(query.getGroupBy().getSelects()));
+        if (query.getGroupBy().getHavingCriteria() != null) {
+            QueryModel queryModel = CriteriaParserHandle.parse(query.getGroupBy().getHavingCriteria());
+            sql.append(" HAVING ").append(queryModel.getConditionStatement());
         }
-        if (handle instanceof QueryCombineNode) {
-            return ((QueryCombineNode) handle).getValue();
-        }
-        return "";
+        return sql.toString();
     }
+
+
+    //only support limit
+    private static String parsePageable(Query query) {
+        if (query.getOffset() == null && query.getSize() == null) return null;
+
+        StringBuilder sql = new StringBuilder(32);
+        sql.append(" LIMIT ");
+        if (query.getOffset() != null) {
+            sql.append(query.getOffset()).append(',');
+        }
+        if (query.getSize() != null) {
+            sql.append(query.getSize());
+        }
+        return sql.toString();
+    }
+
 }
