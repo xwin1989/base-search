@@ -1,9 +1,9 @@
 package com.qeeka.util;
 
-import com.qeeka.annotation.Column;
-import com.qeeka.annotation.Entity;
-import com.qeeka.annotation.Id;
 import com.qeeka.domain.EntityInfo;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.util.StringUtils;
 
 import java.lang.annotation.Annotation;
@@ -29,18 +29,15 @@ public class EntityHandle {
                 return info;
             }
             EntityInfo entityInfo = new EntityInfo();
-            Annotation annotation = clazz.getAnnotation(Entity.class);
+            Annotation annotation = clazz.getAnnotation(Table.class);
             if (annotation == null) {
                 throw new IllegalArgumentException("repository must extend with generic type @Entity");
             } else {
                 String tName = clazz.getSimpleName();
-                if (annotation instanceof Entity) {
-                    Entity entity = (Entity) annotation;
-                    if (StringUtils.hasText(entity.table())) {
-                        tName = entity.table();
-                    }
-                    if (StringUtils.hasText(entity.schema())) {
-                        tName = String.format("%s.%s", entity.schema(), entity.table());
+                if (annotation instanceof Table) {
+                    Table entity = (Table) annotation;
+                    if (StringUtils.hasText(entity.value())) {
+                        tName = entity.value();
                     }
                 } else {
                     throw new IllegalArgumentException("repository must extend with generic type Entity");

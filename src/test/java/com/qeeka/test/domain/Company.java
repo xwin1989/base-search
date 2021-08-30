@@ -1,13 +1,14 @@
 package com.qeeka.test.domain;
 
-import com.qeeka.annotation.Column;
 import com.qeeka.annotation.Entity;
 import com.qeeka.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 /**
  * Created by Neal on 16/4/8.
  */
-@Entity(table = "company")
+@Table("company")
 public class Company {
     @Id
     public Long id;

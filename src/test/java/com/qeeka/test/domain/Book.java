@@ -1,14 +1,15 @@
 package com.qeeka.test.domain;
 
-import com.qeeka.annotation.Column;
 import com.qeeka.annotation.Entity;
 import com.qeeka.annotation.Id;
 import com.qeeka.enums.GenerationType;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 /**
  * Created by Neal on 8/9 0009.
  */
-@Entity(table = "book")
+@Table("book")
 public class Book {
     @Id(strategy = GenerationType.AUTO)
     private Integer id;

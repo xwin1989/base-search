@@ -59,7 +59,7 @@ int update = userRepository.update(userEntity);
 
 #Entity defined
 ```java
-@Entity(table = "user")
+@Table("user")
 public class UserEntity {
     @Id(strategy = GenerationType.AUTO)
     @Column("user_id")

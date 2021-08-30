@@ -1,16 +1,18 @@
 package com.qeeka.test.domain;
 
-import com.qeeka.annotation.Column;
 import com.qeeka.annotation.Entity;
 import com.qeeka.annotation.Id;
 import com.qeeka.enums.GenerationType;
+
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.util.Date;
 
 /**
  * Created by neal.xu on 2018/12/12.
  */
-@Entity(table = "user")
+@Table("user")
 public class UserEntity {
 
     public static final Integer COMMON_NO = 0;

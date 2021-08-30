@@ -5,16 +5,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Created by Neal on 10/12 0012.
  */
-public class BaseRequest {
+public class BaseSearchRequest {
     @JsonProperty("page_index")
     protected Integer pageIndex = 0;
+
     @JsonProperty("page_size")
     protected Integer pageSize = 10;
 
-    public BaseRequest() {
+    public BaseSearchRequest() {
     }
 
-    public BaseRequest(Integer pageIndex, Integer pageSize) {
+    public BaseSearchRequest(Integer pageIndex, Integer pageSize) {
         this.pageIndex = pageIndex;
         this.pageSize = pageSize;
     }

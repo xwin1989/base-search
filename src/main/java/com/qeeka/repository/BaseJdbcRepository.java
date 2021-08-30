@@ -1,6 +1,5 @@
 package com.qeeka.repository;
 
-import com.qeeka.annotation.Entity;
 import com.qeeka.annotation.Id;
 import com.qeeka.domain.EntityInfo;
 import com.qeeka.domain.MappingNode;
@@ -20,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.GenericTypeResolver;
+import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -57,7 +57,7 @@ public abstract class BaseJdbcRepository<T> {
             throw new IllegalArgumentException(MessageFormatter.format("repository must extend with generic type like BaseSearchRepository<T>, class={}", getClass()).getMessage());
         }
         entityClass = (Class<T>) arguments[0];
-        if (entityClass == null || !entityClass.isAnnotationPresent(Entity.class)) {
+        if (entityClass == null || !entityClass.isAnnotationPresent(Table.class)) {
             throw new IllegalArgumentException("repository must extend with generic type like repository<T extends Entity>");
         }
     }
@@ -96,7 +96,7 @@ public abstract class BaseJdbcRepository<T> {
     public int delete(Object entity) {
         if (entity == null) return 0;
         Class<?> clazz = entity.getClass();
-        if (!clazz.isAnnotationPresent(Entity.class)) {
+        if (!clazz.isAnnotationPresent(Table.class)) {
             throw new IllegalArgumentException("entity miss Entity");
         }
         EntityInfo entityInfo = EntityHandle.getEntityInfo(clazz);

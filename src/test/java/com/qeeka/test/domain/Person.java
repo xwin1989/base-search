@@ -1,14 +1,16 @@
 package com.qeeka.test.domain;
 
 
-import com.qeeka.annotation.Column;
 import com.qeeka.annotation.Entity;
 import com.qeeka.annotation.Id;
+
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 /**
  * Created by Neal on 2015/7/27.
  */
-@Entity(table = "person")
+@Table("person")
 public class Person {
     @Id
     public Integer id;

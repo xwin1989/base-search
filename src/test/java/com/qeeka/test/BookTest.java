@@ -4,7 +4,7 @@ import com.qeeka.domain.QueryGroup;
 import com.qeeka.domain.QueryResponse;
 import com.qeeka.enums.Direction;
 import com.qeeka.enums.QueryOperate;
-import com.qeeka.http.BaseRequest;
+import com.qeeka.http.BaseSearchRequest;
 import com.qeeka.test.domain.Book;
 import com.qeeka.test.domain.SimpleMapping;
 import com.qeeka.test.service.BookService;
@@ -163,7 +163,7 @@ public class BookTest extends SpringTestWithDB {
 
     @Test
     public void testSearchRequest() {
-        BaseRequest baseRequest = new BaseRequest(0, 2);
+        BaseSearchRequest baseRequest = new BaseSearchRequest(0, 2);
         QueryResponse<Book> searchResponse = bookService.search(new QueryGroup().needCount().setSearchRequest(baseRequest));
         Assert.assertTrue(searchResponse.getRecords().size() == 2);
         Assert.assertTrue(searchResponse.getTotalRecords() == 3);
@@ -198,7 +198,7 @@ public class BookTest extends SpringTestWithDB {
 
     @Test
     public void testBookMap() {
-        BaseRequest request = new BaseRequest(0, 5);
+        BaseSearchRequest request = new BaseSearchRequest(0, 5);
         QueryResponse<Book> response = bookService.search(new QueryGroup().needCount().setSearchRequest(request));
         List<Book> records = response.getRecords();
         Assert.assertTrue(records.size() == 3);
@@ -212,7 +212,7 @@ public class BookTest extends SpringTestWithDB {
 
     @Test
     public void testBookMapWithParam() {
-        BaseRequest request = new BaseRequest(0, 5);
+        BaseSearchRequest request = new BaseSearchRequest(0, 5);
         List<Integer> ids = Arrays.asList(1, 3);
         QueryGroup group = new QueryGroup("id", ids, QueryOperate.IN);
         QueryResponse<Book> queryResponse = bookService.search(group.needCount().setSearchRequest(request));

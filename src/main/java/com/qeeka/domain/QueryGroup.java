@@ -4,7 +4,7 @@ import com.qeeka.enums.Direction;
 import com.qeeka.enums.QueryLinkOperate;
 import com.qeeka.enums.QueryOperate;
 import com.qeeka.enums.QueryResultType;
-import com.qeeka.http.BaseRequest;
+import com.qeeka.http.BaseSearchRequest;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -77,7 +77,7 @@ public class QueryGroup {
     /**
      * set index & size from search request
      */
-    public QueryGroup setSearchRequest(BaseRequest searchRequest) {
+    public QueryGroup setSearchRequest(BaseSearchRequest searchRequest) {
         this.pageIndex = searchRequest.getPageIndex();
         this.pageSize = searchRequest.getPageSize();
         return this;

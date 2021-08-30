@@ -65,7 +65,7 @@ public class BaseResponse<T> {
         return new ResponseEntity(this, httpStatus);
     }
 
-    public BaseResponse<T> fromRequest(BaseRequest request) {
+    public BaseResponse<T> fromRequest(BaseSearchRequest request) {
         if (request != null) {
             this.pageIndex = request.getPageIndex();
             this.pageSize = request.getPageSize();
