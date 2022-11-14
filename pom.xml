@@ -26,7 +26,7 @@
     <description>base-search framework</description>
 
     <properties>
-        <spring.version>3.2.3.RELEASE</spring.version>
+        <spring.version>3.2.18.RELEASE</spring.version>
         <slf4j.version>1.7.25</slf4j.version>
         <jackson.version.annotations>2.9.0</jackson.version.annotations>
 
